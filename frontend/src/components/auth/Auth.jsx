@@ -161,9 +161,7 @@ function Auth({
           </span>
 
           <h2>
-            Your favorite campus food,
-            <br />
-            delivered fast.
+            Campus food, delivered fast.
           </h2>
 
           <p>
