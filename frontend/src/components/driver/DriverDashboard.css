@@ -1,0 +1,252 @@
+.driver-page {
+  min-height: 100vh;
+  background: #f7f9fc;
+  color: #123b63;
+}
+
+.driver-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px 32px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.driver-brand {
+  margin: 0 0 5px;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.driver-header h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.driver-welcome {
+  margin: 6px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.driver-logout-button {
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 8px;
+  background: #123b63;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.driver-container {
+  width: min(1100px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 28px 0 50px;
+}
+
+.driver-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.driver-summary-card {
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.driver-summary-card span {
+  display: block;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.driver-summary-card strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 25px;
+}
+
+.driver-section {
+  margin-bottom: 28px;
+}
+
+.driver-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 14px;
+}
+
+.driver-section-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.driver-section-header p {
+  margin: 5px 0 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.driver-count {
+  min-width: 30px;
+  padding: 6px 10px;
+  border-radius: 7px;
+  background: #eff6ff;
+  color: #2563eb;
+  text-align: center;
+  font-weight: 700;
+}
+
+.driver-batches {
+  display: grid;
+  gap: 12px;
+}
+
+.driver-batch-card {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 15px;
+  padding: 18px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.driver-batch-card span,
+.driver-order-info span {
+  display: block;
+  margin-bottom: 5px;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.driver-batch-card strong,
+.driver-order-info strong {
+  font-size: 14px;
+}
+
+.driver-orders {
+  display: grid;
+  gap: 14px;
+}
+
+.driver-order-card {
+  padding: 18px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.driver-order-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 18px;
+}
+
+.driver-order-top span:first-child {
+  display: block;
+  margin-bottom: 4px;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.driver-order-top strong {
+  font-size: 18px;
+}
+
+.driver-status {
+  padding: 6px 9px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.driver-status-preparing {
+  background: #fefce8;
+  color: #a16207;
+}
+
+.driver-status-out-for-delivery {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.driver-status-delivered-by-driver {
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.driver-order-info {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 18px;
+}
+
+.driver-primary-button {
+  width: 100%;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.driver-primary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.driver-empty,
+.driver-loading {
+  padding: 35px 20px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  color: #6b7280;
+  text-align: center;
+}
+
+@media (max-width: 700px) {
+  .driver-header {
+    align-items: flex-start;
+    padding: 20px 16px;
+  }
+
+  .driver-header h1 {
+    font-size: 22px;
+  }
+
+  .driver-container {
+    width: calc(100% - 24px);
+    padding-top: 20px;
+  }
+
+  .driver-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .driver-batch-card,
+  .driver-order-info {
+    grid-template-columns: 1fr;
+  }
+
+  .driver-order-top {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

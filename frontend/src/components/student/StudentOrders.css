@@ -1,0 +1,223 @@
+.student-orders-back {
+  border: none;
+  background: transparent;
+  color: #1769aa;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 18px;
+}
+
+.student-orders-back:hover {
+  text-decoration: underline;
+}
+
+.student-orders-page {
+  min-height: 100vh;
+  background: #f7faff;
+  padding: 40px 20px;
+}
+
+.student-orders-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.student-orders-header {
+  margin-bottom: 30px;
+}
+
+.student-orders-header h1 {
+  margin: 0;
+  color: #0b2a4a;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.student-orders-header p {
+  margin: 8px 0 0;
+  color: #6b7c93;
+  font-size: 15px;
+}
+
+.student-orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.student-order-card {
+  background: #ffffff;
+  border: 1px solid #e3ebf5;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 4px 14px rgba(15, 61, 98, 0.06);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.student-order-card:hover {
+  box-shadow: 0 7px 20px rgba(15, 61, 98, 0.09);
+  transform: translateY(-1px);
+}
+
+.student-order-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.student-order-top span {
+  display: block;
+  color: #7b8da1;
+  font-size: 13px;
+  margin-bottom: 5px;
+}
+
+.student-order-top strong {
+  color: #0b2a4a;
+  font-size: 20px;
+}
+
+.student-order-status {
+  background: #eaf4ff;
+  color: #1769aa;
+  border-radius: 20px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Order Items */
+
+.student-order-items {
+  padding: 16px 0;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.student-order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  padding: 7px 0;
+}
+
+.student-order-item-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.student-order-item-info strong {
+  color: #0b2a4a;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.student-order-item-info span {
+  color: #7b8da1;
+  font-size: 14px;
+}
+
+.student-order-item > strong {
+  color: #0b2a4a;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Order Summary */
+
+.student-order-summary {
+  display: flex;
+  justify-content: flex-end;
+  gap: 35px;
+  padding-top: 16px;
+}
+
+.student-order-summary > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.student-order-summary span {
+  color: #7b8da1;
+  font-size: 13px;
+}
+
+.student-order-summary strong {
+  color: #0b2a4a;
+  font-size: 14px;
+}
+
+.student-order-summary > div:last-child strong {
+  color: #1769aa;
+  font-size: 16px;
+}
+
+/* Empty State */
+
+.student-orders-empty {
+  background: #ffffff;
+  border: 1px solid #e3ebf5;
+  border-radius: 14px;
+  padding: 50px 20px;
+  text-align: center;
+}
+
+.student-orders-empty h2 {
+  margin: 0 0 8px;
+  color: #0b2a4a;
+}
+
+.student-orders-empty p {
+  margin: 0;
+  color: #7b8da1;
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+  .student-orders-page {
+    padding: 25px 15px;
+  }
+
+  .student-orders-header {
+    margin-bottom: 22px;
+  }
+
+  .student-orders-header h1 {
+    font-size: 26px;
+  }
+
+  .student-orders-header p {
+    font-size: 14px;
+  }
+
+  .student-order-card {
+    padding: 16px;
+  }
+
+  .student-order-top {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .student-order-status {
+    align-self: flex-start;
+  }
+
+  .student-order-summary {
+    justify-content: space-between;
+    gap: 15px;
+  }
+
+  .student-order-item {
+    gap: 10px;
+  }
+}

@@ -1,0 +1,27 @@
+.admin-delete-button {
+  border: 1px solid #f1caca;
+  background: #ffffff;
+  color: #c62828;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-delete-button:hover {
+  background: #fff1f1;
+  border-color: #c62828;
+  transform: translateY(-1px);
+}
+
+.admin-delete-button:active {
+  transform: translateY(0);
+}
+
+.admin-delete-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}

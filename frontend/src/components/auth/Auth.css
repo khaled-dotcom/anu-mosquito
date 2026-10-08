@@ -1,0 +1,163 @@
+/* =========================
+   LOGIN / REGISTER
+========================= */
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  background:
+    radial-gradient(circle at top right, #dceeff 0%, transparent 35%),
+    #f5f9ff;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  background: white;
+  border-radius: 24px;
+  padding: 42px 38px;
+  box-shadow: 0 15px 45px rgba(20, 75, 130, 0.12);
+  border: 1px solid #e6f0fa;
+}
+
+.logo-container {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.logo-image {
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+}
+
+.brand-name {
+  margin-top: -5px;
+  font-size: 25px;
+  font-weight: 500;
+  color: #1769c2;
+}
+
+.brand-name strong {
+  color: #0754a0;
+  font-weight: 800;
+}
+
+.subtitle {
+  text-align: center;
+  color: #718096;
+  font-size: 14px;
+  margin-bottom: 28px;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+.input-icon {
+  position: absolute;
+  left: 16px;
+  font-size: 17px;
+  z-index: 2;
+}
+
+.input-wrapper input {
+  width: 100%;
+  height: 54px;
+  border: 1px solid #d9e7f5;
+  border-radius: 13px;
+  background: #f8fbff;
+  padding: 0 45px;
+  outline: none;
+  color: #17324d;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.input-wrapper input:focus {
+  border-color: #1474d4;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(20, 116, 212, 0.08);
+}
+
+.password-button {
+  position: absolute;
+  right: 12px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #6b849c;
+  font-size: 17px;
+}
+
+.submit-button {
+  width: 100%;
+  height: 54px;
+  margin-top: 8px;
+  border: none;
+  border-radius: 13px;
+  background: #075eb5;
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.submit-button:hover {
+  background: #064f99;
+  transform: translateY(-1px);
+}
+
+.submit-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.message {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 13px;
+  color: #1769c2;
+}
+
+.switch-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 25px;
+}
+
+.line {
+  height: 1px;
+  flex: 1;
+  background: #e4edf6;
+}
+
+.switch-button {
+  border: none;
+  background: transparent;
+  color: #718096;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.switch-button strong {
+  color: #075eb5;
+}
+
+/* Mobile */
+
+@media (max-width: 700px) {
+  .auth-card {
+    padding: 32px 22px;
+  }
+}

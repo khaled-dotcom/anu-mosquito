@@ -1,0 +1,136 @@
+.driver-management {
+  width: 100%;
+}
+
+.driver-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.driver-header h2 {
+  margin: 0 0 6px;
+}
+
+.driver-header p {
+  margin: 0;
+  color: #6b7280;
+}
+
+.driver-message {
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.driver-form {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.driver-form h3 {
+  margin-top: 0;
+}
+
+.driver-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.driver-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.driver-field label {
+  font-weight: 600;
+}
+
+.driver-field input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.driver-form-actions {
+  margin-top: 18px;
+}
+
+.drivers-table-container {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow-x: auto;
+}
+
+.drivers-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px;
+}
+
+.drivers-table th,
+.drivers-table td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.drivers-table th {
+  background: #f8fafc;
+  font-weight: 600;
+}
+
+.driver-status {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.driver-status.active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.driver-status.inactive {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.empty-drivers {
+  padding: 50px 20px;
+  text-align: center;
+}
+
+.empty-drivers h3 {
+  margin-bottom: 8px;
+}
+
+.empty-drivers p {
+  color: #6b7280;
+}
+
+@media (max-width: 768px) {
+  .driver-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .driver-form-grid {
+    grid-template-columns: 1fr;
+  }
+}

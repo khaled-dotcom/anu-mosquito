@@ -1,0 +1,141 @@
+.admin-restaurant-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-restaurant-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 14px 0;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.admin-restaurant-row:last-child {
+  border-bottom: none;
+}
+
+.admin-restaurant-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-restaurant-left img,
+.admin-restaurant-placeholder {
+  width: 52px;
+  height: 52px;
+  border-radius: 13px;
+  object-fit: cover;
+  background: #edf6ff;
+}
+
+.admin-restaurant-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 23px;
+}
+
+.admin-restaurant-left strong,
+.admin-restaurant-left span {
+  display: block;
+}
+
+.admin-restaurant-left strong {
+  font-size: 14px;
+  color: #173b67;
+}
+
+.admin-restaurant-left span {
+  margin-top: 4px;
+  color: #8498ac;
+  font-size: 12px;
+}
+
+.admin-restaurant-row {
+  align-items: flex-start;
+}
+
+.admin-restaurant-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-search-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 22px 0;
+  padding: 0 16px;
+  height: 48px;
+  background: #ffffff;
+  border: 1px solid #d9e1ec;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(20, 55, 100, 0.05);
+  transition: 0.2s ease;
+}
+
+.admin-search-box:focus-within {
+  border-color: #2f80ed;
+  box-shadow:
+    0 0 0 3px rgba(47, 128, 237, 0.1),
+    0 4px 14px rgba(20, 55, 100, 0.05);
+}
+
+.admin-search-box span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  color: #64748b;
+  font-size: 20px;
+}
+
+.admin-search-box input {
+  flex: 1;
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #1e293b;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.admin-search-box input::placeholder {
+  color: #94a3b8;
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+  .admin-search-box {
+    height: 46px;
+    margin: 18px 0;
+    padding: 0 14px;
+  }
+}
+
+.admin-close-button {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  background: #f3f6fa;
+  color: #64748b;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.admin-close-button:hover {
+  background: #e8eef6;
+  color: #123b6d;
+}

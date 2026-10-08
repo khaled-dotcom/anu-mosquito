@@ -1,0 +1,192 @@
+/* =========================================
+   Shared Admin Management Styles
+   Used by Restaurant Management & Food Management
+   ========================================= */
+
+/* ---------- Section Card ---------- */
+
+.admin-section-card {
+  background: #ffffff;
+  border: 1px solid #e5edf5;
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+}
+
+.admin-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.admin-section-heading h2 {
+  margin: 0;
+  color: #123b63;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.admin-section-heading p {
+  margin: 6px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* ---------- Form Card ---------- */
+
+.admin-form-card {
+  background: #f8fbff;
+  border: 1px solid #dce8f5;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.admin-form-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.admin-form-header h3 {
+  margin: 0;
+  color: #123b63;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.admin-form-header p {
+  margin: 5px 0 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* ---------- Form Grid ---------- */
+
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.admin-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.admin-form-full {
+  grid-column: 1 / -1;
+}
+
+.admin-form-group label {
+  color: #374151;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.admin-form-group input,
+.admin-form-group textarea,
+.admin-form-group select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d5e1ed;
+  background: #ffffff;
+  color: #1f2937;
+  border-radius: 9px;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-form-group input:focus,
+.admin-form-group textarea:focus,
+.admin-form-group select:focus {
+  border-color: #0968bf;
+  box-shadow: 0 0 0 3px rgba(9, 104, 191, 0.1);
+}
+
+.admin-form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.admin-form-group select {
+  cursor: pointer;
+}
+
+/* ---------- Checkbox ---------- */
+
+.admin-form-checkbox {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.admin-form-checkbox input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #0968bf;
+  cursor: pointer;
+}
+
+/* ---------- Form Actions ---------- */
+
+.admin-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid #e3ebf3;
+}
+
+/* ---------- Empty / Loading ---------- */
+
+.admin-empty {
+  padding: 30px 20px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 700px) {
+  .admin-section-card {
+    padding: 16px;
+  }
+
+  .admin-section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-form-full {
+    grid-column: auto;
+  }
+
+  .admin-form-checkbox {
+    grid-column: auto;
+  }
+
+  .admin-form-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+}

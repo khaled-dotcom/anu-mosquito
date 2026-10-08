@@ -1,0 +1,13 @@
+.admin-primary-button {
+  border: none;
+  background: #0968bf;
+  color: white;
+  padding: 11px 16px;
+  border-radius: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-primary-button:hover {
+  background: #075ba9;
+}

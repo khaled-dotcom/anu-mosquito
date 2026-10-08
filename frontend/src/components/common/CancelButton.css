@@ -1,0 +1,17 @@
+.admin-secondary-button {
+  min-height: 42px;
+  padding: 0 18px;
+  border: 1px solid #d9e1ec;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.admin-secondary-button:hover {
+  background: #f7f9fc;
+  border-color: #c5d0df;
+}

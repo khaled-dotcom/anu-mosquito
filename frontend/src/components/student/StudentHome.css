@@ -1,0 +1,623 @@
+/* =========================
+   STUDENT HOME
+========================= */
+
+.student-home {
+  min-height: 100vh;
+  background: #f5f9ff;
+}
+
+/* Header */
+
+.home-header {
+  height: 76px;
+  background: white;
+  border-bottom: 1px solid #e5eef7;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6%;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.home-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.home-logo {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+}
+
+.home-brand-name {
+  font-size: 21px;
+  font-weight: 800;
+  color: #0754a0;
+}
+
+.home-brand-name span {
+  color: #1474d4;
+}
+
+.logout-button {
+  border: 1px solid #d8e6f3;
+  background: white;
+  color: #075eb5;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  background: #edf6ff;
+}
+
+/* Main */
+
+.home-content {
+  width: min(1150px, 90%);
+  margin: 0 auto;
+  padding: 45px 0 70px;
+}
+
+/* Welcome */
+
+.welcome-section {
+  min-height: 190px;
+  background: linear-gradient(135deg, #075eb5, #1684e5);
+  border-radius: 25px;
+  padding: 35px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: white;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 15px 35px rgba(7, 94, 181, 0.18);
+}
+
+.welcome-small {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-bottom: 8px;
+}
+
+.welcome-section h1 {
+  font-size: 34px;
+  margin-bottom: 8px;
+}
+
+.welcome-text {
+  font-size: 15px;
+  opacity: 0.9;
+}
+
+.mosquito-decoration {
+  font-size: 90px;
+  opacity: 0.9;
+  transform: rotate(-8deg);
+}
+
+/* Search */
+
+.search-box {
+  height: 58px;
+  background: white;
+  border: 1px solid #e0ebf5;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  margin: -28px auto 38px;
+  width: 80%;
+  position: relative;
+  box-shadow: 0 8px 25px rgba(25, 80, 130, 0.08);
+}
+
+.search-box span {
+  font-size: 25px;
+  color: #7590a8;
+}
+
+.search-box input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: #17324d;
+}
+
+.search-box input::placeholder {
+  color: #9aabba;
+}
+
+/* Sections */
+
+.section {
+  margin-top: 38px;
+}
+
+.section h2 {
+  font-size: 20px;
+  color: #17324d;
+  margin-bottom: 17px;
+}
+
+.section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.view-all-button {
+  border: none;
+  background: transparent;
+  color: #0871c9;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Quick Access */
+
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.quick-card {
+  background: white;
+  border: 1px solid #e3edf6;
+  border-radius: 17px;
+  padding: 22px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  cursor: pointer;
+  color: #17324d;
+  font-size: 14px;
+  font-weight: 600;
+  transition: 0.2s;
+  text-align: left;
+}
+
+.quick-card:hover {
+  border-color: #8dc7f5;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(30, 100, 160, 0.08);
+}
+
+.quick-icon {
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #edf7ff;
+  border-radius: 12px;
+  font-size: 22px;
+}
+
+/* Categories */
+
+.category-row {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 5px;
+}
+
+.category-row button {
+  border: 1px solid #dceaf6;
+  background: white;
+  color: #31516d;
+  padding: 11px 18px;
+  border-radius: 30px;
+  white-space: nowrap;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.category-row button:hover {
+  background: #eaf6ff;
+  border-color: #8dc7f5;
+  color: #075eb5;
+}
+
+/* Restaurant placeholder */
+
+.empty-state {
+  background: white;
+  border: 1px dashed #cddfeb;
+  border-radius: 20px;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 30px;
+}
+
+.empty-icon {
+  width: 65px;
+  height: 65px;
+  background: #edf7ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  margin-bottom: 15px;
+}
+
+.empty-state h3 {
+  color: #17324d;
+  font-size: 17px;
+  margin-bottom: 8px;
+}
+
+.empty-state p {
+  max-width: 420px;
+  color: #8195a8;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 700px) {
+  .home-header {
+    padding: 0 18px;
+  }
+
+  .home-brand-name {
+    font-size: 17px;
+  }
+
+  .home-logo {
+    width: 43px;
+    height: 43px;
+  }
+
+  .home-content {
+    width: 92%;
+    padding-top: 25px;
+  }
+
+  .welcome-section {
+    min-height: 175px;
+    padding: 27px 24px;
+  }
+
+  .welcome-section h1 {
+    font-size: 26px;
+  }
+
+  .mosquito-decoration {
+    font-size: 60px;
+  }
+
+  .search-box {
+    width: 92%;
+    margin-top: -25px;
+  }
+
+  .quick-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-card {
+    padding: 17px;
+  }
+}
+
+.category-row {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.category-row::-webkit-scrollbar {
+  display: none;
+}
+
+/* Restaurants */
+
+.restaurant-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.restaurant-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+  text-align: left;
+  background: #ffffff;
+  border: 1px solid #e5edf8;
+  border-radius: 18px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.restaurant-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(20, 90, 170, 0.12);
+}
+
+.restaurant-image-wrapper {
+  width: 100%;
+  height: 170px;
+  overflow: hidden;
+  background: #eef6ff;
+}
+
+.restaurant-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.restaurant-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 52px;
+  background: linear-gradient(135deg, #eaf4ff, #f7fbff);
+}
+
+.restaurant-info {
+  padding: 14px 16px 18px;
+}
+
+.restaurant-info h3 {
+  margin: 0 0 6px;
+  color: #123d70;
+  font-size: 17px;
+}
+
+.restaurant-info p {
+  margin: 0;
+  color: #718096;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.restaurant-code {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 4px 9px;
+  border-radius: 8px;
+  background: #edf6ff;
+  color: #1474d4;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.restaurant-arrow {
+  position: absolute;
+  right: 14px;
+  bottom: 15px;
+  color: #1474d4;
+  font-size: 20px;
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+  .restaurant-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .restaurant-image-wrapper {
+    height: 180px;
+  }
+}
+
+/* =========================
+   Restaurant Modal
+========================= */
+
+.restaurant-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(10, 35, 70, 0.45);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+}
+
+.restaurant-modal-card {
+  width: 100%;
+  max-width: 520px;
+
+  background: #ffffff;
+  border-radius: 24px;
+  overflow: hidden;
+
+  box-shadow: 0 20px 60px rgba(0, 40, 100, 0.25);
+
+  position: relative;
+
+  animation: modalAppear 0.2s ease-out;
+}
+
+@keyframes modalAppear {
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+
+  width: 36px;
+  height: 36px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.95);
+  color: #173b67;
+
+  font-size: 22px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.modal-close:hover {
+  background: #f1f7ff;
+}
+
+.modal-restaurant-image {
+  width: 100%;
+  height: 220px;
+
+  object-fit: cover;
+
+  display: block;
+}
+
+.modal-image-placeholder {
+  width: 100%;
+  height: 220px;
+
+  background: #eef6ff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 70px;
+}
+
+.modal-content {
+  padding: 24px;
+}
+
+.modal-content h2 {
+  margin: 0 0 8px;
+
+  color: #173b67;
+
+  font-size: 25px;
+  font-weight: 700;
+}
+
+.modal-content p {
+  margin: 0 0 10px;
+
+  color: #6b7f95;
+
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.modal-content .restaurant-status {
+  display: inline-block;
+
+  margin-bottom: 18px;
+
+  padding: 6px 12px;
+
+  border-radius: 20px;
+
+  background: #e9f7ef;
+  color: #20804b;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.modal-menu-button {
+  width: 100%;
+
+  border: none;
+  border-radius: 12px;
+
+  padding: 14px 18px;
+
+  background: #0b68c9;
+  color: white;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.modal-menu-button:hover {
+  background: #095aaa;
+}
+
+/* =========================
+   Mobile Modal
+========================= */
+
+@media (max-width: 600px) {
+  .restaurant-modal {
+    padding: 14px;
+    align-items: flex-end;
+  }
+
+  .restaurant-modal-card {
+    max-width: 100%;
+    border-radius: 22px 22px 18px 18px;
+  }
+
+  .modal-restaurant-image,
+  .modal-image-placeholder {
+    height: 190px;
+  }
+
+  .modal-content {
+    padding: 20px;
+  }
+
+  .modal-content h2 {
+    font-size: 22px;
+  }
+
+  .modal-menu-button {
+    padding: 15px;
+  }
+}
