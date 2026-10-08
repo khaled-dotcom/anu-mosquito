@@ -13,12 +13,12 @@
 .payment-method-management-header h2 {
   margin: 0;
   font-size: 24px;
-  color: #17212f;
+  color: var(--text);
 }
 
 .payment-method-management-header p {
   margin: 6px 0 0;
-  color: #718096;
+  color: var(--text-muted);
   font-size: 14px;
 }
 
@@ -26,7 +26,7 @@
   border: none;
   border-radius: 10px;
   padding: 12px 18px;
-  background: #0b63ce;
+  background: var(--primary);
   color: #ffffff;
   font-size: 14px;
   font-weight: 700;
@@ -34,14 +34,14 @@
 }
 
 .payment-method-add-button:hover {
-  background: #0957b5;
+  background: var(--primary);
 }
 
 .payment-method-form {
   margin-bottom: 24px;
   padding: 22px;
   background: #ffffff;
-  border: 1px solid #e1e8f0;
+  border: 1px solid var(--border);
   border-radius: 16px;
 }
 
@@ -55,13 +55,13 @@
 
 .payment-method-form-header h3 {
   margin: 0;
-  color: #17212f;
+  color: var(--text);
   font-size: 18px;
 }
 
 .payment-method-form-header p {
   margin: 5px 0 0;
-  color: #718096;
+  color: var(--text-muted);
   font-size: 13px;
 }
 
@@ -95,7 +95,7 @@
 .payment-method-field label {
   font-size: 13px;
   font-weight: 700;
-  color: #374151;
+  color: var(--text-soft);
 }
 
 .payment-method-field input,
@@ -106,7 +106,7 @@
   border-radius: 10px;
   padding: 12px 13px;
   background: #ffffff;
-  color: #17212f;
+  color: var(--text);
   font-size: 14px;
   outline: none;
   font-family: inherit;
@@ -114,7 +114,7 @@
 
 .payment-method-field input:focus,
 .payment-method-field textarea:focus {
-  border-color: #0b63ce;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(11, 99, 206, 0.08);
 }
 
@@ -127,7 +127,7 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  color: #374151;
+  color: var(--text-soft);
   font-size: 14px;
   font-weight: 600;
 }
@@ -135,7 +135,7 @@
 .payment-method-active-field input {
   width: 17px;
   height: 17px;
-  accent-color: #0b63ce;
+  accent-color: var(--primary);
 }
 
 .payment-method-form-actions {
@@ -161,12 +161,12 @@
 }
 
 .payment-method-save-button {
-  background: #0b63ce;
+  background: var(--primary);
   color: #ffffff;
 }
 
 .payment-method-save-button:hover {
-  background: #0957b5;
+  background: var(--primary);
 }
 
 .payment-method-cancel-button:disabled,
@@ -187,7 +187,7 @@
   border: 1px dashed #d8e1eb;
   border-radius: 16px;
   text-align: center;
-  color: #718096;
+  color: var(--text-muted);
   font-size: 14px;
 }
 
@@ -198,7 +198,7 @@
   gap: 20px;
   padding: 18px;
   background: #ffffff;
-  border: 1px solid #e1e8f0;
+  border: 1px solid var(--border);
   border-radius: 15px;
 }
 
@@ -217,27 +217,27 @@
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  background: #eaf4ff;
+  background: var(--primary-50);
   font-size: 20px;
 }
 
 .payment-method-admin-main h3 {
   margin: 0;
-  color: #17212f;
+  color: var(--text);
   font-size: 16px;
 }
 
 .payment-method-admin-type {
   display: inline-block;
   margin-top: 4px;
-  color: #0b63ce;
+  color: var(--primary);
   font-size: 12px;
   font-weight: 700;
 }
 
 .payment-method-admin-main p {
   margin: 7px 0 0;
-  color: #374151;
+  color: var(--text-soft);
   font-size: 14px;
   font-weight: 600;
 }
@@ -245,7 +245,7 @@
 .payment-method-admin-main small {
   display: block;
   margin-top: 5px;
-  color: #718096;
+  color: var(--text-muted);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -287,7 +287,7 @@
 
 .payment-method-action-button {
   background: #edf5ff;
-  color: #0b63ce;
+  color: var(--primary);
 }
 
 .payment-method-delete-button {

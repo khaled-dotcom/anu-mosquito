@@ -107,7 +107,7 @@ handleAssignDriver,
 
         <div className="admin-brand">
           <img
-            src="/logo.png"
+            src="/logo-256.webp"
             alt="ANU Mosquito"
             className="admin-logo"
           />

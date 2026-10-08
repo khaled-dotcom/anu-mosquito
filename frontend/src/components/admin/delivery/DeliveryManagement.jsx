@@ -9,7 +9,6 @@ import CancelButton from '../../common/CancelButton'
 import ToggleButton from '../../common/ToggleButton'
 
 function DeliveryManagement({
-  batches,
   filteredBatches,
   batchSearch,
   setBatchSearch,
@@ -20,7 +19,6 @@ driverAssigning,
 handleAssignDriver,
 
   showBatchForm,
-  setShowBatchForm,
 
   editingBatch,
 

@@ -1,7 +1,7 @@
 import './Auth.css'
 import { supabase } from '../../supabase'
 import { loginUser } from '../../services/authService'
-import Button from '../common/Button'
+import Icon from '../common/Icon'
 
 function Auth({
   isRegister,
@@ -20,7 +20,6 @@ function Auth({
   loading,
   setMessage,
   setLoading,
-  getAuthEmail,
 }) {
   async function handleSubmit(e) {
     e.preventDefault()
@@ -60,8 +59,6 @@ function Auth({
     }
 
     setLoading(true)
-
-    const authEmail = getAuthEmail(universityId)
 
     try {
       if (isRegister) {
@@ -151,196 +148,182 @@ function Auth({
     setLoading(false)
   }
 
+  const isError =
+    message &&
+    !/success/i.test(message)
+
   return (
-    <div className="page">
-      <div className="auth-card">
+    <div className="auth-page">
+      <aside className="auth-hero" aria-hidden="true">
+        <div className="auth-hero-inner">
+          <span className="auth-hero-badge">
+            <Icon name="zap" size={14} /> Campus food delivery
+          </span>
 
-        <div className="logo-container">
+          <h2>
+            Your favorite campus food,
+            <br />
+            delivered fast.
+          </h2>
 
-          <img
-            src="/logo.png"
-            alt="ANU Mosquito Logo"
-            className="logo-image"
-          />
+          <p>
+            Browse restaurants, order in seconds and track your delivery —
+            all with your university ID.
+          </p>
 
-          <div className="brand-name">
-            <span>ANU</span>{' '}
-            <strong>Mosquito</strong>
+          <ul className="auth-hero-points">
+            <li><Icon name="store" size={18} /> All campus restaurants in one place</li>
+            <li><Icon name="clock" size={18} /> Scheduled delivery batches</li>
+            <li><Icon name="shield" size={18} /> Secure student accounts</li>
+          </ul>
+        </div>
+      </aside>
+
+      <main className="auth-panel">
+        <div className="auth-card">
+          <div className="logo-container">
+            <img
+              src="/logo.webp"
+              alt="ANU Mosquito"
+              className="logo-image"
+              width="132"
+              height="132"
+            />
           </div>
 
-        </div>
+          <h1 className="auth-title">
+            {isRegister ? 'Create your account' : 'Welcome back'}
+          </h1>
 
-        <p className="subtitle">
-          {isRegister
-            ? 'Create your student account'
-            : 'Welcome back'}
-        </p>
+          <p className="subtitle">
+            {isRegister
+              ? 'Sign up with your university ID to start ordering.'
+              : 'Log in with your ID to continue.'}
+          </p>
 
-        <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} noValidate>
+            {isRegister && (
+              <label className="input-wrapper">
+                <span className="sr-only">Full name</span>
+                <Icon name="user" size={18} className="input-icon" />
+                <input
+                  type="text"
+                  autoComplete="name"
+                  placeholder="Full name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                />
+              </label>
+            )}
 
-          {isRegister && (
-            <div className="input-wrapper">
-
-              <span className="input-icon">
-                ♙
-              </span>
-
+            <label className="input-wrapper">
+              <span className="sr-only">ID</span>
+              <Icon name="id" size={18} className="input-icon" />
               <input
                 type="text"
-                placeholder="Full Name"
-                value={fullName}
-                onChange={(e) =>
-                  setFullName(e.target.value)
-                }
-                required
-              />
-
-            </div>
-          )}
-
-          <div className="input-wrapper">
-
-            <span className="input-icon">
-              ▣
-            </span>
-
-            <input
-              type="text"
-              inputMode="numeric"
-              maxLength={7}
-              placeholder="ID"
-              value={universityId}
-              onChange={(e) =>
-                setUniversityId(
-                  e.target.value.replace(
-                    /\D/g,
-                    ''
-                  )
-                )
-              }
-              required
-            />
-
-          </div>
-
-          {isRegister && (
-            <div className="input-wrapper">
-
-              <span className="input-icon">
-                📱
-              </span>
-
-              <input
-                type="tel"
                 inputMode="numeric"
-                maxLength={11}
-                placeholder="Phone Number"
-                value={phone}
+                autoComplete="username"
+                maxLength={7}
+                placeholder="University ID (7 digits)"
+                value={universityId}
                 onChange={(e) =>
-                  setPhone(
-                    e.target.value.replace(
-                      /\D/g,
-                      ''
-                    )
-                  )
+                  setUniversityId(e.target.value.replace(/\D/g, ''))
                 }
                 required
               />
+            </label>
 
-            </div>
-          )}
+            {isRegister && (
+              <label className="input-wrapper">
+                <span className="sr-only">Phone number</span>
+                <Icon name="phone" size={18} className="input-icon" />
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel"
+                  maxLength={11}
+                  placeholder="Phone number (01xxxxxxxxx)"
+                  value={phone}
+                  onChange={(e) =>
+                    setPhone(e.target.value.replace(/\D/g, ''))
+                  }
+                  required
+                />
+              </label>
+            )}
 
-          <div className="input-wrapper">
+            <label className="input-wrapper">
+              <span className="sr-only">Password</span>
+              <Icon name="lock" size={18} className="input-icon" />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                autoComplete={isRegister ? 'new-password' : 'current-password'}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+              />
+              <button
+                type="button"
+                className="password-button"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                <Icon name={showPassword ? 'eyeOff' : 'eye'} size={18} />
+              </button>
+            </label>
 
-            <span className="input-icon">
-              🔒
-            </span>
-
-            <input
-              type={
-                showPassword
-                  ? 'text'
-                  : 'password'
-              }
-              placeholder="Password"
-              value={password}
-              onChange={(e) =>
-                setPassword(e.target.value)
-              }
-              required
-              minLength={6}
-            />
+            {message && (
+              <p
+                className={isError ? 'message message-error' : 'message message-success'}
+                role={isError ? 'alert' : 'status'}
+              >
+                {message}
+              </p>
+            )}
 
             <button
-              type="button"
-              className="password-button"
-              onClick={() =>
-                setShowPassword(
-                  !showPassword
-                )
-              }
+              type="submit"
+              className="submit-button"
+              disabled={loading}
             >
-              {showPassword
-                ? '◉'
-                : '◌'}
+              {loading ? (
+                <span className="spinner" aria-label="Please wait" />
+              ) : (
+                <>
+                  {isRegister ? 'Create account' : 'Log in'}
+                  <Icon name="arrowRight" size={18} />
+                </>
+              )}
             </button>
+          </form>
 
+          <div className="switch-container">
+            <span className="line"></span>
+            <button
+              type="button"
+              className="switch-button"
+              onClick={() => {
+                setIsRegister(!isRegister)
+                setMessage('')
+              }}
+            >
+              {isRegister ? (
+                <>
+                  Already have an account? <strong>Log in</strong>
+                </>
+              ) : (
+                <>
+                  New here? <strong>Create an account</strong>
+                </>
+              )}
+            </button>
+            <span className="line"></span>
           </div>
-
-          <button
-            type="submit"
-            className="submit-button"
-            disabled={loading}
-          >
-            {loading
-              ? 'Please wait...'
-              : isRegister
-                ? 'Create Account  →'
-                : 'Login  →'}
-          </button>
-
-        </form>
-
-        {message && (
-          <p className="message">
-            {message}
-          </p>
-        )}
-
-        <div className="switch-container">
-
-          <span className="line"></span>
-
-          <button
-            type="button"
-            className="switch-button"
-            onClick={() => {
-              setIsRegister(!isRegister)
-              setMessage('')
-            }}
-          >
-            {isRegister ? (
-              <>
-                Already have an account?{' '}
-                <strong>
-                  Login
-                </strong>
-              </>
-            ) : (
-              <>
-                Don't have an account?{' '}
-                <strong>
-                  Create one
-                </strong>
-              </>
-            )}
-          </button>
-
-          <span className="line"></span>
-
         </div>
-
-      </div>
+      </main>
     </div>
   )
 }

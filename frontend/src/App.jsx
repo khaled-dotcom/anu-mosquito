@@ -1,18 +1,21 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { supabase } from './supabase'
-import AdminDashboard from './components/admin/AdminDashboard/AdminDashboard'
-import Auth from './components/auth/Auth'
-import StudentHome from './components/student/StudentHome'
-import StudentMenu from './components/student/StudentMenu'
-import { getAuthEmail } from './services/authService'
 import useAuth from './hooks/useAuth'
 import useRestaurants from './hooks/useRestaurants'
 import useFood from './hooks/useFood'
 import useDelivery from './hooks/useDelivery'
-import StudentOrders from './components/student/StudentOrders'
 import { loadDashboardStats } from './services/dashboardService'
-import DriverDashboard from "./components/driver/DriverDashboard";
-import ModeratorDashboard from './components/moderator/ModeratorDashboard'
+import PageLoader from './components/common/PageLoader'
+
+// Each role's screens are split into their own chunk so students never
+// download the admin panel and vice versa.
+const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard/AdminDashboard'))
+const ModeratorDashboard = lazy(() => import('./components/moderator/ModeratorDashboard'))
+const DriverDashboard = lazy(() => import('./components/driver/DriverDashboard'))
+const StudentHome = lazy(() => import('./components/student/StudentHome'))
+const StudentMenu = lazy(() => import('./components/student/StudentMenu'))
+const StudentOrders = lazy(() => import('./components/student/StudentOrders'))
+const Auth = lazy(() => import('./components/auth/Auth'))
 
 function App() {
   const {
@@ -32,7 +35,6 @@ function App() {
   setMessage,
   loading,
   setLoading,
-  handleSubmit,
 } = useAuth()
   const {
   restaurants,
@@ -101,8 +103,6 @@ const {
   foodCategories,
   foodItems,
 
-  foodSearch,
-  setFoodSearch,
 
   foodLoading,
   categoryLoading,
@@ -164,45 +164,54 @@ handleDeleteCategory,
 
  
   // =========================
-  // CHECK SESSION
+  // SESSION
   // =========================
 
   useEffect(() => {
-    async function checkSession() {
-      const { data } = await supabase.auth.getSession()
+    let cancelled = false
 
-      setSession(data.session)
-
-     if (data.session?.user) {
-  await loadProfile(data.session.user.id)
-  await loadRestaurants()
-  await loadBatches()
-  await loadDashboardData()
-}
-
-      setCheckingAuth(false)
-    }
-
-    checkSession()
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+    async function handleSession(newSession) {
       setSession(newSession)
 
-      if (newSession?.user) {
-        await loadProfile(newSession.user.id)
-        await loadRestaurants()
-        await loadBatches()
-        await loadDashboardData()
-      } else {
+      if (!newSession?.user) {
         setProfile(null)
+        setCheckingAuth(false)
+        return
       }
+
+      const loadedProfile = await loadProfile(newSession.user.id)
+      if (cancelled) return
+
+      setCheckingAuth(false)
+
+      setRestaurantsLoading(true)
+      await loadRestaurants()
+      if (!cancelled) setRestaurantsLoading(false)
+
+      if (loadedProfile?.role === 'admin') {
+        loadBatches()
+      }
+    }
+
+    // onAuthStateChange fires INITIAL_SESSION on mount, so no separate
+    // getSession() call is needed. Supabase calls inside the callback are
+    // deferred to avoid deadlocking the auth client.
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, newSession) => {
+      if (event === 'TOKEN_REFRESHED') {
+        setSession(newSession)
+        return
+      }
+
+      setTimeout(() => handleSession(newSession), 0)
     })
 
     return () => {
+      cancelled = true
       subscription.unsubscribe()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // =========================
@@ -219,10 +228,11 @@ handleDeleteCategory,
     if (error) {
       console.error('Profile error:', error)
       setProfile(null)
-      return
+      return null
     }
 
     setProfile(data)
+    return data
   }
 
   async function loadDashboardData() {
@@ -261,6 +271,7 @@ function goToStudentHome() {
     setPassword('')
     setIsRegister(false)
     setAdminSection('dashboard')
+    setStudentPage('home')
   }
 
   // =========================
@@ -268,16 +279,16 @@ function goToStudentHome() {
   // =========================
 
   if (checkingAuth) {
-    return (
-      <div className="page">
-        <div className="auth-card">
-          <p className="subtitle">
-            Loading ANU Mosquito...
-          </p>
-        </div>
-      </div>
-    )
+    return <PageLoader />
   }
+
+  return (
+    <Suspense fallback={<PageLoader />}>
+      {renderScreen()}
+    </Suspense>
+  )
+
+  function renderScreen() {
 // =========================
 // ADMIN DASHBOARD
 // =========================
@@ -522,9 +533,9 @@ setStudentPage={setStudentPage}
     setMessage={setMessage}
     setLoading={setLoading}
 
-    getAuthEmail={getAuthEmail}
   />
 )
+}
 }
 
 export default App

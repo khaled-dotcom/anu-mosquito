@@ -2,10 +2,7 @@ import './StudentCheckout.css'
 import { useEffect, useState } from 'react'
 import StudentPayment from './StudentPayment'
 import { loadDeliverySettings } from '../../services/settingsService'
-import {
-  loadAvailableBatches,
-  createOrder,
-} from '../../services/orderService'
+import { loadAvailableBatches } from '../../services/orderService'
 function StudentCheckout({
   cart,
   setShowCheckout,

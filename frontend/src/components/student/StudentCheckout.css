@@ -1,6 +1,6 @@
 .checkout-page {
   min-height: 100vh;
-  background: #f7f9fc;
+  background: var(--surface-2);
   padding: 40px 20px;
 }
 
@@ -20,15 +20,15 @@
   height: 42px;
   border: none;
   border-radius: 12px;
-  background: #eef5ff;
-  color: #1769e0;
+  background: var(--primary-50);
+  color: var(--primary);
   font-size: 22px;
   cursor: pointer;
   transition: 0.2s ease;
 }
 
 .checkout-back-button:hover {
-  background: #1769e0;
+  background: var(--primary);
   color: white;
 }
 
@@ -39,7 +39,7 @@
 
 .checkout-header h1 {
   margin: 0;
-  color: #123b6d;
+  color: var(--text);
   font-size: 30px;
 }
 
@@ -87,17 +87,17 @@
 
 .checkout-item-info p {
   margin: 0 0 5px;
-  color: #666;
+  color: var(--text-muted);
   font-size: 14px;
 }
 
 .checkout-item-info span {
-  color: #1769e0;
+  color: var(--primary);
   font-size: 13px;
 }
 
 .checkout-item > strong {
-  color: #123b6d;
+  color: var(--text);
   font-size: 16px;
   white-space: nowrap;
 }
@@ -107,12 +107,12 @@
 .checkout-summary {
   margin-top: 30px;
   padding-top: 22px;
-  border-top: 1px solid #e5e9ef;
+  border-top: 1px solid var(--border);
 }
 
 .checkout-summary h2 {
   margin: 0 0 18px;
-  color: #123b6d;
+  color: var(--text);
   font-size: 20px;
 }
 
@@ -121,7 +121,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
-  color: #666;
+  color: var(--text-muted);
   font-size: 15px;
 }
 
@@ -132,18 +132,18 @@
 .checkout-total {
   margin-top: 18px;
   padding-top: 18px;
-  border-top: 1px solid #e5e9ef;
+  border-top: 1px solid var(--border);
 
   display: flex;
   justify-content: space-between;
   align-items: center;
 
-  color: #123b6d;
+  color: var(--text);
   font-size: 19px;
 }
 
 .checkout-total strong {
-  color: #1769e0;
+  color: var(--primary);
 }
 
 /* Button */
@@ -154,7 +154,7 @@
   padding: 15px;
   border: none;
   border-radius: 12px;
-  background: #1769e0;
+  background: var(--primary);
   color: white;
   font-size: 16px;
   font-weight: 600;
@@ -220,7 +220,7 @@
 
 .delivery-batches-section h2 {
   margin-bottom: 16px;
-  color: #123b6d;
+  color: var(--text);
   font-size: 20px;
 }
 
@@ -233,7 +233,7 @@
 .delivery-batch-card {
   width: 100%;
   padding: 16px 18px;
-  border: 1px solid #e1e8f0;
+  border: 1px solid var(--border);
   border-radius: 14px;
   background: white;
   display: flex;
@@ -245,30 +245,30 @@
 }
 
 .delivery-batch-card:hover {
-  border-color: #1769e0;
-  background: #f7faff;
+  border-color: var(--primary);
+  background: var(--surface-2);
 }
 
 .delivery-batch-card.selected {
-  border: 2px solid #1769e0;
-  background: #eef5ff;
+  border: 2px solid var(--primary);
+  background: var(--primary-50);
 }
 
 .delivery-batch-card strong {
   display: block;
-  color: #123b6d;
+  color: var(--text);
   font-size: 16px;
   margin-bottom: 6px;
 }
 
 .delivery-batch-card p {
   margin: 0;
-  color: #666;
+  color: var(--text-muted);
   font-size: 13px;
 }
 
 .delivery-batch-card > span {
-  color: #1769e0;
+  color: var(--primary);
   font-size: 22px;
   font-weight: bold;
 }
@@ -276,8 +276,8 @@
 .batches-message {
   padding: 18px;
   border-radius: 12px;
-  background: #f7f9fc;
-  color: #666;
+  background: var(--surface-2);
+  color: var(--text-muted);
   text-align: center;
 }
 
@@ -292,14 +292,14 @@
 .selected-batch-main strong {
   font-size: 18px;
   font-weight: 700;
-  color: #0b63ce;
+  color: var(--primary);
 }
 
 .selected-batch-time {
   padding: 7px 12px;
   border-radius: 9px;
-  background: #eaf4ff;
-  color: #0b63ce;
+  background: var(--primary-50);
+  color: var(--primary);
   font-size: 15px;
   font-weight: 700;
   white-space: nowrap;
@@ -308,7 +308,7 @@
 .selected-batch-summary > p {
   margin: 4px 0 0;
   font-size: 14px;
-  color: #6b7785;
+  color: var(--text-muted);
 }
 
 .delivery-batch-info {
@@ -326,14 +326,14 @@
 .delivery-batch-main strong {
   font-size: 17px;
   font-weight: 700;
-  color: #0b63ce;
+  color: var(--primary);
 }
 
 .delivery-batch-time {
   padding: 7px 11px;
   border-radius: 9px;
-  background: #eaf4ff;
-  color: #0b63ce;
+  background: var(--primary-50);
+  color: var(--primary);
   font-size: 14px;
   font-weight: 700;
   white-space: nowrap;
@@ -342,11 +342,11 @@
 .delivery-batch-info p {
   margin: 5px 0 0;
   font-size: 13px;
-  color: #6b7785;
+  color: var(--text-muted);
 }
 
 .delivery-batch-arrow {
   font-size: 20px;
-  color: #0b63ce;
+  color: var(--primary);
   margin-left: 8px;
 }

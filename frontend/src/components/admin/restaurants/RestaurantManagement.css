@@ -9,7 +9,7 @@
   justify-content: space-between;
   gap: 15px;
   padding: 14px 0;
-  border-bottom: 1px solid #edf2f7;
+  border-bottom: 1px solid var(--border);
 }
 
 .admin-restaurant-row:last-child {
@@ -28,7 +28,7 @@
   height: 52px;
   border-radius: 13px;
   object-fit: cover;
-  background: #edf6ff;
+  background: var(--primary-50);
 }
 
 .admin-restaurant-placeholder {
@@ -45,7 +45,7 @@
 
 .admin-restaurant-left strong {
   font-size: 14px;
-  color: #173b67;
+  color: var(--text);
 }
 
 .admin-restaurant-left span {
@@ -94,7 +94,7 @@
   justify-content: center;
   width: 22px;
   height: 22px;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 20px;
 }
 
@@ -104,13 +104,13 @@
   border: none;
   outline: none;
   background: transparent;
-  color: #1e293b;
+  color: var(--text);
   font-family: inherit;
   font-size: 14px;
 }
 
 .admin-search-box input::placeholder {
-  color: #94a3b8;
+  color: var(--text-faint);
 }
 
 /* Mobile */
@@ -128,7 +128,7 @@
   border: none;
   border-radius: 10px;
   background: #f3f6fa;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 24px;
   line-height: 1;
   cursor: pointer;
@@ -137,5 +137,5 @@
 
 .admin-close-button:hover {
   background: #e8eef6;
-  color: #123b6d;
+  color: var(--text);
 }

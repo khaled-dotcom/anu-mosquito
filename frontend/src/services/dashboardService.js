@@ -46,7 +46,7 @@ export async function loadDashboardStats() {
     foodItemsResult.error ||
     ordersResult.error ||
     studentsResult.error ||
-    todayOrdersResult.error
+    todayOrdersResult.error ||
     pendingPaymentsResult.error
 
   if (error) {

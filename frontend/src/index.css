@@ -1,18 +1,223 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+/* =========================
+   DESIGN TOKENS
+========================= */
 
-* {
+:root {
+  /* Brand — matched to the logo's royal blue */
+  --primary: #1d4ed8;
+  --primary-hover: #1e40af;
+  --primary-600: #2563eb;
+  --primary-400: #60a5fa;
+  --primary-100: #dbeafe;
+  --primary-50: #eff4ff;
+  --primary-gradient: linear-gradient(135deg, #1e3fae 0%, #2563eb 55%, #3b82f6 100%);
+
+  --accent: #f59e0b;
+  --success: #16a34a;
+  --success-bg: #ecfdf3;
+  --warning: #d97706;
+  --warning-bg: #fffbeb;
+  --danger: #dc2626;
+  --danger-bg: #fef2f2;
+
+  /* Neutrals */
+  --text: #0f1f3d;
+  --text-soft: #334766;
+  --text-muted: #64748b;
+  --text-faint: #94a3b8;
+  --surface: #ffffff;
+  --surface-2: #f8fafd;
+  --bg: #f4f7fc;
+  --bg-gradient:
+    radial-gradient(1200px 600px at 100% -10%, #dfe9ff 0%, transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, #e8f0ff 0%, transparent 55%),
+    var(--bg);
+  --border: #e3e9f3;
+  --border-strong: #cfd9e8;
+
+  /* Shape & depth */
+  --radius-sm: 10px;
+  --radius: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --shadow-sm: 0 1px 2px rgba(15, 31, 61, 0.05);
+  --shadow: 0 4px 16px -4px rgba(15, 31, 61, 0.08), 0 2px 4px rgba(15, 31, 61, 0.04);
+  --shadow-lg: 0 20px 45px -12px rgba(29, 78, 216, 0.22), 0 6px 14px -6px rgba(15, 31, 61, 0.08);
+  --ring: 0 0 0 4px rgba(37, 99, 235, 0.16);
+
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --font: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* =========================
+   BASE
+========================= */
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
 body {
-  font-family: 'Inter', sans-serif;
-  background: #f5f9ff;
-  color: #102a43;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  min-height: 100vh;
 }
 
 button,
-input {
+input,
+select,
+textarea {
   font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color 0.18s var(--ease),
+    border-color 0.18s var(--ease),
+    color 0.18s var(--ease),
+    box-shadow 0.18s var(--ease),
+    transform 0.18s var(--ease),
+    opacity 0.18s var(--ease);
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+input,
+select,
+textarea {
+  transition:
+    border-color 0.18s var(--ease),
+    box-shadow 0.18s var(--ease),
+    background-color 0.18s var(--ease);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--primary-600);
+  box-shadow: var(--ring);
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary-600);
+  outline-offset: 2px;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+}
+
+::selection {
+  background: var(--primary-100);
+  color: var(--primary-hover);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Skeleton loading */
+
+.skeleton {
+  background: linear-gradient(90deg, #eef2f8 0%, #f7f9fc 50%, #eef2f8 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+/* Scrollbars */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-faint);
+}
+
+/* Subtle entrance for top-level screens */
+
+#root > * {
+  animation: screen-in 0.35s var(--ease) both;
+}
+
+@keyframes screen-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

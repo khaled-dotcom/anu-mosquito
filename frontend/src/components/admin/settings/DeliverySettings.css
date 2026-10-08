@@ -10,12 +10,12 @@
   margin: 0 0 6px;
   font-size: 24px;
   font-weight: 700;
-  color: #123b63;
+  color: var(--text);
 }
 
 .delivery-settings-header p {
   margin: 0;
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 14px;
 }
 
@@ -23,7 +23,7 @@
   width: 100%;
   max-width: 650px;
   background: #ffffff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 14px;
   padding: 24px;
   box-sizing: border-box;
@@ -40,7 +40,7 @@
   width: 46px;
   height: 46px;
   border-radius: 12px;
-  background: #eaf4ff;
+  background: var(--primary-50);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -50,13 +50,13 @@
 
 .delivery-settings-card-header h3 {
   margin: 0 0 4px;
-  color: #123b63;
+  color: var(--text);
   font-size: 17px;
 }
 
 .delivery-settings-card-header p {
   margin: 0;
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 13px;
 }
 
@@ -67,7 +67,7 @@
 .delivery-fee-field label {
   display: block;
   margin-bottom: 8px;
-  color: #374151;
+  color: var(--text-soft);
   font-size: 14px;
   font-weight: 600;
 }
@@ -82,11 +82,11 @@
   height: 46px;
   box-sizing: border-box;
   padding: 0 65px 0 14px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-strong);
   border-radius: 9px;
   outline: none;
   font-size: 15px;
-  color: #111827;
+  color: var(--text);
   background: #ffffff;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -101,7 +101,7 @@
   right: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 13px;
   font-weight: 600;
 }
@@ -129,7 +129,7 @@
 }
 
 .delivery-settings-loading {
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 14px;
 }
 

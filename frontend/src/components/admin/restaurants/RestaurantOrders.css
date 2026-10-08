@@ -16,13 +16,13 @@
 
 .restaurant-orders-page-header h2 {
   margin: 0 0 6px;
-  color: #123b63;
+  color: var(--text);
   font-size: 24px;
 }
 
 .restaurant-orders-page-header p {
   margin: 0;
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 14px;
 }
 
@@ -32,9 +32,9 @@
   gap: 8px;
   padding: 10px 14px;
   background: #ffffff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 10px;
-  color: #123b63;
+  color: var(--text);
   font-size: 14px;
   font-weight: 600;
 }
@@ -48,7 +48,7 @@
   padding: 20px;
   margin-bottom: 20px;
   background: #ffffff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 12px;
 }
 
@@ -61,24 +61,24 @@
 .restaurant-orders-field label {
   font-size: 13px;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-soft);
 }
 
 .restaurant-orders-field select {
   width: 100%;
   height: 42px;
   padding: 0 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-strong);
   border-radius: 8px;
   background: #ffffff;
-  color: #374151;
+  color: var(--text-soft);
   font-size: 14px;
   outline: none;
   cursor: pointer;
 }
 
 .restaurant-orders-field select:focus {
-  border-color: #2563eb;
+  border-color: var(--primary);
 }
 
 /* Summary */
@@ -91,7 +91,7 @@
   padding: 18px 20px;
   margin-bottom: 18px;
   background: #ffffff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 12px;
 }
 
@@ -108,19 +108,19 @@
   align-items: center;
   justify-content: center;
   border-radius: 10px;
-  background: #f1f7ff;
+  background: var(--primary-50);
   font-size: 21px;
 }
 
 .restaurant-orders-summary-info h3 {
   margin: 0 0 4px;
-  color: #123b63;
+  color: var(--text);
   font-size: 16px;
 }
 
 .restaurant-orders-summary-info p {
   margin: 0;
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 13px;
 }
 
@@ -133,14 +133,14 @@
 }
 
 .restaurant-orders-count strong {
-  color: #123b63;
+  color: var(--text);
   font-size: 22px;
   line-height: 1;
 }
 
 .restaurant-orders-count span {
   margin-top: 4px;
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 12px;
 }
 
@@ -151,7 +151,7 @@
   padding: 0 16px;
   border: none;
   border-radius: 8px;
-  background: #123b63;
+  background: var(--text);
   color: #ffffff;
   font-size: 13px;
   font-weight: 600;
@@ -178,7 +178,7 @@
 
 .restaurant-order-card {
   background: #ffffff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -193,7 +193,7 @@
 }
 
 .restaurant-order-number {
-  color: #123b63;
+  color: var(--text);
   font-size: 17px;
   font-weight: 700;
 }
@@ -211,8 +211,8 @@
 }
 
 .status-confirmed {
-  background: #eff6ff;
-  color: #2563eb;
+  background: var(--primary-50);
+  color: var(--primary);
 }
 
 .status-preparing {
@@ -245,14 +245,14 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #374151;
+  color: var(--text-soft);
   font-size: 14px;
 }
 
 .restaurant-order-quantity {
   min-width: 28px;
   font-weight: 700;
-  color: #123b63;
+  color: var(--text);
 }
 
 /* Notes */
@@ -261,20 +261,20 @@
   margin: 4px 18px 16px;
   padding: 12px;
   background: #fafafa;
-  border-left: 3px solid #2563eb;
+  border-left: 3px solid var(--primary);
   border-radius: 6px;
 }
 
 .restaurant-order-notes-title {
   margin-bottom: 6px;
-  color: #123b63;
+  color: var(--text);
   font-size: 12px;
   font-weight: 700;
 }
 
 .restaurant-order-note {
   margin-top: 4px;
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -284,7 +284,7 @@
 .restaurant-orders-empty {
   padding: 50px 20px;
   background: #ffffff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 12px;
   text-align: center;
 }
@@ -296,18 +296,18 @@
 
 .restaurant-orders-empty h3 {
   margin: 0 0 8px;
-  color: #123b63;
+  color: var(--text);
   font-size: 17px;
 }
 
 .restaurant-orders-empty p {
   margin: 0;
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 13px;
 }
 
 .restaurant-orders-loading {
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 14px;
 }
 
@@ -402,7 +402,7 @@
     width: 100%;
     margin: 0 0 20px;
     padding: 0 0 16px;
-    border-bottom: 2px solid #123b63;
+    border-bottom: 2px solid var(--text);
     text-align: center;
   }
 

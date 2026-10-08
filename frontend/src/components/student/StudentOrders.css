@@ -1,7 +1,7 @@
 .student-orders-back {
   border: none;
   background: transparent;
-  color: #1769aa;
+  color: var(--primary);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -15,7 +15,7 @@
 
 .student-orders-page {
   min-height: 100vh;
-  background: #f7faff;
+  background: var(--surface-2);
   padding: 40px 20px;
 }
 
@@ -30,14 +30,14 @@
 
 .student-orders-header h1 {
   margin: 0;
-  color: #0b2a4a;
+  color: var(--text);
   font-size: 32px;
   font-weight: 700;
 }
 
 .student-orders-header p {
   margin: 8px 0 0;
-  color: #6b7c93;
+  color: var(--text-muted);
   font-size: 15px;
 }
 
@@ -49,7 +49,7 @@
 
 .student-order-card {
   background: #ffffff;
-  border: 1px solid #e3ebf5;
+  border: 1px solid var(--border);
   border-radius: 14px;
   padding: 20px;
   box-shadow: 0 4px 14px rgba(15, 61, 98, 0.06);
@@ -67,24 +67,24 @@
   align-items: center;
   gap: 15px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #edf2f7;
+  border-bottom: 1px solid var(--border);
 }
 
 .student-order-top span {
   display: block;
-  color: #7b8da1;
+  color: var(--text-muted);
   font-size: 13px;
   margin-bottom: 5px;
 }
 
 .student-order-top strong {
-  color: #0b2a4a;
+  color: var(--text);
   font-size: 20px;
 }
 
 .student-order-status {
-  background: #eaf4ff;
-  color: #1769aa;
+  background: var(--primary-50);
+  color: var(--primary);
   border-radius: 20px;
   padding: 7px 12px;
   font-size: 12px;
@@ -96,7 +96,7 @@
 
 .student-order-items {
   padding: 16px 0;
-  border-bottom: 1px solid #edf2f7;
+  border-bottom: 1px solid var(--border);
 }
 
 .student-order-item {
@@ -114,18 +114,18 @@
 }
 
 .student-order-item-info strong {
-  color: #0b2a4a;
+  color: var(--text);
   font-size: 14px;
   font-weight: 600;
 }
 
 .student-order-item-info span {
-  color: #7b8da1;
+  color: var(--text-muted);
   font-size: 14px;
 }
 
 .student-order-item > strong {
-  color: #0b2a4a;
+  color: var(--text);
   font-size: 14px;
   font-weight: 600;
 }
@@ -146,17 +146,17 @@
 }
 
 .student-order-summary span {
-  color: #7b8da1;
+  color: var(--text-muted);
   font-size: 13px;
 }
 
 .student-order-summary strong {
-  color: #0b2a4a;
+  color: var(--text);
   font-size: 14px;
 }
 
 .student-order-summary > div:last-child strong {
-  color: #1769aa;
+  color: var(--primary);
   font-size: 16px;
 }
 
@@ -164,7 +164,7 @@
 
 .student-orders-empty {
   background: #ffffff;
-  border: 1px solid #e3ebf5;
+  border: 1px solid var(--border);
   border-radius: 14px;
   padding: 50px 20px;
   text-align: center;
@@ -172,12 +172,12 @@
 
 .student-orders-empty h2 {
   margin: 0 0 8px;
-  color: #0b2a4a;
+  color: var(--text);
 }
 
 .student-orders-empty p {
   margin: 0;
-  color: #7b8da1;
+  color: var(--text-muted);
 }
 
 /* Mobile */

@@ -14,7 +14,6 @@ function StudentPayment({
   setShowCheckout,
   profile,
   selectedRestaurant,
-  setStudentPage,
   goToStudentHome,
 }) {
       const [paymentScreenshot, setPaymentScreenshot] = useState(null)

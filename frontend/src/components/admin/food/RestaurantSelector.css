@@ -10,7 +10,7 @@
   width: 100%;
   min-height: 72px;
   padding: 10px 14px;
-  border: 1px solid #d7e3f4;
+  border: 1px solid var(--border-strong);
   border-radius: 10px;
   background: #ffffff;
   display: flex;
@@ -22,7 +22,7 @@
 }
 
 .restaurant-selector-button:hover {
-  border-color: #1557a6;
+  border-color: var(--primary-hover);
   box-shadow: 0 2px 8px rgba(21, 87, 166, 0.08);
 }
 
@@ -46,7 +46,7 @@
   width: 48px;
   height: 48px;
   border-radius: 8px;
-  background: #eef5ff;
+  background: var(--primary-50);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -56,14 +56,14 @@
 
 .restaurant-selector-content strong {
   display: block;
-  color: #17324d;
+  color: var(--text);
   font-size: 15px;
   margin-bottom: 3px;
 }
 
 .restaurant-selector-content span {
   display: block;
-  color: #718096;
+  color: var(--text-muted);
   font-size: 13px;
   white-space: nowrap;
   overflow: hidden;
@@ -71,7 +71,7 @@
 }
 
 .restaurant-selector-arrow {
-  color: #1557a6;
+  color: var(--primary-hover);
   font-size: 12px;
   margin-left: 10px;
   flex-shrink: 0;
@@ -86,7 +86,7 @@
   right: 0;
   z-index: 50;
   background: #ffffff;
-  border: 1px solid #d7e3f4;
+  border: 1px solid var(--border-strong);
   border-radius: 10px;
   box-shadow: 0 8px 24px rgba(15, 50, 90, 0.12);
   overflow: hidden;
@@ -94,21 +94,21 @@
 
 .restaurant-dropdown-search {
   padding: 10px;
-  border-bottom: 1px solid #edf2f7;
+  border-bottom: 1px solid var(--border);
 }
 
 .restaurant-dropdown-search input {
   width: 100%;
   box-sizing: border-box;
   padding: 10px 12px;
-  border: 1px solid #d7e3f4;
+  border: 1px solid var(--border-strong);
   border-radius: 8px;
   outline: none;
   font-size: 14px;
 }
 
 .restaurant-dropdown-search input:focus {
-  border-color: #1557a6;
+  border-color: var(--primary-hover);
   box-shadow: 0 0 0 3px rgba(21, 87, 166, 0.08);
 }
 
@@ -121,7 +121,7 @@
   width: 100%;
   padding: 10px 12px;
   border: none;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--surface-2);
   background: #ffffff;
   display: flex;
   align-items: center;
@@ -132,7 +132,7 @@
 }
 
 .restaurant-dropdown-item:hover {
-  background: #f5f9ff;
+  background: var(--bg);
 }
 
 .restaurant-dropdown-item:last-child {
@@ -141,13 +141,13 @@
 
 .restaurant-dropdown-item strong {
   display: block;
-  color: #17324d;
+  color: var(--text);
   font-size: 14px;
   margin-bottom: 3px;
 }
 
 .restaurant-dropdown-item span {
   display: block;
-  color: #718096;
+  color: var(--text-muted);
   font-size: 12px;
 }

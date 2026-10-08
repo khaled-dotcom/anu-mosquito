@@ -1,6 +1,6 @@
 .admin-primary-button {
   border: none;
-  background: #0968bf;
+  background: var(--primary);
   color: white;
   padding: 11px 16px;
   border-radius: 11px;
@@ -9,7 +9,7 @@
 }
 
 .admin-primary-button:hover {
-  background: #075ba9;
+  background: var(--primary-hover);
 }
 .admin-form-actions .admin-primary-button {
   min-height: 42px;

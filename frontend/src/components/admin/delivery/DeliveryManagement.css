@@ -13,7 +13,7 @@
 }
 
 .delivery-batch-row .admin-restaurant-left span {
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 13px;
 }
 
@@ -50,7 +50,7 @@
   border-radius: 10px;
 
   background: #ffffff;
-  color: #1e293b;
+  color: var(--text);
 
   font-size: 14px;
   font-family: inherit;
@@ -61,11 +61,11 @@
 }
 
 .delivery-search-input::placeholder {
-  color: #94a3b8;
+  color: var(--text-faint);
 }
 
 .delivery-search-input:focus {
-  border-color: #0968bf;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(9, 104, 191, 0.1);
 }
 
@@ -79,7 +79,7 @@
 .batch-driver label {
   font-size: 12px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .batch-driver-select {
@@ -89,7 +89,7 @@
   border: 1px solid #dbe3ef;
   border-radius: 8px;
   background: #ffffff;
-  color: #1e293b;
+  color: var(--text);
   font-size: 13px;
   font-weight: 500;
   outline: none;
@@ -102,7 +102,7 @@
 }
 
 .batch-driver-select:focus {
-  border-color: #2563eb;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 

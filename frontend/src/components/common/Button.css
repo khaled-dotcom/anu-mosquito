@@ -1,13 +1,23 @@
 .admin-primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   border: none;
-  background: #0968bf;
+  background: var(--primary-gradient);
   color: white;
-  padding: 11px 16px;
-  border-radius: 11px;
+  padding: 11px 18px;
+  border-radius: 12px;
   font-weight: 700;
   cursor: pointer;
+  box-shadow: 0 8px 18px -10px rgba(29, 78, 216, 0.7);
 }
 
-.admin-primary-button:hover {
-  background: #075ba9;
+.admin-primary-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 22px -10px rgba(29, 78, 216, 0.75);
+}
+
+.admin-primary-button:disabled {
+  opacity: 0.6;
 }
