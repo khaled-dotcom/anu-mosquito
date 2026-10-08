@@ -1,10 +1,22 @@
 import './StudentPayment.css'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import TopBar from '../common/TopBar'
+import Icon from '../common/Icon'
 import {
   loadActivePaymentMethods,
   uploadPaymentProof,
 } from '../../services/paymentService'
 import { createOrder } from '../../services/orderService'
+
+function formatBatch(batch) {
+  const date = batch?.delivery_time ? new Date(batch.delivery_time) : null
+  if (!date || Number.isNaN(date.getTime())) return `Batch ${batch?.batch_number ?? ''}`
+
+  return `Batch ${batch.batch_number} · ${date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  })}, ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`
+}
 
 function StudentPayment({
   cart,
@@ -14,337 +26,386 @@ function StudentPayment({
   setShowCheckout,
   profile,
   selectedRestaurant,
+  setStudentPage,
   goToStudentHome,
 }) {
-      const [paymentScreenshot, setPaymentScreenshot] = useState(null)
+  const [paymentScreenshot, setPaymentScreenshot] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [orderResult, setOrderResult] = useState(null)
-    const [paymentMethods, setPaymentMethods] = useState([])
-const [paymentMethodsLoading, setPaymentMethodsLoading] = useState(true)
-const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null)
+  const [paymentMethods, setPaymentMethods] = useState([])
+  const [paymentMethodsLoading, setPaymentMethodsLoading] = useState(true)
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null)
+  const [copied, setCopied] = useState(false)
 
-useEffect(() => {
-  async function loadMethods() {
-    const { data, error } = await loadActivePaymentMethods()
+  useEffect(() => {
+    async function loadMethods() {
+      const { data, error } = await loadActivePaymentMethods()
 
-    if (error) {
-      console.error('Payment methods error:', error)
-      alert(error.message)
-      setPaymentMethods([])
-    } else {
-      setPaymentMethods(data || [])
+      if (error) {
+        console.error('Payment methods error:', error)
+        alert(error.message)
+        setPaymentMethods([])
+      } else {
+        setPaymentMethods(data || [])
+      }
+
+      setPaymentMethodsLoading(false)
     }
 
-    setPaymentMethodsLoading(false)
-  }
+    loadMethods()
+  }, [])
 
-  loadMethods()
-}, [])
- const foodSubtotal = cart.reduce(
-  (total, item) =>
-    total + item.selling_price * item.quantity,
-  0
-)
-
-const totalAmount = foodSubtotal + deliveryFee
-
-const handleSubmitPayment = async () => {
-  if (!selectedPaymentMethod) {
-    alert('Please select a payment method.')
-    return
-  }
-
-  if (!paymentScreenshot) {
-    alert('Please upload your payment screenshot.')
-    return
-  }
-
-  if (!selectedBatch) {
-    alert('Please select a delivery batch.')
-    return
-  }
-
-  if (!profile?.id) {
-    alert('Student profile not found.')
-    return
-  }
-
-  if (!selectedRestaurant?.id) {
-    alert('Restaurant not found.')
-    return
-  }
-
-  setSubmitting(true)
-
-  const {
-    data: uploadData,
-    error: uploadError,
-    filePath,
-  } = await uploadPaymentProof(
-    paymentScreenshot,
-    profile.id
+  // Thumbnail of the chosen screenshot.
+  const previewUrl = useMemo(
+    () => (paymentScreenshot ? URL.createObjectURL(paymentScreenshot) : null),
+    [paymentScreenshot]
   )
 
-  if (uploadError) {
-    console.error('Payment proof upload error:', uploadError)
-    alert(uploadError.message)
-    setSubmitting(false)
-    return
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl)
+    }
+  }, [previewUrl])
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [orderResult])
+
+  const foodSubtotal = cart.reduce(
+    (total, item) => total + item.selling_price * item.quantity,
+    0
+  )
+
+  const totalAmount = foodSubtotal + deliveryFee
+
+  async function copyAccountNumber() {
+    try {
+      await navigator.clipboard.writeText(
+        String(selectedPaymentMethod?.account_number || '')
+      )
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Clipboard can be blocked; the number is still visible to copy by hand.
+    }
   }
 
-  console.log('Payment proof uploaded:', uploadData)
+  const handleSubmitPayment = async () => {
+    if (!selectedPaymentMethod) {
+      alert('Please select a payment method.')
+      return
+    }
 
-  const { data, error } = await createOrder({
-    student_id: profile.id,
-    restaurant_id: selectedRestaurant.id,
-    batch_id: selectedBatch.id,
-    items: cart,
-    food_subtotal: foodSubtotal,
-    delivery_fee: deliveryFee,
-    total_amount: totalAmount,
-    payment_method_id: selectedPaymentMethod.id,
-    payment_screenshot_path: filePath,
-  })
+    if (!paymentScreenshot) {
+      alert('Please upload your payment screenshot.')
+      return
+    }
 
-  if (error) {
-    console.error('Create order error:', error)
-    alert(error.message)
+    if (!selectedBatch) {
+      alert('Please select a delivery batch.')
+      return
+    }
+
+    if (!profile?.id) {
+      alert('Student profile not found.')
+      return
+    }
+
+    if (!selectedRestaurant?.id) {
+      alert('Restaurant not found.')
+      return
+    }
+
+    setSubmitting(true)
+
+    const { error: uploadError, filePath } = await uploadPaymentProof(
+      paymentScreenshot,
+      profile.id
+    )
+
+    if (uploadError) {
+      console.error('Payment proof upload error:', uploadError)
+      alert(uploadError.message)
+      setSubmitting(false)
+      return
+    }
+
+    const { data, error } = await createOrder({
+      student_id: profile.id,
+      restaurant_id: selectedRestaurant.id,
+      batch_id: selectedBatch.id,
+      items: cart,
+      food_subtotal: foodSubtotal,
+      delivery_fee: deliveryFee,
+      total_amount: totalAmount,
+      payment_method_id: selectedPaymentMethod.id,
+      payment_screenshot_path: filePath,
+    })
+
+    if (error) {
+      console.error('Create order error:', error)
+      alert(error.message)
+      setSubmitting(false)
+      return
+    }
+
     setSubmitting(false)
-    return
+
+    if (data?.order) {
+      setOrderResult(data.order)
+    }
   }
 
- console.log('Order created:', data)
+  // =========================
+  // SUCCESS
+  // =========================
 
-setSubmitting(false)
-
-if (data?.order) {
-  setOrderResult(data.order)
-}
-}
-
-if (orderResult) {
-  return (
-    <div className="payment-page">
-      <div className="payment-container">
-
-        <div className="payment-header">
-          <h1>Order Submitted Successfully 🎉</h1>
-          <p>Your order has been received and is waiting for payment confirmation.</p>
-        </div>
-
-        <div className="payment-summary">
-
-          <div className="payment-summary-row">
-            <span>Order Number</span>
-            <strong>{orderResult.order_number}</strong>
+  if (orderResult) {
+    return (
+      <div className="app-page payment-page">
+        <main className="app-page-content payment-success">
+          <div className="payment-success-icon" aria-hidden="true">
+            <Icon name="check" size={36} strokeWidth={3} />
           </div>
 
-          <div className="payment-summary-row">
-            <span>Food Subtotal</span>
+          <h1>Order placed!</h1>
+          <p>
+            We&apos;ve received your order. We&apos;ll confirm your payment
+            shortly.
+          </p>
+
+          <div className="app-card payment-success-card">
+            <div className="payment-row">
+              <span>Order number</span>
+              <strong>{orderResult.order_number}</strong>
+            </div>
+            <div className="payment-row">
+              <span>Restaurant</span>
+              <strong>{selectedRestaurant?.name}</strong>
+            </div>
+            {selectedBatch && (
+              <div className="payment-row">
+                <span>Delivery</span>
+                <strong>{formatBatch(selectedBatch)}</strong>
+              </div>
+            )}
+            <div className="payment-row">
+              <span>Payment</span>
+              <span className="status-badge tone-warning">Under review</span>
+            </div>
+            <div className="payment-row total">
+              <span>Total</span>
+              <strong>{totalAmount} EGP</strong>
+            </div>
+          </div>
+
+          <div className="payment-success-actions">
+            <button
+              type="button"
+              className="btn-primary btn-block"
+              onClick={() => {
+                setShowCheckout(false)
+                setStudentPage('orders')
+              }}
+            >
+              <Icon name="package" size={18} />
+              Track my order
+            </button>
+
+            <button
+              type="button"
+              className="btn-secondary btn-block payment-back-home-button"
+              onClick={() => {
+                setShowCheckout(false)
+                goToStudentHome()
+              }}
+            >
+              Back to home
+            </button>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  // =========================
+  // PAYMENT FORM
+  // =========================
+
+  const ready = selectedPaymentMethod && paymentScreenshot && !submitting
+
+  return (
+    <div className="app-page payment-page">
+      <TopBar
+        title="Payment"
+        subtitle={`Total ${totalAmount} EGP`}
+        onBack={() => setShowPayment(false)}
+        backLabel="Back to checkout"
+      />
+
+      <main className="app-page-content has-bottom-bar">
+
+        {/* Summary */}
+        <div className="app-card payment-summary-card">
+          <div className="payment-row">
+            <span>Food subtotal</span>
             <strong>{foodSubtotal} EGP</strong>
           </div>
-
-          <div className="payment-summary-row">
-            <span>Delivery Fee</span>
+          <div className="payment-row">
+            <span>Delivery fee</span>
             <strong>{deliveryFee} EGP</strong>
           </div>
-
-          <div className="payment-total">
-            <span>Total</span>
+          {selectedBatch && (
+            <div className="payment-row">
+              <span>Delivery</span>
+              <strong>{formatBatch(selectedBatch)}</strong>
+            </div>
+          )}
+          <div className="payment-row total">
+            <span>Total to pay</span>
             <strong>{totalAmount} EGP</strong>
           </div>
-
         </div>
 
-        <div className="payment-batch">
-          <span>Payment Status</span>
+        {/* Step 1 — method */}
+        <h2 className="app-section-title">
+          <span>
+            <span className="payment-step">1</span>
+            Choose how to pay
+          </span>
+        </h2>
 
-          <div className="payment-batch-main">
-            <strong>Under Confirmation</strong>
+        {paymentMethodsLoading ? (
+          <div className="pay-methods">
+            {[0, 1].map((i) => (
+              <div key={i} className="pay-method skeleton" style={{ height: 64 }} />
+            ))}
           </div>
-
-          <p>
-            Your payment proof has been submitted successfully.
-          </p>
-        </div>
-      <button
-  className="payment-back-home-button"
-  onClick={() => {
-    setShowCheckout(false)
-    goToStudentHome()
-  }}
->
-  ← Back to Home
-</button>
-
-      </div>
-    </div>
-  )
-}
-
-  return (
-    <div className="payment-page">
-      <div className="payment-container">
-
-        <button
-          className="payment-back-button"
-          onClick={() => setShowPayment(false)}
-        >
-          ←
-        </button>
-
-        <div className="payment-header">
-          <h1>Payment</h1>
-          <p>Complete your payment to place your order</p>
-        </div>
-
-        <div className="payment-summary">
-          <h2>Order Summary</h2>
-
-          <div className="payment-summary-row">
-            <span>Food Subtotal</span>
-            <strong>{foodSubtotal} EGP</strong>
+        ) : paymentMethods.length === 0 ? (
+          <div className="app-card payment-message">
+            No payment methods are available right now.
           </div>
+        ) : (
+          <div className="pay-methods" role="radiogroup" aria-label="Payment method">
+            {paymentMethods.map((method) => {
+              const selected = selectedPaymentMethod?.id === method.id
 
-          <div className="payment-summary-row">
-  <span>Delivery Fee</span>
-  <strong>{deliveryFee} EGP</strong>
-</div>
-
-<div className="payment-total">
-  <span>Total</span>
-  <strong>{totalAmount} EGP</strong>
-</div>
-        </div>
-
-        {selectedBatch && (
-          <div className="payment-batch">
-            <span>Delivery Batch</span>
-
-            <div className="payment-batch-main">
-              <strong>
-                Batch {selectedBatch.batch_number}
-              </strong>
-
-              <span>
-                🕐{' '}
-                {new Date(
-                  selectedBatch.delivery_time
-                ).toLocaleTimeString('en-US', {
-                  hour: 'numeric',
-                  minute: '2-digit',
-                })}
-              </span>
-            </div>
-
-            <p>
-              {new Date(
-                selectedBatch.delivery_time
-              ).toLocaleDateString('en-US', {
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric',
-              })}
-            </p>
+              return (
+                <button
+                  key={method.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  className={`pay-method ${selected ? 'selected' : ''}`}
+                  onClick={() => {
+                    setSelectedPaymentMethod(method)
+                    setCopied(false)
+                  }}
+                >
+                  <span className="pay-method-icon" aria-hidden="true">💳</span>
+                  <span className="pay-method-text">
+                    <strong>{method.name}</strong>
+                    {method.type && <small>{method.type}</small>}
+                  </span>
+                  <span className="batch-option-check" aria-hidden="true">
+                    {selected && <Icon name="check" size={16} strokeWidth={3} />}
+                  </span>
+                </button>
+              )
+            })}
           </div>
         )}
 
-        <div className="payment-method-section">
-          <h2>Payment Method</h2>
+        {selectedPaymentMethod && (
+          <div className="app-card pay-details">
+            <span className="pay-details-label">
+              Send {totalAmount} EGP to
+            </span>
 
-          <div className="payment-method-list">
-
-  {paymentMethodsLoading ? (
-    <p className="payment-message">
-      Loading payment methods...
-    </p>
-  ) : paymentMethods.length === 0 ? (
-    <p className="payment-message">
-      No payment methods are available right now.
-    </p>
-  ) : (
-    paymentMethods.map((method) => (
-      <button
-        key={method.id}
-        type="button"
-        className={`payment-method-card ${
-          selectedPaymentMethod?.id === method.id
-            ? 'selected'
-            : ''
-        }`}
-        onClick={() => setSelectedPaymentMethod(method)}
-      >
-        <div>
-          <strong>{method.name}</strong>
-          <span>{method.type}</span>
-        </div>
-
-        <span className="payment-method-arrow">
-          →
-        </span>
-      </button>
-    ))
-  )}
-
-</div>
-        </div>
-         
-                {selectedPaymentMethod && (
-          <div className="selected-payment-method">
-            <div className="selected-payment-method-header">
-              <span>Payment Details</span>
-              <strong>{selectedPaymentMethod.name}</strong>
-            </div>
-
-            <div className="payment-account">
-              <span>Account Number</span>
+            <div className="pay-account">
               <strong>{selectedPaymentMethod.account_number}</strong>
+              <button
+                type="button"
+                className="pay-copy"
+                onClick={copyAccountNumber}
+              >
+                <Icon name={copied ? 'check' : 'copy'} size={16} />
+                {copied ? 'Copied' : 'Copy'}
+              </button>
             </div>
 
             {selectedPaymentMethod.instructions && (
-              <div className="payment-instructions">
-                <span>Instructions</span>
-                <p>{selectedPaymentMethod.instructions}</p>
-              </div>
+              <p className="pay-instructions">
+                {selectedPaymentMethod.instructions}
+              </p>
             )}
           </div>
         )}
 
-        <div className="payment-upload-section">
-          <h2>Payment Proof</h2>
+        {/* Step 2 — proof */}
+        <h2 className="app-section-title">
+          <span>
+            <span className="payment-step">2</span>
+            Upload your receipt
+          </span>
+        </h2>
 
-          <p>
-            Upload your payment screenshot after completing the payment.
-          </p>
+        <label className={`pay-upload ${paymentScreenshot ? 'has-file' : ''}`}>
+          {previewUrl ? (
+            <img src={previewUrl} alt="" className="pay-upload-preview" />
+          ) : (
+            <span className="pay-upload-icon" aria-hidden="true">
+              <Icon name="upload" size={22} />
+            </span>
+          )}
 
-          <label className="payment-upload-box">
-            <span>📷</span>
-            <strong>Upload Payment Screenshot</strong>
-            <small>PNG, JPG or JPEG</small>
+          <span className="pay-upload-text">
+            <strong>
+              {paymentScreenshot ? 'Screenshot added' : 'Add payment screenshot'}
+            </strong>
+            <small>
+              {paymentScreenshot
+                ? paymentScreenshot.name
+                : 'PNG or JPG of your transfer confirmation'}
+            </small>
+          </span>
 
-            <input
-  type="file"
-  accept="image/png,image/jpeg"
-  onChange={(e) => {
-    setPaymentScreenshot(e.target.files[0] || null)
-  }}
-/>
-{paymentScreenshot && (
-  <small className="payment-file-name">
-    Selected: {paymentScreenshot.name}
-  </small>
-)}
-          </label>
+          <span className="pay-upload-action">
+            {paymentScreenshot ? 'Change' : 'Choose'}
+          </span>
+
+          <input
+            type="file"
+            accept="image/png,image/jpeg"
+            onChange={(e) => {
+              setPaymentScreenshot(e.target.files[0] || null)
+            }}
+          />
+        </label>
+      </main>
+
+      <div className="app-bottom-bar">
+        <div className="app-bottom-bar-inner">
+          <div className="app-bottom-bar-total">
+            <span>Total</span>
+            <strong>{totalAmount} EGP</strong>
+          </div>
+
+          <button
+            type="button"
+            className="btn-primary btn-grow submit-payment-button"
+            onClick={handleSubmitPayment}
+            disabled={!ready}
+          >
+            {submitting
+              ? 'Sending…'
+              : !selectedPaymentMethod
+                ? 'Choose a payment method'
+                : !paymentScreenshot
+                  ? 'Add your screenshot'
+                  : 'Place order'}
+          </button>
         </div>
-
-        <button
-  className="submit-payment-button"
-  onClick={handleSubmitPayment}
-  disabled={submitting}
->
-  {submitting ? 'Uploading...' : 'Submit Payment →'}
-</button>
-
       </div>
     </div>
   )

@@ -15,6 +15,13 @@ export async function loadStudentOrders(studentId) {
       status,
       payment_screenshot_path,
       created_at,
+      restaurants (
+        name
+      ),
+      delivery_batches (
+        batch_number,
+        delivery_time
+      ),
       order_items (
         id,
         food_name_snapshot,

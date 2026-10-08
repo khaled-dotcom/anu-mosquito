@@ -1,146 +1,212 @@
 import './StudentOrders.css'
 import { useEffect, useState } from 'react'
+import TopBar from '../common/TopBar'
+import Icon from '../common/Icon'
+import StudentTabBar from './StudentTabBar'
 import { loadStudentOrders } from '../../services/studentOrderService'
+import {
+  ORDER_STEPS,
+  orderStatusInfo,
+  orderStepIndex,
+  paymentStatusInfo,
+} from '../../orderStatus'
 
-function StudentOrders({ profile, setStudentPage }) {
+function formatDate(value) {
+  const date = value ? new Date(value) : null
+  if (!date || Number.isNaN(date.getTime())) return ''
+
+  return date.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  })
+}
+
+function groupItems(orderItems) {
+  return Object.values(
+    (orderItems || []).reduce((items, item) => {
+      const key = item.food_name_snapshot
+
+      if (!items[key]) {
+        items[key] = { name: key, quantity: 0, total: 0 }
+      }
+
+      items[key].quantity += item.quantity
+      items[key].total += Number(item.line_total || 0)
+
+      return items
+    }, {})
+  )
+}
+
+function OrderTracker({ status }) {
+  const current = orderStepIndex(status)
+  if (current < 0) return null
+
+  return (
+    <ol className="order-tracker" aria-label="Order progress">
+      {ORDER_STEPS.map((step, index) => (
+        <li
+          key={step.key}
+          className={
+            index < current ? 'done' : index === current ? 'current' : ''
+          }
+          aria-current={index === current ? 'step' : undefined}
+        >
+          <span className="order-tracker-dot" aria-hidden="true">
+            {index < current && <Icon name="check" size={12} strokeWidth={3.5} />}
+          </span>
+          <span className="order-tracker-label">{step.label}</span>
+        </li>
+      ))}
+    </ol>
+  )
+}
+
+async function fetchOrders(profile) {
+  if (!profile?.id) return []
+
+  const { data, error } = await loadStudentOrders(profile.id)
+
+  if (error) {
+    console.error('Student orders error:', error)
+    alert(error.message)
+    return []
+  }
+
+  return data || []
+}
+
+function StudentOrders({ profile, setStudentPage, handleLogout }) {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
-    async function loadOrders() {
-      if (!profile?.id) {
-        setOrders([])
-        setLoading(false)
-        return
-      }
+    let cancelled = false
 
-      const { data, error } = await loadStudentOrders(profile.id)
-
-      if (error) {
-        console.error('Student orders error:', error)
-        alert(error.message)
-        setOrders([])
-      } else {
-        setOrders(data || [])
-      }
-
+    fetchOrders(profile).then((data) => {
+      if (cancelled) return
+      setOrders(data)
       setLoading(false)
-    }
+    })
 
-    loadOrders()
+    return () => {
+      cancelled = true
+    }
   }, [profile])
 
-  if (loading) {
-    return (
-      <div className="student-orders-page">
-        <div className="student-orders-container">
-          <p>Loading your orders...</p>
-        </div>
-      </div>
-    )
+  async function refresh() {
+    setRefreshing(true)
+    setOrders(await fetchOrders(profile))
+    setRefreshing(false)
   }
 
   return (
-    <div className="student-orders-page">
-      <div className="student-orders-container">
-
-        <div className="student-orders-header">
+    <div className="app-page student-orders-page">
+      <TopBar
+        title="My orders"
+        onBack={() => setStudentPage('home')}
+        backLabel="Back to home"
+        right={
           <button
-            className="student-orders-back"
-            onClick={() => setStudentPage('home')}
+            type="button"
+            className={`app-icon-button ${refreshing ? 'is-spinning' : ''}`}
+            onClick={refresh}
+            disabled={refreshing || loading}
+            aria-label="Refresh orders"
           >
-            ← Back to Home
+            <Icon name="refresh" size={20} />
           </button>
+        }
+      />
 
-          <h1>My Orders</h1>
-          <p>Track your orders and payment status</p>
-        </div>
-
-        {orders.length === 0 ? (
-          <div className="student-orders-empty">
-            <h2>No orders yet</h2>
-            <p>Your orders will appear here after you place an order.</p>
+      <main className="app-page-content student-orders-content">
+        {loading ? (
+          <div className="student-orders-list">
+            {[0, 1].map((i) => (
+              <div key={i} className="app-card student-order-card">
+                <div className="skeleton skeleton-line" />
+                <div className="skeleton skeleton-line short" />
+                <div className="skeleton" style={{ height: 40, borderRadius: 12, marginTop: 12 }} />
+              </div>
+            ))}
+          </div>
+        ) : orders.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-icon">🧾</div>
+            <h3>No orders yet</h3>
+            <p>When you place an order it will show up here so you can track it.</p>
+            <button
+              type="button"
+              className="btn-primary student-orders-browse"
+              onClick={() => setStudentPage('home')}
+            >
+              Browse restaurants
+            </button>
           </div>
         ) : (
           <div className="student-orders-list">
+            {orders.map((order) => {
+              const status = orderStatusInfo(order.status)
+              const payment = paymentStatusInfo(order.payment_status)
+              const items = groupItems(order.order_items)
 
-            {orders.map((order) => (
-              <div
-                key={order.id}
-                className="student-order-card"
-              >
-
-                <div className="student-order-top">
-
-                  <div>
-                    <span>Order Number</span>
-                    <strong>{order.order_number}</strong>
-                  </div>
-
-                  <div className="student-order-status">
-                    {order.status}
-                  </div>
-
-                </div>
-
-                <div className="student-order-items">
-
-                  {Object.values(
-                    (order.order_items || []).reduce((items, item) => {
-                      const key = item.food_name_snapshot
-
-                      if (!items[key]) {
-                        items[key] = {
-                          name: item.food_name_snapshot,
-                          quantity: 0,
-                          total: 0,
-                        }
-                      }
-
-                      items[key].quantity += item.quantity
-                      items[key].total += item.line_total
-
-                      return items
-                    }, {})
-                  ).map((item) => (
-                    <div
-                      key={item.name}
-                      className="student-order-item"
-                    >
-                      <div className="student-order-item-info">
-                        <strong>{item.name}</strong>
-                        <span>× {item.quantity}</span>
-                      </div>
-
-                      <strong>
-                        {item.total} EGP
-                      </strong>
+              return (
+                <article key={order.id} className="app-card student-order-card">
+                  <header className="student-order-head">
+                    <div className="student-order-title">
+                      <h2>{order.restaurants?.name || 'Order'}</h2>
+                      <p>
+                        #{order.order_number}
+                        {order.created_at && ` · ${formatDate(order.created_at)}`}
+                      </p>
                     </div>
-                  ))}
 
-                </div>
+                    <span className={`status-badge tone-${status.tone}`}>
+                      {status.label}
+                    </span>
+                  </header>
 
-                <div className="student-order-summary">
+                  {order.status !== 'CANCELLED' && (
+                    <OrderTracker status={order.status} />
+                  )}
 
-                  <div>
-                    <span>Delivery</span>
-                    <strong>{order.delivery_fee} EGP</strong>
-                  </div>
+                  <ul className="student-order-items">
+                    {items.map((item) => (
+                      <li key={item.name}>
+                        <span>
+                          <b>{item.quantity}×</b> {item.name}
+                        </span>
+                        <span>{item.total} EGP</span>
+                      </li>
+                    ))}
+                    <li className="muted">
+                      <span>Delivery</span>
+                      <span>{order.delivery_fee} EGP</span>
+                    </li>
+                  </ul>
 
-                  <div>
-                    <span>Total</span>
+                  <footer className="student-order-foot">
+                    <span className={`status-badge tone-${payment.tone}`}>
+                      {payment.label}
+                    </span>
                     <strong>{order.total_amount} EGP</strong>
-                  </div>
-
-                </div>
-
-              </div>
-            ))}
-
+                  </footer>
+                </article>
+              )
+            })}
           </div>
         )}
+      </main>
 
-      </div>
+      <StudentTabBar
+        active="orders"
+        profile={profile}
+        setStudentPage={setStudentPage}
+        handleLogout={handleLogout}
+      />
     </div>
   )
 }

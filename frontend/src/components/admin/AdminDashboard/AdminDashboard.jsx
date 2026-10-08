@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react'
 import Button from '../../common/Button'
+import Icon from '../../common/Icon'
 import RestaurantManagement from '../restaurants/RestaurantManagement'
 import FoodManagement from '../food/FoodManagement'
 import './AdminDashboard.css'
@@ -10,6 +12,20 @@ import RestaurantOrders from '../restaurants/RestaurantOrders'
 import UserManagement from '../users/UserManagement'
 import FinanceManagement from '../finances/FinanceManagement'
 import DriverManagement from '../drivers/DriverManagement'
+
+const ADMIN_NAV = [
+  { key: 'dashboard', label: 'Dashboard', icon: '🏠' },
+  { key: 'restaurants', label: 'Restaurants', icon: '🍔' },
+  { key: 'food', label: 'Food & Menu', icon: '🍕' },
+  { key: 'orders', label: 'Orders', icon: '📦' },
+  { key: 'restaurant-orders', label: 'Restaurant Orders', icon: '🍽️' },
+  { key: 'delivery', label: 'Delivery', icon: '🚚' },
+  { key: 'users', label: 'Users', icon: '👥' },
+  { key: 'finance', label: 'Finances', icon: '💰' },
+  { key: 'drivers', label: 'Drivers', icon: '🚗' },
+  { key: 'payment-methods', label: 'Payment Methods', icon: '💳' },
+  { key: 'settings', label: 'Settings', icon: '⚙️' },
+]
 
 function AdminDashboard({
   adminSection,
@@ -99,11 +115,71 @@ handleAssignDriver,
   handleToggleBatch,
   handleDeleteBatch,
 }) {
+  const [navOpen, setNavOpen] = useState(false)
+  const currentNav =
+    ADMIN_NAV.find((item) => item.key === adminSection) || ADMIN_NAV[0]
+
+  // Lock page scroll while the mobile drawer is open; close it with Escape.
+  useEffect(() => {
+    if (!navOpen) return
+
+    function onKeyDown(e) {
+      if (e.key === 'Escape') setNavOpen(false)
+    }
+
+    document.addEventListener('keydown', onKeyDown)
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.removeEventListener('keydown', onKeyDown)
+      document.body.style.overflow = ''
+    }
+  }, [navOpen])
+
+  function goToSection(key) {
+    setAdminSection(key)
+    setNavOpen(false)
+    window.scrollTo(0, 0)
+  }
+
   return (
-    <div className="admin-layout">
+    <div className={`admin-layout ${navOpen ? 'nav-open' : ''}`}>
+
+      {/* Mobile top bar */}
+      <header className="admin-mobile-bar">
+        <button
+          type="button"
+          className="admin-menu-toggle"
+          onClick={() => setNavOpen(true)}
+          aria-label="Open menu"
+          aria-expanded={navOpen}
+          aria-controls="admin-sidebar"
+        >
+          <Icon name="menu" size={22} />
+        </button>
+
+        <div className="admin-mobile-title">
+          <span aria-hidden="true">{currentNav.icon}</span>
+          {currentNav.label}
+        </div>
+
+        <img
+          src="/logo-256.webp"
+          alt="ANU Mosquito"
+          className="admin-mobile-logo"
+          width="36"
+          height="36"
+        />
+      </header>
+
+      <div
+        className="admin-nav-backdrop"
+        onClick={() => setNavOpen(false)}
+        aria-hidden="true"
+      />
 
       {/* Sidebar */}
-      <aside className="admin-sidebar">
+      <aside className="admin-sidebar" id="admin-sidebar">
 
         <div className="admin-brand">
           <img
@@ -121,153 +197,33 @@ handleAssignDriver,
               Admin Panel
             </div>
           </div>
+
+          <button
+            type="button"
+            className="admin-nav-close"
+            onClick={() => setNavOpen(false)}
+            aria-label="Close menu"
+          >
+            <Icon name="close" size={20} />
+          </button>
         </div>
 
         <nav className="admin-nav">
-
-          <Button
-            variant="nav"
-            className={
-              adminSection === 'dashboard'
-                ? 'admin-nav-button active'
-                : 'admin-nav-button'
-            }
-            onClick={() => setAdminSection('dashboard')}
-          >
-            <span>🏠</span>
-            Dashboard
-          </Button>
-
-          <Button
-            variant="nav"
-            className={
-              adminSection === 'restaurants'
-                ? 'admin-nav-button active'
-                : 'admin-nav-button'
-            }
-            onClick={() => setAdminSection('restaurants')}
-          >
-            <span>🍔</span>
-            Restaurants
-          </Button>
-
-          <Button
-            variant="nav"
-            className={
-              adminSection === 'food'
-                ? 'admin-nav-button active'
-                : 'admin-nav-button'
-            }
-            onClick={() => setAdminSection('food')}
-          >
-            <span>🍕</span>
-            Food & Menu
-          </Button>
-
-          <Button
-            variant="nav"
-            className={
-              adminSection === 'orders'
-                ? 'admin-nav-button active'
-                : 'admin-nav-button'
-            }
-            onClick={() => setAdminSection('orders')}
-          >
-            <span>📦</span>
-            Orders
-          </Button>
-
-          <Button
-  variant="nav"
-  className={
-    adminSection === 'restaurant-orders'
-      ? 'admin-nav-button active'
-      : 'admin-nav-button'
-  }
-  onClick={() => setAdminSection('restaurant-orders')}
->
-  <span>🍽️</span>
-  Restaurant Orders
-</Button>
-
-          <Button
-            variant="nav"
-            className={
-              adminSection === 'delivery'
-                ? 'admin-nav-button active'
-                : 'admin-nav-button'
-            }
-            onClick={() => setAdminSection('delivery')}
-          >
-            <span>🚚</span>
-            Delivery
-          </Button>
-
-          <Button
-            variant="nav"
-            className={
-              adminSection === 'users'
-                ? 'admin-nav-button active'
-                : 'admin-nav-button'
-            }
-            onClick={() => setAdminSection('users')}
-          >
-            <span>👥</span>
-            Users
-          </Button>
-
-          <Button
-            variant="nav"
-            className={
-              adminSection === 'finance'
-                ? 'admin-nav-button active'
-                : 'admin-nav-button'
-            }
-            onClick={() => setAdminSection('finance')}
-          >
-            <span>💰</span>
-            Finances
-          </Button>
-
-          <Button
-  variant="nav"
-  className={
-    adminSection === 'drivers'
-      ? 'admin-nav-button active'
-      : 'admin-nav-button'
-  }
-  onClick={() => setAdminSection('drivers')}
->
-  <span>🚗</span>
-  Drivers
-</Button>
-          
-          <Button
-  variant="nav"
-  className={
-    adminSection === 'payment-methods'
-      ? 'admin-nav-button active'
-      : 'admin-nav-button'
-  }
-  onClick={() => setAdminSection('payment-methods')}
->
-  <span>💳</span>
-  Payment Methods
-</Button>
-
-          <Button
-            variant="nav"
-            className={
-              adminSection === 'settings'
-                ? 'admin-nav-button active'
-                : 'admin-nav-button'
-            }
-            onClick={() => setAdminSection('settings')}
-          >
-            <span>⚙️</span>
-            Settings
-          </Button>
-
+          {ADMIN_NAV.map((item) => (
+            <Button
+              key={item.key}
+              variant="nav"
+              className={
+                adminSection === item.key
+                  ? 'admin-nav-button active'
+                  : 'admin-nav-button'
+              }
+              onClick={() => goToSection(item.key)}
+            >
+              <span>{item.icon}</span>
+              {item.label}
+            </Button>
+          ))}
         </nav>
 
         <Button
@@ -286,29 +242,7 @@ handleAssignDriver,
         <header className="admin-topbar">
 
           <div>
-            <h1>
-              {adminSection === 'dashboard'
-                ? 'Dashboard'
-                : adminSection === 'restaurants'
-                  ? 'Restaurants'
-                  : adminSection === 'food'
-                    ? 'Food & Menu'
-                    : adminSection === 'orders'
-                      ? 'Orders'
-                      : adminSection === 'restaurant-orders'
-                        ? 'Restaurant Orders'
-                        : adminSection === 'delivery'
-                          ? 'Delivery'
-                          : adminSection === 'users'
-                            ? 'Users'
-                           : adminSection === 'finance'
-  ? 'Finances'
-  : adminSection === 'drivers'
-    ? 'Drivers'
-    : adminSection === 'payment-methods'
-    ? 'Payment Methods'
-    : 'Settings'}
-            </h1>
+            <h1>{currentNav.label}</h1>
 
             <p>
               Manage ANU Mosquito from one place.

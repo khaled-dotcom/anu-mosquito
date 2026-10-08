@@ -1,6 +1,7 @@
 import './StudentHome.css'
-import { useEffect, useMemo, useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import Icon from '../common/Icon'
+import StudentTabBar from './StudentTabBar'
 
 const CATEGORIES = [
   { label: 'Burgers', emoji: '🍔', query: 'burger' },
@@ -22,7 +23,6 @@ function StudentHome({
   search,
   setSearch,
   profile,
-  selectedRestaurant,
   setSelectedRestaurant,
   handleLogout,
   setStudentPage,
@@ -42,22 +42,11 @@ function StudentHome({
     )
   }, [restaurants, search])
 
-  // Close the restaurant modal with Escape and lock page scroll while open.
-  useEffect(() => {
-    if (!selectedRestaurant) return
-
-    function onKeyDown(e) {
-      if (e.key === 'Escape') setSelectedRestaurant(null)
-    }
-
-    document.addEventListener('keydown', onKeyDown)
-    document.body.style.overflow = 'hidden'
-
-    return () => {
-      document.removeEventListener('keydown', onKeyDown)
-      document.body.style.overflow = ''
-    }
-  }, [selectedRestaurant, setSelectedRestaurant])
+  function openRestaurant(restaurant) {
+    setSelectedRestaurant(restaurant)
+    setStudentPage('menu')
+    window.scrollTo(0, 0)
+  }
 
   function scrollToRestaurants() {
     restaurantsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -255,7 +244,7 @@ function StudentHome({
                 <button
                   key={restaurant.id}
                   className="restaurant-card"
-                  onClick={() => setSelectedRestaurant(restaurant)}
+                  onClick={() => openRestaurant(restaurant)}
                 >
                   <div className="restaurant-image-wrapper">
                     {restaurant.image_url ? (
@@ -289,59 +278,13 @@ function StudentHome({
         </section>
       </main>
 
-      {/* Restaurant Modal */}
-      {selectedRestaurant && (
-        <div
-          className="restaurant-modal"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="restaurant-modal-title"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setSelectedRestaurant(null)
-            }
-          }}
-        >
-          <div className="restaurant-modal-card">
-            <button
-              className="modal-close"
-              aria-label="Close"
-              onClick={() => setSelectedRestaurant(null)}
-            >
-              <Icon name="close" size={18} />
-            </button>
+      <StudentTabBar
+        active="home"
+        profile={profile}
+        setStudentPage={setStudentPage}
+        handleLogout={handleLogout}
+      />
 
-            {selectedRestaurant.image_url ? (
-              <img
-                src={selectedRestaurant.image_url}
-                alt={selectedRestaurant.name}
-                className="modal-restaurant-image"
-              />
-            ) : (
-              <div className="modal-image-placeholder">🍔</div>
-            )}
-
-            <div className="modal-content">
-              <span className="restaurant-status">● Open now</span>
-
-              <h2 id="restaurant-modal-title">{selectedRestaurant.name}</h2>
-
-              <p>
-                {selectedRestaurant.description ||
-                  'Delicious food available for ANU students.'}
-              </p>
-
-              <button
-                className="modal-menu-button"
-                autoFocus
-                onClick={() => setStudentPage('menu')}
-              >
-                View menu <Icon name="arrowRight" size={18} />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

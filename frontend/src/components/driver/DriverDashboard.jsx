@@ -1,17 +1,21 @@
 import './DriverDashboard.css'
 import { useEffect, useState } from 'react'
 import { supabase } from '../../supabase'
+import Icon from '../common/Icon'
+import { orderStatusInfo } from '../../orderStatus'
 
 function DriverDashboard({ profile, handleLogout }) {
   const [orders, setOrders] = useState([])
   const [batches, setBatches] = useState([])
   const [loading, setLoading] = useState(true)
   const [updatingOrderId, setUpdatingOrderId] = useState(null)
+  const [activeTab, setActiveTab] = useState(null)
+  const [refreshing, setRefreshing] = useState(false)
 
-  async function loadDriverData() {
+  async function loadDriverData(silent = false) {
     if (!profile?.id) return
 
-    setLoading(true)
+    if (!silent) setLoading(true)
 
     const [
       { data: orderData, error: orderError },
@@ -121,42 +125,20 @@ function DriverDashboard({ profile, handleLogout }) {
     )
   }
 
-  function getStatusLabel(status) {
-    const labels = {
-      PAYMENT_UNDER_CONFIRMATION:
-        'Payment Under Confirmation',
-      CONFIRMED: 'Confirmed',
-      PREPARING: 'Preparing',
-      OUT_FOR_DELIVERY: 'Out For Delivery',
-      DELIVERED_BY_DRIVER: 'Delivered',
-      COMPLETED: 'Completed',
-      CANCELLED: 'Cancelled',
-    }
-
-    return labels[status] || status
-  }
-
-  function getStatusClass(status) {
-    return `driver-status driver-status-${status
-      .toLowerCase()
-      .replaceAll('_', '-')}`
-  }
-
   if (loading) {
     return (
       <div className="driver-page">
         <div className="driver-loading">
-          Loading Driver Dashboard...
+          <span className="driver-spinner" aria-hidden="true" />
+          Loading your deliveries…
         </div>
       </div>
     )
   }
 
   const pickupOrders = orders.filter(
-  (order) =>
-    order.status === 'CONFIRMED' ||
-    order.status === 'PREPARING'
-)
+    (order) => order.status === 'CONFIRMED' || order.status === 'PREPARING'
+  )
 
   const deliveryOrders = orders.filter(
     (order) => order.status === 'OUT_FOR_DELIVERY'
@@ -164,405 +146,215 @@ function DriverDashboard({ profile, handleLogout }) {
 
   const completedOrders = orders.filter(
     (order) =>
-      order.status === 'DELIVERED_BY_DRIVER' ||
-      order.status === 'COMPLETED'
+      order.status === 'DELIVERED_BY_DRIVER' || order.status === 'COMPLETED'
   )
+
+  const tabs = [
+    { key: 'pickup', label: 'To pick up', icon: 'store', orders: pickupOrders },
+    { key: 'delivering', label: 'On the way', icon: 'truck', orders: deliveryOrders },
+    { key: 'done', label: 'Done', icon: 'check', orders: completedOrders },
+  ]
+
+  const currentTab =
+    tabs.find((tab) => tab.key === activeTab) ||
+    tabs.find((tab) => tab.orders.length > 0 && tab.key !== 'done') ||
+    tabs[0]
+
+  const emptyText = {
+    pickup: 'No orders waiting for pickup.',
+    delivering: 'Nothing on the way right now.',
+    done: 'No completed orders yet.',
+  }
+
+  async function refresh() {
+    setRefreshing(true)
+    await loadDriverData(true)
+    setRefreshing(false)
+  }
 
   return (
     <div className="driver-page">
 
       {/* Header */}
-      <header className="driver-header">
-        <div>
-          <p className="driver-brand">
-            ANU Mosquito
-          </p>
+      <header className="driver-appbar">
+        <div className="driver-appbar-inner">
+          <img
+            src="/logo-256.webp"
+            alt=""
+            className="driver-logo"
+            width="40"
+            height="40"
+          />
 
-          <h1>Driver Dashboard</h1>
+          <div className="driver-appbar-text">
+            <p className="driver-brand">Driver</p>
+            <h1>Hi, {profile?.full_name?.split(' ')[0] || 'Driver'}</h1>
+          </div>
 
-          <p className="driver-welcome">
-            Welcome, {profile?.full_name || 'Driver'}
-          </p>
+          <button
+            type="button"
+            className={`app-icon-button ${refreshing ? 'is-spinning' : ''}`}
+            onClick={refresh}
+            disabled={refreshing}
+            aria-label="Refresh"
+          >
+            <Icon name="refresh" size={20} />
+          </button>
+
+          <button
+            type="button"
+            className="app-icon-button driver-logout-button"
+            onClick={handleLogout}
+            aria-label="Log out"
+          >
+            <Icon name="logout" size={20} />
+          </button>
         </div>
-
-        <button
-          className="driver-logout-button"
-          onClick={handleLogout}
-        >
-          Logout
-        </button>
       </header>
 
       <main className="driver-container">
 
-        {/* Summary */}
-        <section className="driver-summary">
+        {/* Status tabs */}
+        <div className="driver-tabs" role="tablist" aria-label="Orders">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              role="tab"
+              aria-selected={currentTab.key === tab.key}
+              className={`driver-tab driver-tab-${tab.key} ${
+                currentTab.key === tab.key ? 'active' : ''
+              }`}
+              onClick={() => setActiveTab(tab.key)}
+            >
+              <span className="driver-tab-icon" aria-hidden="true">
+                <Icon name={tab.icon} size={18} />
+              </span>
+              <strong>{tab.orders.length}</strong>
+              <span>{tab.label}</span>
+            </button>
+          ))}
+        </div>
 
-          <div className="driver-summary-card">
-            <span>Assigned Orders</span>
-            <strong>{orders.length}</strong>
-          </div>
+        {/* Orders for the selected tab */}
+        <section className="driver-section" role="tabpanel">
+          {currentTab.orders.length === 0 ? (
+            <div className="driver-empty">
+              <Icon name={currentTab.icon} size={26} />
+              <p>{emptyText[currentTab.key]}</p>
+            </div>
+          ) : (
+            <div className="driver-orders">
+              {currentTab.orders.map((order) => {
+                const status = orderStatusInfo(order.status)
+                const busy = updatingOrderId === order.id
+                const time = order.delivery_batches?.delivery_time
+                  ? new Date(order.delivery_batches.delivery_time).toLocaleTimeString('en-US', {
+                      hour: 'numeric',
+                      minute: '2-digit',
+                    })
+                  : null
 
-          <div className="driver-summary-card">
-            <span>Pickup</span>
-            <strong>{pickupOrders.length}</strong>
-          </div>
+                return (
+                  <article key={order.id} className="driver-order-card">
+                    <div className="driver-order-top">
+                      <span className="driver-order-number">
+                        #{order.order_number}
+                      </span>
+                      <span className={`status-badge tone-${status.tone}`}>
+                        {status.label}
+                      </span>
+                    </div>
 
-          <div className="driver-summary-card">
-            <span>Deliveries</span>
-            <strong>{deliveryOrders.length}</strong>
-          </div>
+                    <h3 className="driver-order-restaurant">
+                      <Icon name="store" size={18} />
+                      {order.restaurants?.name || 'Restaurant'}
+                    </h3>
 
-          <div className="driver-summary-card">
-            <span>Completed</span>
-            <strong>{completedOrders.length}</strong>
-          </div>
+                    <div className="driver-order-meta">
+                      <span>
+                        Batch #{order.delivery_batches?.batch_number || '—'}
+                        {time && ` · ${time}`}
+                      </span>
+                      <strong>{order.total_amount} EGP</strong>
+                    </div>
 
+                    {currentTab.key === 'pickup' && (
+                      <button
+                        type="button"
+                        className="btn-primary btn-block driver-primary-button"
+                        disabled={busy}
+                        onClick={() => updateOrderStatus(order, 'OUT_FOR_DELIVERY')}
+                      >
+                        <Icon name="package" size={18} />
+                        {busy ? 'Updating…' : 'Confirm pickup'}
+                      </button>
+                    )}
+
+                    {currentTab.key === 'delivering' && (
+                      <button
+                        type="button"
+                        className="btn-primary btn-block driver-primary-button driver-deliver-button"
+                        disabled={busy}
+                        onClick={() => updateOrderStatus(order, 'DELIVERED_BY_DRIVER')}
+                      >
+                        <Icon name="check" size={18} strokeWidth={2.5} />
+                        {busy ? 'Updating…' : 'Confirm delivery'}
+                      </button>
+                    )}
+                  </article>
+                )
+              })}
+            </div>
+          )}
         </section>
 
-        {/* Assigned Batches */}
+        {/* Assigned batches */}
         <section className="driver-section">
-
-          <div className="driver-section-header">
-            <div>
-              <h2>My Batches</h2>
-              <p>
-                Batches assigned to you
-              </p>
-            </div>
-          </div>
+          <h2 className="app-section-title">
+            My batches
+            <small>{batches.length}</small>
+          </h2>
 
           {batches.length === 0 ? (
             <div className="driver-empty">
-              No batches assigned yet.
+              <Icon name="clock" size={26} />
+              <p>No batches assigned yet.</p>
             </div>
           ) : (
             <div className="driver-batches">
-
               {batches.map((assignment) => {
-                const batch =
-                  assignment.delivery_batches
+                const batch = assignment.delivery_batches
+                const date = batch?.delivery_time ? new Date(batch.delivery_time) : null
 
                 return (
-                  <div
-                    key={assignment.id}
-                    className="driver-batch-card"
-                  >
-                    <div>
-                      <span>Batch</span>
-                      <strong>
-                        #{batch?.batch_number}
-                      </strong>
+                  <div key={assignment.id} className="driver-batch-card">
+                    <div className="driver-batch-top">
+                      <strong>Batch #{batch?.batch_number}</strong>
+                      <span
+                        className={`status-badge ${
+                          batch?.is_active ? 'tone-success' : ''
+                        }`}
+                      >
+                        {batch?.is_active ? 'Active' : 'Inactive'}
+                      </span>
                     </div>
-
-                    <div>
-                      <span>Delivery Time</span>
-                      <strong>
-                        {batch?.delivery_time
-                          ? new Date(
-                              batch.delivery_time
-                            ).toLocaleString(
-                              'en-US',
-                              {
-                                dateStyle: 'medium',
-                                timeStyle: 'short',
-                              }
-                            )
-                          : '—'}
-                      </strong>
-                    </div>
-
-                    <div>
-                      <span>Status</span>
-                      <strong>
-                        {batch?.is_active
-                          ? 'Active'
-                          : 'Inactive'}
-                      </strong>
-                    </div>
+                    <span className="driver-batch-time">
+                      <Icon name="clock" size={15} />
+                      {date
+                        ? date.toLocaleString('en-US', {
+                            weekday: 'short',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                          })
+                        : '—'}
+                    </span>
                   </div>
                 )
               })}
-
             </div>
           )}
         </section>
-
-        {/* Pickup */}
-        <section className="driver-section">
-
-          <div className="driver-section-header">
-            <div>
-              <h2>Restaurant Pickup</h2>
-              <p>
-                Orders you need to collect from restaurants
-              </p>
-            </div>
-
-            <span className="driver-count">
-              {pickupOrders.length}
-            </span>
-          </div>
-
-          {pickupOrders.length === 0 ? (
-            <div className="driver-empty">
-              No orders waiting for pickup.
-            </div>
-          ) : (
-            <div className="driver-orders">
-
-              {pickupOrders.map((order) => (
-                <div
-                  key={order.id}
-                  className="driver-order-card"
-                >
-
-                  <div className="driver-order-top">
-
-                    <div>
-                      <span>Order</span>
-                      <strong>
-                        {order.order_number}
-                      </strong>
-                    </div>
-
-                    <span
-                      className={getStatusClass(
-                        order.status
-                      )}
-                    >
-                      {getStatusLabel(order.status)}
-                    </span>
-
-                  </div>
-
-                  <div className="driver-order-info">
-
-                    <div>
-                      <span>Restaurant</span>
-                      <strong>
-                        {order.restaurants?.name ||
-                          'Restaurant'}
-                      </strong>
-                    </div>
-
-                    <div>
-                      <span>Batch</span>
-                      <strong>
-                        #
-                        {order.delivery_batches
-                          ?.batch_number || '—'}
-                      </strong>
-                    </div>
-
-                    <div>
-                      <span>Total</span>
-                      <strong>
-                        {order.total_amount} EGP
-                      </strong>
-                    </div>
-
-                  </div>
-
-                  <button
-                    className="driver-primary-button"
-                    disabled={
-                      updatingOrderId === order.id
-                    }
-                    onClick={() =>
-                      updateOrderStatus(
-                        order,
-                        'OUT_FOR_DELIVERY'
-                      )
-                    }
-                  >
-                    {updatingOrderId === order.id
-                      ? 'Updating...'
-                      : 'Confirm Pickup'}
-                  </button>
-
-                </div>
-              ))}
-
-            </div>
-          )}
-        </section>
-
-        {/* Deliveries */}
-        <section className="driver-section">
-
-          <div className="driver-section-header">
-            <div>
-              <h2>My Deliveries</h2>
-              <p>
-                Orders currently with you
-              </p>
-            </div>
-
-            <span className="driver-count">
-              {deliveryOrders.length}
-            </span>
-          </div>
-
-          {deliveryOrders.length === 0 ? (
-            <div className="driver-empty">
-              No deliveries right now.
-            </div>
-          ) : (
-            <div className="driver-orders">
-
-              {deliveryOrders.map((order) => (
-                <div
-                  key={order.id}
-                  className="driver-order-card"
-                >
-
-                  <div className="driver-order-top">
-
-                    <div>
-                      <span>Order</span>
-                      <strong>
-                        {order.order_number}
-                      </strong>
-                    </div>
-
-                    <span
-                      className={getStatusClass(
-                        order.status
-                      )}
-                    >
-                      {getStatusLabel(order.status)}
-                    </span>
-
-                  </div>
-
-                  <div className="driver-order-info">
-
-                    <div>
-                      <span>Restaurant</span>
-                      <strong>
-                        {order.restaurants?.name ||
-                          'Restaurant'}
-                      </strong>
-                    </div>
-
-                    <div>
-                      <span>Total</span>
-                      <strong>
-                        {order.total_amount} EGP
-                      </strong>
-                    </div>
-
-                  </div>
-
-                  <button
-                    className="driver-primary-button"
-                    disabled={
-                      updatingOrderId === order.id
-                    }
-                    onClick={() =>
-                      updateOrderStatus(
-                        order,
-                        'DELIVERED_BY_DRIVER'
-                      )
-                    }
-                  >
-                    {updatingOrderId === order.id
-                      ? 'Updating...'
-                      : 'Confirm Delivery'}
-                  </button>
-
-                </div>
-              ))}
-
-            </div>
-          )}
-        </section>
- 
-       {/* Completed Orders */}
-<section className="driver-section">
-
-  <div className="driver-section-header">
-    <div>
-      <h2>Completed Orders</h2>
-      <p>
-        Orders you have completed
-      </p>
-    </div>
-
-    <span className="driver-count">
-      {completedOrders.length}
-    </span>
-  </div>
-
-  {completedOrders.length === 0 ? (
-    <div className="driver-empty">
-      No completed orders yet.
-    </div>
-  ) : (
-    <div className="driver-orders">
-
-      {completedOrders.map((order) => (
-        <div
-          key={order.id}
-          className="driver-order-card"
-        >
-
-          <div className="driver-order-top">
-
-            <div>
-              <span>Order</span>
-              <strong>
-                {order.order_number}
-              </strong>
-            </div>
-
-            <span
-              className={getStatusClass(
-                order.status
-              )}
-            >
-              {getStatusLabel(order.status)}
-            </span>
-
-          </div>
-
-          <div className="driver-order-info">
-
-            <div>
-              <span>Restaurant</span>
-              <strong>
-                {order.restaurants?.name ||
-                  'Restaurant'}
-              </strong>
-            </div>
-
-            <div>
-              <span>Batch</span>
-              <strong>
-                #
-                {order.delivery_batches
-                  ?.batch_number || '—'}
-              </strong>
-            </div>
-
-            <div>
-              <span>Total</span>
-              <strong>
-                {order.total_amount} EGP
-              </strong>
-            </div>
-
-          </div>
-
-        </div>
-      ))}
-
-    </div>
-  )}
-
-</section>
-   
       </main>
     </div>
   )

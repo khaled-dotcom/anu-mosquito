@@ -3,6 +3,7 @@
 // screens' CSS (e.g. .search-box, .empty-state), so keeping one global cascade
 // avoids missing styles when only one role's JS chunk is downloaded.
 import './components/common/Button.css'
+import './components/common/AppChrome.css'
 import './components/admin/shared/AdminManagement.css'
 import './components/admin/restaurants/RestaurantManagement.css'
 import './components/common/DeleteButton.css'
@@ -20,6 +21,7 @@ import './components/admin/restaurants/RestaurantOrders.css'
 import './components/admin/users/UserManagement.css'
 import './components/admin/finances/FinanceManagement.css'
 import './components/admin/drivers/DriverManagement.css'
+import './components/admin/shared/AdminMobile.css'
 import './components/auth/Auth.css'
 import './components/student/StudentHome.css'
 import './components/student/StudentMenu.css'

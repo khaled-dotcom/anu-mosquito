@@ -1,0 +1,331 @@
+/* =========================
+   ADMIN — PHONE LAYOUT FIXES
+   Loaded after every admin stylesheet so these win on small screens.
+========================= */
+
+/* Long names in the restaurant picker must not push the page sideways. */
+.restaurant-selector-content {
+  flex: 1;
+}
+
+.restaurant-selector-content > div {
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .admin-section-card,
+  .admin-management-section {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 700px) {
+  /* ---------- Shared list rows (restaurants, categories, food, batches) ---------- */
+
+  .admin-restaurant-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 16px 0;
+  }
+
+  .admin-restaurant-left {
+    align-items: flex-start;
+    min-width: 0;
+  }
+
+  .admin-restaurant-left > div {
+    min-width: 0;
+  }
+
+  .admin-restaurant-actions {
+    justify-content: flex-start;
+    gap: 8px;
+  }
+
+  .admin-restaurant-actions > button {
+    flex: 1 1 0;
+    min-height: 42px;
+    white-space: nowrap;
+  }
+
+  .admin-restaurant-actions .admin-active-badge,
+  .admin-restaurant-row > .admin-active-badge {
+    flex: none;
+    align-self: center;
+  }
+
+  .admin-restaurant-row > .admin-active-badge {
+    align-self: flex-start;
+  }
+
+  .delivery-batch-row .batch-driver {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .batch-driver-select {
+    height: 44px;
+  }
+
+  .delivery-search-input {
+    max-width: none;
+  }
+
+  /* ---------- Section headers & toolbars ---------- */
+
+  .admin-management-header,
+  .admin-orders-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .admin-management-header > button,
+  .admin-section-heading > button {
+    width: 100%;
+    min-height: 46px;
+  }
+
+  .admin-section-heading {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .admin-actions {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .admin-actions button {
+    padding: 14px;
+  }
+
+  /* ---------- Orders ---------- */
+
+  .admin-order-card {
+    padding: 16px;
+  }
+
+  .admin-order-info {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .admin-order-payment {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .admin-order-payment > div:first-child {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .admin-payment-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .admin-payment-actions > button {
+    min-height: 44px;
+    width: 100%;
+  }
+
+  .admin-payment-actions > .admin-payment-proof-button {
+    grid-column: 1 / -1;
+  }
+
+  .admin-order-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+    gap: 8px;
+  }
+
+  .admin-order-actions > button,
+  .admin-order-actions select {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  /* Batch filter chips scroll sideways… */
+  .admin-orders-filters:has(> .admin-order-filter) {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin-left: -16px;
+    margin-right: -16px;
+    padding: 0 16px 4px;
+    scrollbar-width: none;
+  }
+
+  .admin-orders-filters:has(> .admin-order-filter)::-webkit-scrollbar {
+    display: none;
+  }
+
+  .admin-orders-filters > .admin-order-filter {
+    flex-shrink: 0;
+  }
+
+  /* …while the batch status controls stack, one batch per row. */
+  .admin-orders-filters:has(> div) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .admin-orders-filters > div {
+    flex-wrap: nowrap !important;
+    justify-content: space-between;
+  }
+
+  .admin-orders-filters > div > span {
+    flex-shrink: 0;
+  }
+
+  .admin-orders-filters > div > .admin-order-filter {
+    min-width: 0;
+    min-height: 42px;
+    white-space: normal;
+    text-align: center;
+  }
+
+  /* Modals become bottom sheets */
+  .admin-payment-proof-overlay,
+  .admin-edit-order-overlay,
+  .admin-contact-student-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .admin-payment-proof-modal,
+  .admin-edit-order-modal,
+  .admin-contact-student-modal {
+    width: 100%;
+    max-width: none;
+    max-height: calc(100dvh - 40px);
+    border-radius: 22px 22px 0 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* ---------- Drivers table → cards ---------- */
+
+  .drivers-table-container {
+    background: transparent;
+    border: none;
+    overflow: visible;
+  }
+
+  .drivers-table {
+    min-width: 0;
+  }
+
+  .drivers-table thead {
+    display: none;
+  }
+
+  .drivers-table,
+  .drivers-table tbody,
+  .drivers-table tr,
+  .drivers-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .drivers-table tr {
+    margin-bottom: 12px;
+    padding: 6px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .drivers-table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    text-align: right;
+  }
+
+  .drivers-table tr td:last-child {
+    border-bottom: none;
+  }
+
+  .drivers-table td[data-label]::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+  }
+
+  .drivers-table td.driver-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-bottom: 14px;
+  }
+
+  .drivers-table td.driver-actions::before {
+    flex-basis: 100%;
+  }
+
+  .drivers-table td.driver-actions button {
+    flex: 1 1 0;
+    min-height: 42px;
+    padding: 0 10px;
+    white-space: nowrap;
+  }
+
+  /* ---------- Forms ---------- */
+
+  .admin-form-actions > button,
+  .driver-form-actions > button {
+    min-height: 46px;
+  }
+}
+
+/* Compact two-up stat tiles on phones (users, finance). */
+@media (max-width: 700px) {
+  .user-stats-grid,
+  .finance-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px;
+  }
+
+  .user-stat-card,
+  .finance-stat-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 14px;
+    min-width: 0;
+  }
+
+  .user-stat-card > div,
+  .finance-stat-card > div {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .finance-stat-card strong {
+    font-size: 18px;
+    overflow-wrap: anywhere;
+  }
+
+  .finance-table-wrapper {
+    margin: 0 -14px;
+    padding: 0 14px;
+  }
+
+  .admin-management-header > button {
+    margin-top: 4px;
+  }
+}

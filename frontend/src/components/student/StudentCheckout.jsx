@@ -1,8 +1,42 @@
 import './StudentCheckout.css'
 import { useEffect, useState } from 'react'
 import StudentPayment from './StudentPayment'
+import TopBar from '../common/TopBar'
+import Icon from '../common/Icon'
 import { loadDeliverySettings } from '../../services/settingsService'
 import { loadAvailableBatches } from '../../services/orderService'
+
+function validDate(value) {
+  if (!value) return null
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? null : date
+}
+
+function formatTime(value) {
+  const date = validDate(value)
+  return date
+    ? date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+    : '—'
+}
+
+function formatDay(value) {
+  const date = validDate(value)
+  if (!date) return ''
+
+  const today = new Date()
+  const tomorrow = new Date()
+  tomorrow.setDate(today.getDate() + 1)
+
+  if (date.toDateString() === today.toDateString()) return 'Today'
+  if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow'
+
+  return date.toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
 function StudentCheckout({
   cart,
   setShowCheckout,
@@ -11,20 +45,20 @@ function StudentCheckout({
   selectedRestaurant,
   goToStudentHome,
 }) {
-    const [batches, setBatches] = useState([])
+  const [batches, setBatches] = useState([])
   const [batchesLoading, setBatchesLoading] = useState(true)
   const [selectedBatch, setSelectedBatch] = useState(null)
   const [showPayment, setShowPayment] = useState(false)
   const [deliveryFee, setDeliveryFee] = useState(0)
-const [deliveryFeeLoading, setDeliveryFeeLoading] = useState(true)
+  const [deliveryFeeLoading, setDeliveryFeeLoading] = useState(true)
 
   useEffect(() => {
     async function loadBatches() {
       const { data, error } = await loadAvailableBatches()
 
       if (error) {
-  console.error('Batches error:', error)
-  alert(error.message)
+        console.error('Batches error:', error)
+        alert(error.message)
         setBatches([])
       } else {
         setBatches(data || [])
@@ -34,236 +68,183 @@ const [deliveryFeeLoading, setDeliveryFeeLoading] = useState(true)
     }
 
     loadBatches()
-  }, [])  
-
-const foodSubtotal = cart.reduce(
-  (total, item) =>
-    total + item.selling_price * item.quantity,
-  0
-)
-
-const totalAmount = foodSubtotal + deliveryFee
+  }, [])
 
   useEffect(() => {
-  async function loadFee() {
-    const { data, error } = await loadDeliverySettings()
+    async function loadFee() {
+      const { data, error } = await loadDeliverySettings()
 
-    if (error) {
-      console.error('Delivery fee error:', error)
-      setDeliveryFee(0)
-    } else {
-      setDeliveryFee(Number(data?.delivery_fee ?? 0))
+      if (error) {
+        console.error('Delivery fee error:', error)
+        setDeliveryFee(0)
+      } else {
+        setDeliveryFee(Number(data?.delivery_fee ?? 0))
+      }
+
+      setDeliveryFeeLoading(false)
     }
 
-    setDeliveryFeeLoading(false)
+    loadFee()
+  }, [])
+
+  // Payment screen covers checkout; start it at the top.
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [showPayment])
+
+  const itemCount = cart.reduce((total, item) => total + item.quantity, 0)
+
+  const foodSubtotal = cart.reduce(
+    (total, item) => total + item.selling_price * item.quantity,
+    0
+  )
+
+  const totalAmount = foodSubtotal + deliveryFee
+
+  if (showPayment) {
+    return (
+      <StudentPayment
+        cart={cart}
+        selectedBatch={selectedBatch}
+        deliveryFee={deliveryFee}
+        setShowPayment={setShowPayment}
+        setShowCheckout={setShowCheckout}
+        profile={profile}
+        selectedRestaurant={selectedRestaurant}
+        setStudentPage={setStudentPage}
+        goToStudentHome={goToStudentHome}
+      />
+    )
   }
 
-  loadFee()
-}, [])
-
-if (showPayment) {
   return (
-    <StudentPayment
-  cart={cart}
-  selectedBatch={selectedBatch}
-  deliveryFee={deliveryFee}
-  setShowPayment={setShowPayment}
-  setShowCheckout={setShowCheckout}
-  profile={profile}
-  selectedRestaurant={selectedRestaurant}
-  setStudentPage={setStudentPage}
-  goToStudentHome={goToStudentHome}
-/>
-  )
-}
+    <div className="app-page checkout-page">
+      <TopBar
+        title="Checkout"
+        subtitle={selectedRestaurant?.name}
+        onBack={() => setShowCheckout(false)}
+        backLabel="Back to menu"
+      />
 
-  return (
-    <div className="checkout-page">
+      <main className="app-page-content has-bottom-bar">
 
-      <div className="checkout-container">
+        {/* Items */}
+        <h2 className="app-section-title">
+          Your order
+          <small>
+            {itemCount} item{itemCount === 1 ? '' : 's'}
+          </small>
+        </h2>
 
-        <button
-          className="checkout-back-button"
-          onClick={() => setShowCheckout(false)}
-        >
-          ←
-        </button>
-
-        <div className="checkout-header">
-          <h1>Checkout</h1>
-          <p>Review your order before confirming</p>
-        </div>
-
-        <div className="checkout-items">
-
+        <ul className="app-card checkout-lines">
           {cart.map((item, index) => (
-            <div
-              key={`${item.id}-${index}`}
-              className="checkout-item"
-            >
-
-              {item.image_url && (
-                <img
-                  src={item.image_url}
-                  alt={item.name}
-                  className="checkout-item-image"
-                />
+            <li key={`${item.id}-${index}`} className="checkout-line">
+              {item.image_url ? (
+                <img src={item.image_url} alt="" className="checkout-line-thumb" />
+              ) : (
+                <span className="checkout-line-thumb" aria-hidden="true">🍽️</span>
               )}
 
-              <div className="checkout-item-info">
-
+              <div className="checkout-line-info">
                 <h3>{item.name}</h3>
-
-                <p>
-                  Quantity: {item.quantity}
-                </p>
-
                 <span>
-                  {item.selling_price} EGP each
+                  {item.quantity} × {item.selling_price} EGP
                 </span>
-
               </div>
 
-              <strong>
-                {item.selling_price * item.quantity} EGP
-              </strong>
-
-            </div>
+              <strong>{item.selling_price * item.quantity} EGP</strong>
+            </li>
           ))}
+        </ul>
 
-        </div>
+        {/* Delivery batch */}
+        <h2 className="app-section-title">Delivery time</h2>
 
-        <div className="checkout-summary">
+        {batchesLoading ? (
+          <div className="batch-options">
+            {[0, 1].map((i) => (
+              <div key={i} className="batch-option skeleton" style={{ height: 76 }} />
+            ))}
+          </div>
+        ) : batches.length === 0 ? (
+          <div className="app-card checkout-empty">
+            <Icon name="clock" size={22} />
+            <p>No delivery batches are open right now. Please check back soon.</p>
+          </div>
+        ) : (
+          <div className="batch-options" role="radiogroup" aria-label="Delivery batch">
+            {batches.map((batch) => {
+              const selected = selectedBatch?.id === batch.id
+              const orderBy = validDate(batch.registration_end)
 
-          <h2>Order Summary</h2>
+              return (
+                <button
+                  key={batch.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  className={`batch-option ${selected ? 'selected' : ''}`}
+                  onClick={() => setSelectedBatch(batch)}
+                >
+                  <span className="batch-option-time">
+                    <strong>{formatTime(batch.delivery_time)}</strong>
+                    <small>{formatDay(batch.delivery_time)}</small>
+                  </span>
 
+                  <span className="batch-option-info">
+                    <strong>Batch {batch.batch_number}</strong>
+                    {orderBy && (
+                      <small>Order by {formatTime(batch.registration_end)}</small>
+                    )}
+                  </span>
+
+                  <span className="batch-option-check" aria-hidden="true">
+                    {selected && <Icon name="check" size={16} strokeWidth={3} />}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Summary */}
+        <h2 className="app-section-title">Summary</h2>
+
+        <div className="app-card checkout-summary">
           <div className="checkout-summary-row">
-            <span>Food Subtotal</span>
+            <span>Food subtotal</span>
             <strong>{foodSubtotal} EGP</strong>
           </div>
 
           <div className="checkout-summary-row">
-  <span>Delivery Fee</span>
-  <strong>
-    {deliveryFeeLoading ? '...' : `${deliveryFee} EGP`}
-  </strong>
-</div>
+            <span>Delivery fee</span>
+            <strong>{deliveryFeeLoading ? '…' : `${deliveryFee} EGP`}</strong>
+          </div>
 
-<div className="checkout-total">
-  <span>Total</span>
-  <strong>
-    {totalAmount} EGP
-  </strong>
-</div>
-
+          <div className="checkout-summary-row total">
+            <span>Total</span>
+            <strong>{totalAmount} EGP</strong>
+          </div>
         </div>
+      </main>
 
-        <div className="delivery-batches-section">
+      <div className="app-bottom-bar">
+        <div className="app-bottom-bar-inner">
+          <div className="app-bottom-bar-total">
+            <span>Total</span>
+            <strong>{totalAmount} EGP</strong>
+          </div>
 
-  <h2>Choose Delivery Batch</h2>
-
-  {batchesLoading ? (
-    <p className="batches-message">
-      Loading available batches...
-    </p>
-  ) : batches.length === 0 ? (
-    <p className="batches-message">
-      No delivery batches available right now.
-    </p>
-  ) : (
-    <div className="delivery-batches-list">
-
-      {batches.map((batch) => (
-        <button
-  key={batch.id}
-  className={`delivery-batch-card ${
-    selectedBatch?.id === batch.id ? 'selected' : ''
-  }`}
-  onClick={() => setSelectedBatch(batch)}
->
-         <div className="delivery-batch-info">
-  <div className="delivery-batch-main">
-    <strong>
-      Batch {batch.batch_number}
-    </strong>
-
-    <span className="delivery-batch-time">
-      🕐{' '}
-      {new Date(batch.delivery_time).toLocaleTimeString(
-        'en-US',
-        {
-          hour: 'numeric',
-          minute: '2-digit',
-        }
-      )}
-    </span>
-  </div>
-
-  <p>
-    {new Date(batch.delivery_time).toLocaleDateString(
-      'en-US',
-      {
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
-      }
-    )}
-  </p>
-</div>
-
-<span className="delivery-batch-arrow">
-  →
-</span>
-        </button>
-      ))}
-
-    </div>
-  )}
-{selectedBatch && (
-  <div className="selected-batch-summary">
-    <span>Selected Delivery Batch</span>
-
-    <div className="selected-batch-main">
-      <strong>
-        Batch {selectedBatch.batch_number}
-      </strong>
-
-      <span className="selected-batch-time">
-        🕐{' '}
-        {new Date(selectedBatch.delivery_time).toLocaleTimeString(
-          'en-US',
-          {
-            hour: 'numeric',
-            minute: '2-digit',
-          }
-        )}
-      </span>
-    </div>
-
-    <p>
-      {new Date(selectedBatch.delivery_time).toLocaleDateString(
-        'en-US',
-        {
-          month: 'long',
-          day: 'numeric',
-          year: 'numeric',
-        }
-      )}
-    </p>
-  </div>
-)}
-<button
-  className="confirm-order-button"
-  disabled={!selectedBatch}
-  onClick={() => setShowPayment(true)}
->
-  Continue to Payment →
-</button>
-
-</div>
-
+          <button
+            type="button"
+            className="btn-primary btn-grow checkout-continue"
+            disabled={!selectedBatch}
+            onClick={() => setShowPayment(true)}
+          >
+            {selectedBatch ? 'Continue to payment' : 'Choose a delivery time'}
+          </button>
+        </div>
       </div>
-
     </div>
   )
 }

@@ -457,10 +457,11 @@ if (
 // =========================
 if (session && studentPage === 'orders') {
   return (
-   <StudentOrders
-  profile={profile}
-  setStudentPage={setStudentPage}
-/>
+    <StudentOrders
+      profile={profile}
+      setStudentPage={setStudentPage}
+      handleLogout={handleLogout}
+    />
   )
 }
 
@@ -476,6 +477,7 @@ if (session && studentPage === 'menu') {
       goToStudentHome={goToStudentHome}
       foodCategories={foodCategories}
       foodItems={foodItems}
+      foodLoading={foodLoading}
       loadMenuForRestaurant={loadMenuForRestaurant}
     />
   )
@@ -492,7 +494,6 @@ if (session) {
 
       profile={profile}
 
-      selectedRestaurant={selectedRestaurant}
       setSelectedRestaurant={setSelectedRestaurant}
 
       studentPage={studentPage}

@@ -462,22 +462,22 @@ async function handleDeleteDriver(driver) {
               {drivers.map((driver) => (
                 <tr key={driver.id}>
 
-                  <td>
+                  <td data-label="Driver ID">
                     {driver.profiles?.driver_id ||
                       '—'}
                   </td>
 
-                  <td>
+                  <td data-label="Name">
                     {driver.profiles?.full_name ||
                       '—'}
                   </td>
 
-                  <td>
+                  <td data-label="Phone">
                     {driver.profiles?.phone ||
                       '—'}
                   </td>
 
-                  <td>
+                  <td data-label="Status">
                     <span
                       className={`driver-status ${
                         driver.is_active
@@ -491,7 +491,7 @@ async function handleDeleteDriver(driver) {
                     </span>
                   </td>
 
-                  <td>
+                  <td data-label="Created">
                     {driver.created_at
                       ? new Date(
                           driver.created_at
@@ -499,7 +499,7 @@ async function handleDeleteDriver(driver) {
                       : '—'}
                   </td>
 
-                  <td className="driver-actions">
+                  <td className="driver-actions" data-label="Actions">
   <Button
     variant="secondary"
     onClick={() => handleStartEdit(driver)}

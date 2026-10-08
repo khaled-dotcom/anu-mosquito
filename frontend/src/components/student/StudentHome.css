@@ -568,140 +568,6 @@ button.quick-card:hover {
 }
 
 /* =========================
-   Restaurant Modal
-========================= */
-
-.restaurant-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  background: rgba(15, 31, 61, 0.45);
-  backdrop-filter: blur(4px);
-  animation: fade-in 0.2s ease-out;
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-}
-
-.restaurant-modal-card {
-  position: relative;
-  width: 100%;
-  max-width: 500px;
-  overflow: hidden;
-  background: var(--surface);
-  border-radius: var(--radius-xl);
-  box-shadow: 0 30px 70px -20px rgba(15, 31, 61, 0.45);
-  animation: modalAppear 0.25s var(--ease);
-}
-
-@keyframes modalAppear {
-  from {
-    opacity: 0;
-    transform: translateY(16px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-.modal-close {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  z-index: 2;
-  width: 38px;
-  height: 38px;
-  display: grid;
-  place-items: center;
-  border: none;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.95);
-  color: var(--text);
-  cursor: pointer;
-  box-shadow: var(--shadow);
-}
-
-.modal-close:hover {
-  background: #fff;
-  color: var(--primary);
-}
-
-.modal-restaurant-image,
-.modal-image-placeholder {
-  width: 100%;
-  height: 230px;
-  display: block;
-}
-
-.modal-restaurant-image {
-  object-fit: cover;
-}
-
-.modal-image-placeholder {
-  display: grid;
-  place-items: center;
-  font-size: 72px;
-  background: linear-gradient(135deg, var(--primary-50), #fff);
-}
-
-.modal-content {
-  padding: 22px 26px 26px;
-}
-
-.modal-content h2 {
-  margin: 10px 0 8px;
-  color: var(--text);
-  font-size: 26px;
-  font-weight: 800;
-}
-
-.modal-content p {
-  margin: 0 0 22px;
-  color: var(--text-muted);
-  font-size: 15px;
-  line-height: 1.6;
-}
-
-.modal-content .restaurant-status {
-  display: inline-block;
-  padding: 5px 12px;
-  border-radius: 999px;
-  background: var(--success-bg);
-  color: var(--success);
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.modal-menu-button {
-  width: 100%;
-  height: 52px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: none;
-  border-radius: var(--radius);
-  background: var(--primary-gradient);
-  color: #fff;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 10px 24px -10px rgba(29, 78, 216, 0.7);
-}
-
-.modal-menu-button:hover {
-  transform: translateY(-1px);
-}
-
-/* =========================
    RESPONSIVE
 ========================= */
 
@@ -777,34 +643,120 @@ button.quick-card:hover {
   .restaurant-grid {
     grid-template-columns: 1fr;
   }
-
-  .restaurant-modal {
-    padding: 0;
-    align-items: flex-end;
-  }
-
-  .restaurant-modal-card {
-    max-width: 100%;
-    border-radius: 24px 24px 0 0;
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-
-  .modal-restaurant-image,
-  .modal-image-placeholder {
-    height: 200px;
-  }
-
-  .modal-content {
-    padding: 18px 20px 22px;
-  }
-
-  .modal-content h2 {
-    font-size: 22px;
-  }
 }
 
 @media (max-width: 400px) {
   .welcome-mascot {
     display: none;
   }
+}
+
+/* =========================
+   STUDENT TAB BAR (phones)
+========================= */
+
+.student-tabbar {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .student-tabbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 45;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    padding: 6px 8px calc(6px + var(--safe-bottom));
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    border-top: 1px solid var(--border);
+  }
+
+  .student-tabbar button {
+    min-height: 54px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    border: none;
+    border-radius: 14px;
+    background: none;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .student-tabbar button.active {
+    color: var(--primary);
+  }
+
+  .student-tabbar button.active svg {
+    stroke-width: 2.4;
+  }
+
+  .student-home .home-content {
+    padding-bottom: calc(96px + var(--safe-bottom));
+  }
+
+  /* The tab bar replaces the header buttons on phones. */
+  .student-home .home-header-actions {
+    display: none;
+  }
+}
+
+/* Account sheet */
+
+.account-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.account-avatar {
+  flex-shrink: 0;
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--primary-gradient);
+  color: #fff;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.account-card div:last-child {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.account-card strong {
+  font-size: 16px;
+  color: var(--text);
+}
+
+.account-card span {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.btn-secondary.account-logout {
+  margin-top: 14px;
+  color: var(--danger);
+}
+
+.btn-secondary.account-logout:hover {
+  border-color: var(--danger);
+  background: var(--danger-bg);
 }

@@ -254,9 +254,17 @@
   letter-spacing: -0.02em;
 }
 
+.admin-stat-card > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .admin-stat-card div span {
   color: var(--text-muted);
   font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
   margin-bottom: 5px;
 }
 
@@ -403,9 +411,135 @@
    ADMIN MOBILE
 ========================= */
 
+/* Mobile chrome — hidden on desktop */
+
+.admin-mobile-bar,
+.admin-nav-backdrop,
+.admin-nav-close {
+  display: none;
+}
+
 @media (max-width: 900px) {
+  .admin-layout {
+    display: block;
+  }
+
+  .admin-mobile-bar {
+    position: sticky;
+    top: 0;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: calc(60px + var(--safe-top));
+    padding: var(--safe-top) 12px 0;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .admin-menu-toggle {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border: none;
+    border-radius: 14px;
+    background: var(--primary-50);
+    color: var(--primary);
+    cursor: pointer;
+  }
+
+  .admin-mobile-title {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .admin-mobile-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    object-fit: contain;
+  }
+
+  /* Sidebar becomes an off-canvas drawer */
   .admin-sidebar {
-    width: 220px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 1001;
+    width: min(300px, 86vw);
+    height: 100vh;
+    height: 100dvh;
+    padding: calc(18px + var(--safe-top)) 14px calc(18px + var(--safe-bottom));
+    transform: translateX(-102%);
+    transition: transform 0.28s var(--ease), box-shadow 0.28s var(--ease);
+    visibility: hidden;
+  }
+
+  .admin-layout.nav-open .admin-sidebar {
+    transform: none;
+    visibility: visible;
+    box-shadow: 20px 0 60px -10px rgba(15, 31, 61, 0.45);
+  }
+
+  .admin-nav-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(15, 31, 61, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+
+  .admin-layout.nav-open .admin-nav-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .admin-nav-close {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    margin-left: auto;
+    border: none;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    cursor: pointer;
+  }
+
+  .admin-nav-button {
+    min-height: 48px;
+    font-size: 15px;
+  }
+
+  .admin-logout {
+    margin-top: 16px;
+    min-height: 48px;
+  }
+
+  .admin-main {
+    padding: 16px 16px calc(32px + var(--safe-bottom));
+  }
+
+  /* The mobile bar already shows the section title. */
+  .admin-topbar {
+    display: none;
   }
 
   .admin-stats {
@@ -418,55 +552,6 @@
 }
 
 @media (max-width: 650px) {
-  .admin-layout {
-    display: block;
-  }
-
-  .admin-sidebar {
-    width: 100%;
-    height: auto;
-    min-height: auto;
-    position: static;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-    padding: 14px;
-  }
-
-  .admin-brand {
-    padding-bottom: 14px;
-  }
-
-  .admin-nav {
-    flex-direction: row;
-    overflow-x: auto;
-    padding-bottom: 4px;
-  }
-
-  .admin-nav-button {
-    flex: 0 0 auto;
-    white-space: nowrap;
-    padding: 9px 11px;
-  }
-
-  .admin-logout {
-    margin-top: 12px;
-  }
-
-  .admin-main {
-    padding: 16px;
-  }
-
-  .admin-topbar {
-    align-items: flex-start;
-  }
-
-  .admin-topbar h1 {
-    font-size: 23px;
-  }
-
-  .admin-user {
-    display: none;
-  }
 
   .admin-welcome {
     padding: 22px;
@@ -487,6 +572,13 @@
 
   .admin-stat-card {
     padding: 14px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .admin-stat-card > div {
+    width: 100%;
   }
 
   .admin-stat-icon {
@@ -497,6 +589,7 @@
 
   .admin-stat-card strong {
     font-size: 20px;
+    overflow-wrap: anywhere;
   }
 
   .admin-actions {
