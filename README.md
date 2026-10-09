@@ -4,9 +4,9 @@ Campus food delivery for ANU students: students order from campus restaurants,
 admins confirm payments and manage the menu, drivers deliver by batch.
 
 - `frontend/` — React + Vite app (mobile-first). Hosted on GitHub Pages and compatible with Vercel.
-- `supabase/migrations/` — database schema, security rules and order logic.
-- `supabase/functions/` — edge functions: `student-auth` (sign-up),
-  `driver-login`, `create-driver`, `update-driver`, `delete-driver`.
+- Backend: Supabase project **ANU Mosquito** (`rydsexghjokzsyrjuozc`) — tables,
+  security rules, storage and edge functions (`student-auth`, `driver-login`,
+  `create-driver`, `update-driver`, `delete-driver`) live there.
 
 ## Run locally
 
