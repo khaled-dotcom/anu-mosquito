@@ -164,7 +164,7 @@ handleAssignDriver,
         </div>
 
         <img
-          src="/logo-256.webp"
+          src={`${import.meta.env.BASE_URL}logo-256.webp`}
           alt="ANU Mosquito"
           className="admin-mobile-logo"
           width="36"
@@ -183,7 +183,7 @@ handleAssignDriver,
 
         <div className="admin-brand">
           <img
-            src="/logo-256.webp"
+            src={`${import.meta.env.BASE_URL}logo-256.webp`}
             alt="ANU Mosquito"
             className="admin-logo"
           />

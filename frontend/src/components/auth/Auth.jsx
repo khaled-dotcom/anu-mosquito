@@ -181,7 +181,7 @@ function Auth({
         <div className="auth-card">
           <div className="logo-container">
             <img
-              src="/logo.webp"
+              src={`${import.meta.env.BASE_URL}logo.webp`}
               alt="ANU Mosquito"
               className="logo-image"
               width="132"

@@ -72,7 +72,7 @@ function StudentHome({
       <header className="home-header">
         <div className="home-brand">
           <img
-            src="/logo-256.webp"
+            src={`${import.meta.env.BASE_URL}logo-256.webp`}
             alt="ANU Mosquito"
             className="home-logo"
             width="44"
@@ -118,7 +118,7 @@ function StudentHome({
           </div>
 
           <img
-            src="/logo-256.webp"
+            src={`${import.meta.env.BASE_URL}logo-256.webp`}
             alt=""
             className="welcome-mascot"
             width="168"

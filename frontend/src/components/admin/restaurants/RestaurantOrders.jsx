@@ -203,7 +203,7 @@ function RestaurantOrders({ restaurants, batches }) {
 
           <div className="restaurant-orders-print-header">
             <img
-              src="/logo.png"
+              src={`${import.meta.env.BASE_URL}logo.png`}
               alt="ANU Mosquito"
               className="restaurant-orders-print-logo"
             />

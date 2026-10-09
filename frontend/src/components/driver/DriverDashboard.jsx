@@ -179,7 +179,7 @@ function DriverDashboard({ profile, handleLogout }) {
       <header className="driver-appbar">
         <div className="driver-appbar-inner">
           <img
-            src="/logo-256.webp"
+            src={`${import.meta.env.BASE_URL}logo-256.webp`}
             alt=""
             className="driver-logo"
             width="40"
