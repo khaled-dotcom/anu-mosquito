@@ -30,17 +30,23 @@ function StudentHome({
   const searchRef = useRef(null)
   const restaurantsRef = useRef(null)
 
+  // Students only see restaurants the admin has switched on.
+  const openRestaurants = useMemo(
+    () => restaurants.filter((restaurant) => restaurant.is_active !== false),
+    [restaurants]
+  )
+
   const filteredRestaurants = useMemo(() => {
     const searchText = search.toLowerCase().trim()
 
-    if (!searchText) return restaurants
+    if (!searchText) return openRestaurants
 
-    return restaurants.filter(
+    return openRestaurants.filter(
       (restaurant) =>
         restaurant.name?.toLowerCase().includes(searchText) ||
         restaurant.description?.toLowerCase().includes(searchText)
     )
-  }, [restaurants, search])
+  }, [openRestaurants, search])
 
   function openRestaurant(restaurant) {
     setSelectedRestaurant(restaurant)
@@ -150,7 +156,7 @@ function StudentHome({
               <span className="quick-icon">🍔</span>
               <span>
                 <strong>Restaurants</strong>
-                <small>{restaurants.length} available</small>
+                <small>{openRestaurants.length} available</small>
               </span>
             </button>
 
