@@ -1,0 +1,75 @@
+{
+  "startedAt": "2026-10-09T01:20:33.256Z",
+  "generator": {
+    "node": "v24.15.0",
+    "location": "one client machine and IP",
+    "model": "three synchronized request bursts per stage"
+  },
+  "thresholds": {
+    "requestP95Ms": 2000,
+    "errorRatePercentLessThan": 1
+  },
+  "limits": {
+    "requestBudget": 6000,
+    "decodedByteBudget": 104857600
+  },
+  "publicSites": [
+    {
+      "url": "https://anu-mosquito.vercel.app/",
+      "assetsChecked": 9,
+      "stages": [
+        {
+          "name": "Vercel: uncached app assets",
+          "virtualClients": 100,
+          "configuredRounds": 1,
+          "requests": 900,
+          "peakConcurrentRequests": 100,
+          "seconds": 17.35,
+          "requestsPerSecond": 51.88,
+          "failures": 626,
+          "errorRatePercent": 69.56,
+          "requestMedianMs": 225,
+          "requestP95Ms": 7299,
+          "requestMaxMs": 15011,
+          "journeyP95Ms": 17238,
+          "generatorEventLoopP95Ms": 33,
+          "statuses": {
+            "200": 275,
+            "403": 625
+          },
+          "errors": [
+            "HTTP 403",
+            "Request timed out"
+          ],
+          "passed": false
+        }
+      ]
+    }
+  ],
+  "database": {
+    "tested": false,
+    "reason": "A student test account is required",
+    "authHealth": {
+      "status": 200,
+      "ms": 447,
+      "error": null
+    }
+  },
+  "orderSubmission": {
+    "tested": false,
+    "reason": "Requires staging and disposable order/payment fixtures"
+  },
+  "loginConcurrency": {
+    "tested": false,
+    "reason": "A shared account and source IP do not represent distinct student logins"
+  },
+  "limitations": [
+    "HTTP requests simulate visitors; hundreds of real browser sessions were not launched.",
+    "Short bursts measure immediate response, not sustained peak-hour capacity.",
+    "Frontend results do not establish authenticated student or order-submission capacity."
+  ],
+  "finishedAt": "2026-10-09T01:20:53.671Z",
+  "totalRequests": 911,
+  "decodedMegabytes": 35.35,
+  "stoppedOnServerErrorOrRateLimit": false
+}

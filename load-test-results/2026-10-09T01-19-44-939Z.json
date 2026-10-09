@@ -1,0 +1,54 @@
+{
+  "startedAt": "2026-10-09T01:19:44.939Z",
+  "generator": {
+    "node": "v24.15.0",
+    "location": "one client machine and IP",
+    "model": "three synchronized request bursts per stage"
+  },
+  "thresholds": {
+    "requestP95Ms": 2000,
+    "errorRatePercentLessThan": 1
+  },
+  "limits": {
+    "requestBudget": 6000,
+    "decodedByteBudget": 104857600
+  },
+  "publicSites": [
+    {
+      "url": "https://anu-mosquito.vercel.app/",
+      "assetsChecked": 9,
+      "stages": []
+    },
+    {
+      "url": "https://khaled-dotcom.github.io/anu-mosquito/",
+      "assetsChecked": 9,
+      "stages": []
+    }
+  ],
+  "database": {
+    "tested": false,
+    "reason": "A student test account is required",
+    "authHealth": {
+      "status": 200,
+      "ms": 729,
+      "error": null
+    }
+  },
+  "orderSubmission": {
+    "tested": false,
+    "reason": "Requires staging and disposable order/payment fixtures"
+  },
+  "loginConcurrency": {
+    "tested": false,
+    "reason": "A shared account and source IP do not represent distinct student logins"
+  },
+  "limitations": [
+    "HTTP requests simulate visitors; hundreds of real browser sessions were not launched.",
+    "Short bursts measure immediate response, not sustained peak-hour capacity.",
+    "Frontend results do not establish authenticated student or order-submission capacity."
+  ],
+  "finishedAt": "2026-10-09T01:19:52.140Z",
+  "totalRequests": 21,
+  "decodedMegabytes": 1.45,
+  "stoppedOnServerErrorOrRateLimit": false
+}

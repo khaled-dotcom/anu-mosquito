@@ -1,0 +1,39 @@
+{
+  "startedAt": "2026-10-09T01:22:10.038Z",
+  "generator": {
+    "node": "v24.15.0",
+    "location": "one client machine and IP",
+    "model": "three synchronized request bursts per stage"
+  },
+  "thresholds": {
+    "requestP95Ms": 2000,
+    "errorRatePercentLessThan": 1
+  },
+  "limits": {
+    "requestBudget": 8000,
+    "decodedByteBudget": 104857600
+  },
+  "publicSites": [],
+  "database": {
+    "tested": false,
+    "reason": "A student test account is required"
+  },
+  "orderSubmission": {
+    "tested": false,
+    "reason": "Requires staging and disposable order/payment fixtures"
+  },
+  "loginConcurrency": {
+    "tested": false,
+    "reason": "A shared account and source IP do not represent distinct student logins"
+  },
+  "limitations": [
+    "HTTP requests simulate visitors; hundreds of real browser sessions were not launched.",
+    "Short bursts measure immediate response, not sustained peak-hour capacity.",
+    "Frontend results do not establish authenticated student or order-submission capacity."
+  ],
+  "error": "Static asset: HTTP 403",
+  "finishedAt": "2026-10-09T01:22:10.997Z",
+  "totalRequests": 3,
+  "decodedMegabytes": 0.04,
+  "stoppedOnServerErrorOrRateLimit": true
+}
