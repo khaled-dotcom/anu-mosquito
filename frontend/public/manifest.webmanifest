@@ -1,7 +1,7 @@
 {
   "name": "ANU Mosquito",
-  "short_name": "Mosquito",
-  "description": "Campus food delivery",
+"short_name": "ANU Mosquito",
+"description": "Campus food delivery",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
