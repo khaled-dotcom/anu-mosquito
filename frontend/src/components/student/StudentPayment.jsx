@@ -7,6 +7,7 @@ import {
   uploadPaymentProof,
 } from '../../services/paymentService'
 import { createOrder } from '../../services/orderService'
+import { cartSubtotal, formatEGP } from '../../lib/pricing'
 
 function formatBatch(batch) {
   const date = batch?.delivery_time ? new Date(batch.delivery_time) : null
@@ -71,11 +72,7 @@ function StudentPayment({
     window.scrollTo(0, 0)
   }, [orderResult])
 
-  const foodSubtotal = cart.reduce(
-    (total, item) => total + item.selling_price * item.quantity,
-    0
-  )
-
+  const foodSubtotal = cartSubtotal(cart)
   const totalAmount = foodSubtotal + deliveryFee
 
   async function copyAccountNumber() {
@@ -195,9 +192,16 @@ function StudentPayment({
             </div>
             <div className="payment-row total">
               <span>Total</span>
-              <strong>{totalAmount} EGP</strong>
+              <strong>{formatEGP(orderResult.total_amount ?? totalAmount)}</strong>
             </div>
           </div>
+
+          {orderResult.total_amount != null && Number(orderResult.total_amount) !== Number(totalAmount) && (
+            <p className="payment-total-changed" role="status">
+              The final total is {formatEGP(orderResult.total_amount)} because menu prices changed while you were ordering.
+              We&apos;ll check your payment against this amount.
+            </p>
+          )}
 
           <div className="payment-success-actions">
             <button
@@ -238,7 +242,7 @@ function StudentPayment({
     <div className="app-page payment-page">
       <TopBar
         title="Payment"
-        subtitle={`Total ${totalAmount} EGP`}
+        subtitle={`Total ${formatEGP(totalAmount)}`}
         onBack={() => setShowPayment(false)}
         backLabel="Back to checkout"
       />
@@ -249,11 +253,11 @@ function StudentPayment({
         <div className="app-card payment-summary-card">
           <div className="payment-row">
             <span>Food subtotal</span>
-            <strong>{foodSubtotal} EGP</strong>
+            <strong>{formatEGP(foodSubtotal)}</strong>
           </div>
           <div className="payment-row">
             <span>Delivery fee</span>
-            <strong>{deliveryFee} EGP</strong>
+            <strong>{formatEGP(deliveryFee)}</strong>
           </div>
           {selectedBatch && (
             <div className="payment-row">
@@ -263,7 +267,7 @@ function StudentPayment({
           )}
           <div className="payment-row total">
             <span>Total to pay</span>
-            <strong>{totalAmount} EGP</strong>
+            <strong>{formatEGP(totalAmount)}</strong>
           </div>
         </div>
 
@@ -319,7 +323,7 @@ function StudentPayment({
         {selectedPaymentMethod && (
           <div className="app-card pay-details">
             <span className="pay-details-label">
-              Send {totalAmount} EGP to
+              Send {formatEGP(totalAmount)} to
             </span>
 
             <div className="pay-account">
@@ -388,7 +392,7 @@ function StudentPayment({
         <div className="app-bottom-bar-inner">
           <div className="app-bottom-bar-total">
             <span>Total</span>
-            <strong>{totalAmount} EGP</strong>
+            <strong>{formatEGP(totalAmount)}</strong>
           </div>
 
           <button

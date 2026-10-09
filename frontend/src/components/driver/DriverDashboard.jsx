@@ -4,6 +4,14 @@ import { supabase } from '../../supabase'
 import Icon from '../common/Icon'
 import { orderStatusInfo } from '../../orderStatus'
 
+const PICKUP_STATUSES = ['CONFIRMED', 'PREPARING', 'READY_FOR_PICKUP', 'PICKED_UP']
+
+function itemsSummary(order) {
+  const items = order.order_items || []
+  if (items.length === 0) return ''
+  return items.map((item) => `${item.quantity}× ${item.food_name_snapshot}`).join(', ')
+}
+
 function DriverDashboard({ profile, handleLogout }) {
   const [orders, setOrders] = useState([])
   const [batches, setBatches] = useState([])
@@ -17,52 +25,62 @@ function DriverDashboard({ profile, handleLogout }) {
 
     if (!silent) setLoading(true)
 
-    const [
-      { data: orderData, error: orderError },
-      { data: batchData, error: batchError },
-    ] = await Promise.all([
-      supabase
-        .from('orders')
-        .select(`
+    const { data: batchData, error: batchError } = await supabase
+      .from('driver_batch_assignments')
+      .select(`
+        id,
+        batch_id,
+        assigned_at,
+        delivery_batches (
           id,
-          order_number,
-          status,
-          payment_status,
-          total_amount,
-          created_at,
-          batch_id,
-          restaurant_id,
-          restaurants (
-            id,
-            name
-          ),
-          delivery_batches (
-            id,
-            batch_number,
-            delivery_time
-          )
-        `)
-        .eq('assigned_driver_id', profile.id)
-        .order('created_at', { ascending: false }),
+          batch_number,
+          registration_start,
+          registration_end,
+          delivery_time,
+          is_active
+        )
+      `)
+      .eq('driver_id', profile.id)
+      .order('assigned_at', { ascending: false })
 
-      supabase
-        .from('driver_batch_assignments')
-        .select(`
+    // Orders in any batch assigned to this driver, plus orders handed to them directly.
+    const batchIds = (batchData || []).map((assignment) => assignment.batch_id).filter(Boolean)
+    const scope = batchIds.length > 0
+      ? `assigned_driver_id.eq.${profile.id},batch_id.in.(${batchIds.join(',')})`
+      : `assigned_driver_id.eq.${profile.id}`
+
+    const { data: orderData, error: orderError } = await supabase
+      .from('orders')
+      .select(`
+        id,
+        order_number,
+        status,
+        payment_status,
+        total_amount,
+        created_at,
+        batch_id,
+        restaurant_id,
+        student_name_snapshot,
+        student_phone_snapshot,
+        university_id_snapshot,
+        restaurants (
           id,
-          batch_id,
-          assigned_at,
-          delivery_batches (
-            id,
-            batch_number,
-            registration_start,
-            registration_end,
-            delivery_time,
-            is_active
-          )
-        `)
-        .eq('driver_id', profile.id)
-        .order('assigned_at', { ascending: false }),
-    ])
+          name
+        ),
+        delivery_batches (
+          id,
+          batch_number,
+          delivery_time
+        ),
+        order_items (
+          id,
+          quantity,
+          food_name_snapshot
+        )
+      `)
+      .or(scope)
+      .not('status', 'in', '(PAYMENT_UNDER_CONFIRMATION,CANCELLED)')
+      .order('created_at', { ascending: false })
 
     if (orderError) {
       console.error('Driver orders error:', orderError)
@@ -79,6 +97,14 @@ function DriverDashboard({ profile, handleLogout }) {
 
   useEffect(() => {
     loadDriverData()
+
+    // Keep the list fresh while the driver has the app open.
+    const timer = setInterval(() => {
+      if (document.visibilityState === 'visible') loadDriverData(true)
+    }, 30000)
+
+    return () => clearInterval(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile])
 
   async function updateOrderStatus(order, newStatus) {
@@ -137,7 +163,7 @@ function DriverDashboard({ profile, handleLogout }) {
   }
 
   const pickupOrders = orders.filter(
-    (order) => order.status === 'CONFIRMED' || order.status === 'PREPARING'
+    (order) => PICKUP_STATUSES.includes(order.status)
   )
 
   const deliveryOrders = orders.filter(
@@ -278,6 +304,32 @@ function DriverDashboard({ profile, handleLogout }) {
                       </span>
                       <strong>{order.total_amount} EGP</strong>
                     </div>
+
+                    {itemsSummary(order) && (
+                      <p className="driver-order-items">{itemsSummary(order)}</p>
+                    )}
+
+                    {(order.student_name_snapshot || order.student_phone_snapshot) && (
+                      <div className="driver-order-student">
+                        <span className="driver-student-avatar" aria-hidden="true">
+                          {(order.student_name_snapshot || '?').charAt(0).toUpperCase()}
+                        </span>
+                        <span className="driver-student-text">
+                          <strong>{order.student_name_snapshot || 'Student'}</strong>
+                          {order.university_id_snapshot && <small>ID {order.university_id_snapshot}</small>}
+                        </span>
+                        {order.student_phone_snapshot && (
+                          <a
+                            className="driver-call"
+                            href={`tel:${order.student_phone_snapshot}`}
+                            aria-label={`Call ${order.student_name_snapshot || 'student'}`}
+                          >
+                            <Icon name="phone" size={18} />
+                            Call
+                          </a>
+                        )}
+                      </div>
+                    )}
 
                     {currentTab.key === 'pickup' && (
                       <button

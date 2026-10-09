@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react'
 import StudentPayment from './StudentPayment'
 import TopBar from '../common/TopBar'
 import Icon from '../common/Icon'
-import { loadDeliverySettings } from '../../services/settingsService'
+import { loadDeliverySettings, loadDeliveryFeeTiers } from '../../services/settingsService'
+import { cartSubtotal, deliveryFeeFor, formatEGP, lineLabel, nextTier } from '../../lib/pricing'
 import { loadAvailableBatches } from '../../services/orderService'
 
 function validDate(value) {
@@ -47,9 +48,11 @@ function StudentCheckout({
 }) {
   const [batches, setBatches] = useState([])
   const [batchesLoading, setBatchesLoading] = useState(true)
+  const [loadedAt] = useState(() => Date.now())
   const [selectedBatch, setSelectedBatch] = useState(null)
   const [showPayment, setShowPayment] = useState(false)
-  const [deliveryFee, setDeliveryFee] = useState(0)
+  const [baseFee, setBaseFee] = useState(0)
+  const [feeTiers, setFeeTiers] = useState([])
   const [deliveryFeeLoading, setDeliveryFeeLoading] = useState(true)
 
   useEffect(() => {
@@ -61,7 +64,13 @@ function StudentCheckout({
         alert(error.message)
         setBatches([])
       } else {
-        setBatches(data || [])
+        // Only batches still taking orders, soonest delivery first.
+        const now = Date.now()
+        setBatches(
+          (data || [])
+            .filter((batch) => !batch.registration_end || new Date(batch.registration_end).getTime() > now)
+            .sort((a, b) => new Date(a.delivery_time) - new Date(b.delivery_time))
+        )
       }
 
       setBatchesLoading(false)
@@ -72,15 +81,14 @@ function StudentCheckout({
 
   useEffect(() => {
     async function loadFee() {
-      const { data, error } = await loadDeliverySettings()
+      const [{ data: settings, error }, { data: tiers }] = await Promise.all([
+        loadDeliverySettings(),
+        loadDeliveryFeeTiers(),
+      ])
 
-      if (error) {
-        console.error('Delivery fee error:', error)
-        setDeliveryFee(0)
-      } else {
-        setDeliveryFee(Number(data?.delivery_fee ?? 0))
-      }
-
+      if (error) console.error('Delivery fee error:', error)
+      setBaseFee(Number(settings?.delivery_fee ?? 0))
+      setFeeTiers(tiers || [])
       setDeliveryFeeLoading(false)
     }
 
@@ -94,11 +102,9 @@ function StudentCheckout({
 
   const itemCount = cart.reduce((total, item) => total + item.quantity, 0)
 
-  const foodSubtotal = cart.reduce(
-    (total, item) => total + item.selling_price * item.quantity,
-    0
-  )
-
+  const foodSubtotal = cartSubtotal(cart)
+  const deliveryFee = deliveryFeeFor(foodSubtotal, feeTiers, baseFee)
+  const upcomingTier = nextTier(foodSubtotal, feeTiers)
   const totalAmount = foodSubtotal + deliveryFee
 
   if (showPayment) {
@@ -138,7 +144,7 @@ function StudentCheckout({
 
         <ul className="app-card checkout-lines">
           {cart.map((item, index) => (
-            <li key={`${item.id}-${index}`} className="checkout-line">
+            <li key={item.key || `${item.id}-${index}`} className="checkout-line">
               {item.image_url ? (
                 <img src={item.image_url} alt="" className="checkout-line-thumb" />
               ) : (
@@ -146,13 +152,13 @@ function StudentCheckout({
               )}
 
               <div className="checkout-line-info">
-                <h3>{item.name}</h3>
+                <h3>{lineLabel(item)}</h3>
                 <span>
-                  {item.quantity} × {item.selling_price} EGP
+                  {item.quantity} × {formatEGP(item.selling_price)}
                 </span>
               </div>
 
-              <strong>{item.selling_price * item.quantity} EGP</strong>
+              <strong>{formatEGP(item.selling_price * item.quantity)}</strong>
             </li>
           ))}
         </ul>
@@ -176,6 +182,8 @@ function StudentCheckout({
             {batches.map((batch) => {
               const selected = selectedBatch?.id === batch.id
               const orderBy = validDate(batch.registration_end)
+              const opensAt = validDate(batch.registration_start)
+              const notOpenYet = opensAt && opensAt.getTime() > loadedAt
 
               return (
                 <button
@@ -183,7 +191,8 @@ function StudentCheckout({
                   type="button"
                   role="radio"
                   aria-checked={selected}
-                  className={`batch-option ${selected ? 'selected' : ''}`}
+                  className={`batch-option ${selected ? 'selected' : ''} ${notOpenYet ? 'is-later' : ''}`}
+                  disabled={notOpenYet}
                   onClick={() => setSelectedBatch(batch)}
                 >
                   <span className="batch-option-time">
@@ -193,7 +202,9 @@ function StudentCheckout({
 
                   <span className="batch-option-info">
                     <strong>Batch {batch.batch_number}</strong>
-                    {orderBy && (
+                    {notOpenYet ? (
+                      <small>Ordering opens at {formatTime(batch.registration_start)}</small>
+                    ) : orderBy && (
                       <small>Order by {formatTime(batch.registration_end)}</small>
                     )}
                   </span>
@@ -213,17 +224,23 @@ function StudentCheckout({
         <div className="app-card checkout-summary">
           <div className="checkout-summary-row">
             <span>Food subtotal</span>
-            <strong>{foodSubtotal} EGP</strong>
+            <strong>{formatEGP(foodSubtotal)}</strong>
           </div>
 
           <div className="checkout-summary-row">
             <span>Delivery fee</span>
-            <strong>{deliveryFeeLoading ? '…' : `${deliveryFee} EGP`}</strong>
+            <strong>{deliveryFeeLoading ? '…' : formatEGP(deliveryFee)}</strong>
           </div>
+
+          {!deliveryFeeLoading && upcomingTier && (
+            <p className="checkout-fee-hint">
+              Orders from {formatEGP(upcomingTier.min_order_total)} pay {formatEGP(upcomingTier.fee)} delivery.
+            </p>
+          )}
 
           <div className="checkout-summary-row total">
             <span>Total</span>
-            <strong>{totalAmount} EGP</strong>
+            <strong>{formatEGP(totalAmount)}</strong>
           </div>
         </div>
       </main>
@@ -232,7 +249,7 @@ function StudentCheckout({
         <div className="app-bottom-bar-inner">
           <div className="app-bottom-bar-total">
             <span>Total</span>
-            <strong>{totalAmount} EGP</strong>
+            <strong>{formatEGP(totalAmount)}</strong>
           </div>
 
           <button

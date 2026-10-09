@@ -7,7 +7,46 @@ import {
   updateFoodItem,
   deleteFoodItem,
   loadMenuForRestaurant as fetchMenuForRestaurant,
+  validateFoodForm,
 } from '../services/foodService'
+
+export function emptyFoodForm() {
+  return {
+    name: '',
+    description: '',
+    category_id: '',
+    home_category_id: '',
+    selling_price: '',
+    cost_price: '',
+    image_url: '',
+    is_available: true,
+    sizes: [],
+  }
+}
+
+/** Turn a food item from the database into the edit form. */
+export function foodToForm(food) {
+  return {
+    name: food.name || '',
+    description: food.description || '',
+    category_id: food.category_id || '',
+    home_category_id: food.home_category_id || '',
+    selling_price: food.selling_price ?? '',
+    cost_price: food.cost_price ?? '',
+    image_url: food.image_url || '',
+    is_available: food.is_available !== false,
+    sizes: (food.food_item_sizes || [])
+      .slice()
+      .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+      .map((size) => ({
+        id: size.id,
+        name: size.name,
+        selling_price: size.selling_price,
+        cost_price: size.cost_price ?? '',
+        is_available: size.is_available !== false,
+      })),
+  }
+}
 
 function useFood() {
   // Food & Menu Management
@@ -32,15 +71,7 @@ function useFood() {
 
   const [showFoodForm, setShowFoodForm] = useState(false)
 
-  const [foodForm, setFoodForm] = useState({
-    name: '',
-    description: '',
-    category_id: '',
-    selling_price: '',
-    cost_price: '',
-    image_url: '',
-    is_available: true,
-  })
+  const [foodForm, setFoodForm] = useState(emptyFoodForm())
 
   const [foodSaving, setFoodSaving] = useState(false)
   const [editingFood, setEditingFood] = useState(null)
@@ -181,13 +212,9 @@ async function handleDeleteCategory(categoryId) {
       return
     }
 
-    if (!foodForm.name.trim()) {
-      alert('Please enter food name.')
-      return
-    }
-
-    if (!foodForm.category_id) {
-      alert('Please select a category.')
+    const problem = validateFoodForm(foodForm)
+    if (problem) {
+      alert(problem)
       return
     }
 
@@ -202,15 +229,7 @@ async function handleDeleteCategory(categoryId) {
       console.error('Add food error:', error)
       alert(error.message)
     } else {
-      setFoodForm({
-        name: '',
-        description: '',
-        category_id: '',
-        selling_price: '',
-        cost_price: '',
-        image_url: '',
-        is_available: true,
-      })
+      setFoodForm(emptyFoodForm())
 
       setShowFoodForm(false)
 
@@ -227,13 +246,9 @@ async function handleDeleteCategory(categoryId) {
       return
     }
 
-    if (!foodForm.name.trim()) {
-      alert('Please enter food name.')
-      return
-    }
-
-    if (!foodForm.category_id) {
-      alert('Please select a category.')
+    const problem = validateFoodForm(foodForm)
+    if (problem) {
+      alert(problem)
       return
     }
 
@@ -250,15 +265,7 @@ async function handleDeleteCategory(categoryId) {
     } else {
       setEditingFood(null)
 
-      setFoodForm({
-        name: '',
-        description: '',
-        category_id: '',
-        selling_price: '',
-        cost_price: '',
-        image_url: '',
-        is_available: true,
-      })
+      setFoodForm(emptyFoodForm())
 
       setShowFoodForm(false)
 

@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# end-to-end test output
+tests/e2e/screenshots/

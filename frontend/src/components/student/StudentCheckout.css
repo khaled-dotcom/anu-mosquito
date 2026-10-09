@@ -200,3 +200,14 @@
   font-weight: 800;
   color: var(--primary);
 }
+
+.checkout-fee-hint {
+  margin-top: -2px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.batch-option.is-later {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

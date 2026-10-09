@@ -760,3 +760,339 @@ button.quick-card:hover {
   border-color: var(--danger);
   background: var(--danger-bg);
 }
+
+/* =========================
+   HOME HERO + NEXT DROP
+========================= */
+
+.home-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+  align-items: end;
+  gap: 24px;
+  padding: 32px 32px 56px;
+  border-radius: var(--radius-xl);
+  background:
+    radial-gradient(420px 220px at 92% -10%, rgba(255, 255, 255, 0.16), transparent 70%),
+    var(--primary-gradient);
+  color: #fff;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.home-hero::after {
+  content: '';
+  position: absolute;
+  right: -40px;
+  bottom: -60px;
+  z-index: -1;
+  width: 240px;
+  height: 240px;
+  background: url('/logo-256.webp') center / contain no-repeat;
+  opacity: 0.1;
+  transform: rotate(-12deg);
+}
+
+.home-hero-greeting {
+  font-size: 15px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.home-hero h1 {
+  margin-top: 6px;
+  max-width: 14ch;
+  font-size: clamp(30px, 5vw, 46px);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+
+.home-hero-text {
+  margin-top: 12px;
+  max-width: 34ch;
+  font-size: 15px;
+  line-height: 1.5;
+  opacity: 0.85;
+}
+
+.next-drop {
+  position: relative;
+  padding: 18px 20px 16px;
+  border-radius: 22px;
+  background: #fff;
+  color: var(--text);
+  box-shadow: 0 24px 40px -22px rgba(8, 20, 60, 0.6);
+}
+
+/* Ticket notches cut out of both sides */
+.next-drop {
+  -webkit-mask:
+    radial-gradient(circle 10px at left 50%, #0000 97%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle 10px at right 50%, #0000 97%, #000) right / 51% 100% no-repeat;
+  mask:
+    radial-gradient(circle 10px at left 50%, #0000 97%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle 10px at right 50%, #0000 97%, #000) right / 51% 100% no-repeat;
+}
+
+.next-drop-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.next-drop-time {
+  display: block;
+  margin-top: 2px;
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.next-drop.is-closed .next-drop-time {
+  font-size: 26px;
+  color: var(--text-soft);
+}
+
+.next-drop-note {
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-soft);
+}
+
+.next-drop-bar {
+  height: 6px;
+  margin-top: 14px;
+  border-radius: 999px;
+  background: var(--primary-50);
+  overflow: hidden;
+}
+
+.next-drop-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), #f97316);
+  transform-origin: left;
+  transition: transform 0.6s var(--ease);
+}
+
+.next-drop-skeleton {
+  height: 140px;
+  border-radius: 22px;
+  opacity: 0.35;
+}
+
+/* =========================
+   CATEGORY RAIL
+========================= */
+
+.cat-rail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(118px, 1fr);
+  gap: 12px;
+  overflow-x: auto;
+  padding: 4px 2px 8px;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+
+.cat-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.cat-tile {
+  min-height: 132px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 10px 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  text-align: left;
+  cursor: pointer;
+  scroll-snap-align: start;
+  transition: border-color 0.18s var(--ease), transform 0.18s var(--ease), background 0.18s var(--ease);
+}
+
+.cat-tile.skeleton {
+  border: none;
+  cursor: default;
+}
+
+.cat-tile:hover {
+  border-color: var(--primary-400);
+}
+
+.cat-tile.active {
+  border-color: var(--primary);
+  background: var(--primary-50);
+  transform: translateY(-2px);
+}
+
+.cat-tile-visual {
+  width: 100%;
+  height: 64px;
+  margin-bottom: 8px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #fff6e5;
+  font-size: 38px;
+}
+
+.cat-tile.active .cat-tile-visual {
+  background: #fff;
+}
+
+.cat-tile-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cat-tile-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.cat-tile-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* =========================
+   DISHES IN A CATEGORY
+========================= */
+
+.dish-rail {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.dish-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  text-align: left;
+  cursor: pointer;
+}
+
+.dish-card:hover {
+  border-color: var(--primary-400);
+}
+
+.dish-card-image {
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #fff6e5;
+  font-size: 30px;
+}
+
+.dish-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dish-card-body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.dish-card-body strong {
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.25;
+}
+
+.dish-card-body small {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.dish-card-body em {
+  margin-top: 4px;
+  font-style: normal;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+@media (max-width: 760px) {
+  .home-hero {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    padding: 24px 20px 50px;
+    border-radius: var(--radius-lg);
+  }
+
+  .home-hero h1 {
+    max-width: 12ch;
+  }
+
+  .next-drop {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 14px;
+    align-items: center;
+    padding: 14px 18px;
+  }
+
+  .next-drop-label {
+    grid-column: 1 / -1;
+  }
+
+  .next-drop-time {
+    font-size: 32px;
+  }
+
+  .next-drop-note {
+    margin-top: 0;
+  }
+
+  .next-drop-bar {
+    grid-column: 1 / -1;
+    margin-top: 10px;
+  }
+
+  .cat-rail {
+    grid-auto-columns: 112px;
+    margin: 0 -16px;
+    padding: 4px 16px 8px;
+  }
+
+  .dish-rail {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cat-tile.active {
+    transform: none;
+  }
+}

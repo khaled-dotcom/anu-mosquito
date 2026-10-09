@@ -3,19 +3,19 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import StudentCheckout from './StudentCheckout'
 import Icon from '../common/Icon'
 import Sheet from '../common/Sheet'
+import {
+  addToCart as addLineToCart,
+  availableSizes,
+  cartCount as cartCountOf,
+  cartSubtotal as cartTotalOf,
+  changeCartQuantity,
+  formatEGP,
+  hasSizes,
+  startingPrice,
+  unitPrice,
+} from '../../lib/pricing'
 
 const OTHER_CATEGORY = '__other__'
-
-function cartCountOf(cart) {
-  return cart.reduce((total, item) => total + item.quantity, 0)
-}
-
-function cartTotalOf(cart) {
-  return cart.reduce(
-    (total, item) => total + Number(item.selling_price) * item.quantity,
-    0
-  )
-}
 
 function StudentMenu({
   selectedRestaurant,
@@ -28,6 +28,7 @@ function StudentMenu({
   goToStudentHome,
 }) {
   const [selectedFood, setSelectedFood] = useState(null)
+  const [selectedSizeId, setSelectedSizeId] = useState(null)
   const [quantity, setQuantity] = useState(1)
   const [cart, setCart] = useState([])
   const [showCart, setShowCart] = useState(false)
@@ -94,6 +95,7 @@ function StudentMenu({
 
   const closeFood = useCallback(() => {
     setSelectedFood(null)
+    setSelectedSizeId(null)
     setQuantity(1)
   }, [])
 
@@ -102,47 +104,45 @@ function StudentMenu({
   function openFood(item) {
     if (item.is_available === false) return
     setSelectedFood(item)
+    const sizes = availableSizes(item)
+    setSelectedSizeId(sizes.length === 1 ? sizes[0].id : null)
     setQuantity(1)
   }
 
+  // Opened from a dish on the home page: show that dish straight away.
+  const [focusHandled, setFocusHandled] = useState(null)
+  const focusFoodId = selectedRestaurant?.focusFoodId
+  if (focusFoodId && focusHandled !== focusFoodId) {
+    const focusItem = items.find((item) => item.id === focusFoodId)
+    if (focusItem) {
+      setFocusHandled(focusFoodId)
+      openFood(focusItem)
+    }
+  }
+
+  const foodSizes = availableSizes(selectedFood)
+  const selectedSize = foodSizes.find((size) => size.id === selectedSizeId) || null
+  const needsSize = foodSizes.length > 0 && !selectedSize
+  const sheetUnitPrice = unitPrice(selectedFood, selectedSize)
+
   function addToCart() {
-    if (!selectedFood) return
-
-    setCart((currentCart) => {
-      const existing = currentCart.find((item) => item.id === selectedFood.id)
-
-      if (existing) {
-        return currentCart.map((item) =>
-          item.id === selectedFood.id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        )
-      }
-
-      return [...currentCart, { ...selectedFood, quantity }]
-    })
-
+    if (!selectedFood || needsSize) return
+    setCart((currentCart) => addLineToCart(currentCart, selectedFood, selectedSize, quantity))
     closeFood()
   }
 
-  function changeQuantity(itemId, delta) {
-    setCart((currentCart) =>
-      currentCart
-        .map((item) =>
-          item.id === itemId
-            ? { ...item, quantity: item.quantity + delta }
-            : item
-        )
-        .filter((item) => item.quantity > 0)
-    )
+  function changeQuantity(key, delta) {
+    setCart((currentCart) => changeCartQuantity(currentCart, key, delta))
   }
 
-  function removeItem(itemId) {
-    setCart((currentCart) => currentCart.filter((item) => item.id !== itemId))
+  function removeItem(key) {
+    setCart((currentCart) => currentCart.filter((line) => line.key !== key))
   }
 
   function quantityInCart(itemId) {
-    return cart.find((item) => item.id === itemId)?.quantity || 0
+    return cart
+      .filter((line) => line.id === itemId)
+      .reduce((total, line) => total + line.quantity, 0)
   }
 
   if (showCheckout) {
@@ -275,7 +275,14 @@ function StudentMenu({
                         <h3>{item.name}</h3>
                         {item.description && <p>{item.description}</p>}
                         <div className="menu-item-bottom">
-                          <strong>{item.selling_price} EGP</strong>
+                          <strong>
+                            {hasSizes(item) ? `from ${formatEGP(startingPrice(item))}` : formatEGP(item.selling_price)}
+                          </strong>
+                          {hasSizes(item) && (
+                            <span className="menu-item-tag sizes">
+                              {availableSizes(item).map((size) => size.name).join(' · ')}
+                            </span>
+                          )}
                           {unavailable && (
                             <span className="menu-item-tag">Unavailable</span>
                           )}
@@ -325,7 +332,7 @@ function StudentMenu({
             >
               <span className="menu-cart-count">{cartCount}</span>
               <span className="menu-cart-label">View cart</span>
-              <strong>{cartTotal} EGP</strong>
+              <strong>{formatEGP(cartTotal)}</strong>
             </button>
           </div>
         </div>
@@ -371,8 +378,9 @@ function StudentMenu({
               type="button"
               className="btn-primary btn-grow"
               onClick={addToCart}
+              disabled={needsSize}
             >
-              Add · {Number(selectedFood?.selling_price || 0) * quantity} EGP
+              {needsSize ? 'Choose a size' : `Add · ${formatEGP(sheetUnitPrice * quantity)}`}
             </button>
           </div>
         }
@@ -380,7 +388,31 @@ function StudentMenu({
         {selectedFood?.description && (
           <p className="food-sheet-desc">{selectedFood.description}</p>
         )}
-        <p className="food-sheet-price">{selectedFood?.selling_price} EGP</p>
+        {foodSizes.length > 0 ? (
+          <fieldset className="size-picker">
+            <legend>Choose a size</legend>
+            <div className="size-picker-options">
+              {foodSizes.map((size) => (
+                <label
+                  key={size.id}
+                  className={`size-option ${selectedSizeId === size.id ? 'selected' : ''}`}
+                >
+                  <input
+                    type="radio"
+                    name="food-size"
+                    value={size.id}
+                    checked={selectedSizeId === size.id}
+                    onChange={() => setSelectedSizeId(size.id)}
+                  />
+                  <span className="size-option-name">{size.name}</span>
+                  <span className="size-option-price">{formatEGP(size.selling_price)}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        ) : (
+          <p className="food-sheet-price">{formatEGP(selectedFood?.selling_price)}</p>
+        )}
       </Sheet>
 
       {/* Cart */}
@@ -404,7 +436,7 @@ function StudentMenu({
                 <span>
                   Subtotal · {cartCount} item{cartCount === 1 ? '' : 's'}
                 </span>
-                <strong>{cartTotal} EGP</strong>
+                <strong>{formatEGP(cartTotal)}</strong>
               </div>
               <p className="cart-sheet-note">
                 Delivery fee is added at checkout.
@@ -437,7 +469,7 @@ function StudentMenu({
         ) : (
           <ul className="cart-sheet-items">
             {cart.map((item) => (
-              <li key={item.id} className="cart-sheet-item">
+              <li key={item.key} className="cart-sheet-item">
                 {item.image_url ? (
                   <img src={item.image_url} alt="" className="cart-sheet-thumb" />
                 ) : (
@@ -445,15 +477,18 @@ function StudentMenu({
                 )}
 
                 <div className="cart-sheet-info">
-                  <h3>{item.name}</h3>
-                  <span>{item.selling_price} EGP each</span>
+                  <h3>
+                    {item.name}
+                    {item.size_name && <span className="cart-size-badge">{item.size_name}</span>}
+                  </h3>
+                  <span>{formatEGP(item.selling_price)} each</span>
 
                   <div className="cart-sheet-controls">
                     <div className="qty-stepper" role="group" aria-label={`Quantity of ${item.name}`}>
                       <button
                         type="button"
                         aria-label="Decrease quantity"
-                        onClick={() => changeQuantity(item.id, -1)}
+                        onClick={() => changeQuantity(item.key, -1)}
                       >
                         {item.quantity === 1 ? (
                           <Icon name="trash" size={16} />
@@ -465,7 +500,7 @@ function StudentMenu({
                       <button
                         type="button"
                         aria-label="Increase quantity"
-                        onClick={() => changeQuantity(item.id, 1)}
+                        onClick={() => changeQuantity(item.key, 1)}
                       >
                         <Icon name="plus" size={16} strokeWidth={2.5} />
                       </button>
@@ -474,7 +509,7 @@ function StudentMenu({
                     <button
                       type="button"
                       className="cart-sheet-remove"
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => removeItem(item.key)}
                     >
                       Remove
                     </button>
@@ -482,7 +517,7 @@ function StudentMenu({
                 </div>
 
                 <strong className="cart-sheet-line">
-                  {Number(item.selling_price) * item.quantity} EGP
+                  {formatEGP(Number(item.selling_price) * item.quantity)}
                 </strong>
               </li>
             ))}

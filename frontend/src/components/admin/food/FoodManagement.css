@@ -1,0 +1,191 @@
+.food-form {
+  display: grid;
+  gap: 18px;
+}
+
+.food-form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+  gap: 20px;
+  align-items: start;
+}
+
+.food-form-main {
+  display: grid;
+  gap: 14px;
+}
+
+.food-form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.food-form .admin-form-group {
+  margin: 0;
+}
+
+.food-form-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: var(--text-soft);
+  cursor: pointer;
+}
+
+.food-form-check input {
+  width: 18px;
+  height: 18px;
+}
+
+/* Sizes */
+
+.sizes-editor {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  display: grid;
+  gap: 12px;
+}
+
+.sizes-editor-head h4 {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.sizes-editor-head p {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.sizes-list {
+  display: grid;
+  gap: 8px;
+}
+
+.sizes-row {
+  display: grid;
+  grid-template-columns: minmax(70px, 1fr) minmax(80px, 1fr) minmax(80px, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.sizes-row-head span {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.sizes-row input {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.sizes-row.is-off input {
+  opacity: 0.55;
+}
+
+.sizes-row-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.sizes-row-actions button {
+  min-width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-soft);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sizes-row-actions button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.sizes-toggle {
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.sizes-toggle.on {
+  border-color: var(--success) !important;
+  background: var(--success-bg) !important;
+  color: var(--success) !important;
+}
+
+.sizes-remove:hover {
+  color: var(--danger) !important;
+  border-color: var(--danger) !important;
+}
+
+.sizes-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sizes-presets button {
+  height: 36px;
+  padding: 0 14px;
+  border: 1px dashed var(--primary-400);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.sizes-presets button:hover {
+  background: var(--primary-50);
+}
+
+.food-price-line {
+  color: var(--primary) !important;
+  font-weight: 700;
+}
+
+.food-home-tag {
+  display: inline-block !important;
+  width: fit-content;
+  margin-top: 6px !important;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--primary-50);
+  color: var(--primary) !important;
+  font-size: 12px !important;
+  font-weight: 700;
+}
+
+@media (max-width: 760px) {
+  .food-form-grid,
+  .food-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .sizes-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .sizes-row-head {
+    display: none;
+  }
+
+  .sizes-row-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+}

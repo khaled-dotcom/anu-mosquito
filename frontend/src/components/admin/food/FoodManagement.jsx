@@ -5,6 +5,159 @@ import EditButton from '../../common/EditButton'
 import SaveButton from '../../common/SaveButton'
 import CancelButton from '../../common/CancelButton'
 import './RestaurantSelector.css'
+import './FoodManagement.css'
+import { useEffect, useState } from 'react'
+import ImageUploader from '../../common/ImageUploader'
+import Icon from '../../common/Icon'
+import { emptyFoodForm, foodToForm } from '../../../hooks/useFood'
+import { loadHomeCategories } from '../../../services/homeCategoryService'
+import { availableSizes, formatEGP } from '../../../lib/pricing'
+
+const SIZE_PRESETS = ['S', 'M', 'L', 'XL']
+
+// Meal sizes: when an item has sizes, each size has its own price and the
+// student must pick one. Without sizes the single price below is used.
+function SizesEditor({ foodForm, setFoodForm }) {
+  const sizes = foodForm.sizes || []
+
+  function update(index, patch) {
+    setFoodForm((form) => ({
+      ...form,
+      sizes: form.sizes.map((size, i) => (i === index ? { ...size, ...patch } : size)),
+    }))
+  }
+
+  function addSize(name = '') {
+    setFoodForm((form) => ({
+      ...form,
+      sizes: [...(form.sizes || []), { name, selling_price: '', cost_price: '', is_available: true }],
+    }))
+  }
+
+  function removeSize(index) {
+    setFoodForm((form) => ({ ...form, sizes: form.sizes.filter((_, i) => i !== index) }))
+  }
+
+  function move(index, delta) {
+    setFoodForm((form) => {
+      const next = [...form.sizes]
+      const target = index + delta
+      if (target < 0 || target >= next.length) return form
+      ;[next[index], next[target]] = [next[target], next[index]]
+      return { ...form, sizes: next }
+    })
+  }
+
+  const unusedPresets = SIZE_PRESETS.filter(
+    (preset) => !sizes.some((size) => String(size.name).trim().toUpperCase() === preset)
+  )
+
+  return (
+    <div className="sizes-editor">
+      <div className="sizes-editor-head">
+        <div>
+          <h4>Price{sizes.length > 0 ? 's by size' : ''}</h4>
+          <p>
+            {sizes.length > 0
+              ? 'Students choose one of these sizes. Each size has its own price.'
+              : 'One price for this item, or add sizes like M / L / XL with different prices.'}
+          </p>
+        </div>
+      </div>
+
+      {sizes.length === 0 ? (
+        <div className="food-form-row">
+          <div className="admin-form-group">
+            <label htmlFor="food-price">Selling price (EGP)</label>
+            <input
+              id="food-price"
+              type="number"
+              min="0"
+              inputMode="decimal"
+              value={foodForm.selling_price}
+              onChange={(e) => setFoodForm({ ...foodForm, selling_price: e.target.value })}
+              placeholder="0"
+            />
+          </div>
+          <div className="admin-form-group">
+            <label htmlFor="food-cost">Cost price (EGP)</label>
+            <input
+              id="food-cost"
+              type="number"
+              min="0"
+              inputMode="decimal"
+              value={foodForm.cost_price}
+              onChange={(e) => setFoodForm({ ...foodForm, cost_price: e.target.value })}
+              placeholder="0"
+            />
+          </div>
+        </div>
+      ) : (
+        <div className="sizes-list">
+          <div className="sizes-row sizes-row-head" aria-hidden="true">
+            <span>Size</span>
+            <span>Price</span>
+            <span>Cost</span>
+            <span />
+          </div>
+          {sizes.map((size, index) => (
+            <div key={size.id || `new-${index}`} className={`sizes-row ${size.is_available === false ? 'is-off' : ''}`}>
+              <input
+                aria-label={`Size ${index + 1} name`}
+                value={size.name}
+                onChange={(e) => update(index, { name: e.target.value })}
+                placeholder="e.g. L"
+              />
+              <input
+                aria-label={`Size ${index + 1} price`}
+                type="number"
+                min="0"
+                inputMode="decimal"
+                value={size.selling_price}
+                onChange={(e) => update(index, { selling_price: e.target.value })}
+                placeholder="Price"
+              />
+              <input
+                aria-label={`Size ${index + 1} cost`}
+                type="number"
+                min="0"
+                inputMode="decimal"
+                value={size.cost_price}
+                onChange={(e) => update(index, { cost_price: e.target.value })}
+                placeholder="Cost"
+              />
+              <div className="sizes-row-actions">
+                <button
+                  type="button"
+                  className={`sizes-toggle ${size.is_available === false ? '' : 'on'}`}
+                  onClick={() => update(index, { is_available: size.is_available === false })}
+                  aria-pressed={size.is_available !== false}
+                  title={size.is_available === false ? 'Hidden from students' : 'Available'}
+                >
+                  {size.is_available === false ? 'Off' : 'On'}
+                </button>
+                <button type="button" onClick={() => move(index, -1)} disabled={index === 0} aria-label="Move up">↑</button>
+                <button type="button" onClick={() => move(index, 1)} disabled={index === sizes.length - 1} aria-label="Move down">↓</button>
+                <button type="button" className="sizes-remove" onClick={() => removeSize(index)} aria-label={`Remove size ${size.name || index + 1}`}>
+                  <Icon name="trash" size={16} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="sizes-presets">
+        {unusedPresets.map((preset) => (
+          <button key={preset} type="button" onClick={() => addSize(preset)}>
+            + {preset}
+          </button>
+        ))}
+        <button type="button" onClick={() => addSize('')}>+ Custom size</button>
+      </div>
+    </div>
+  )
+}
 
 function FoodManagement({
   restaurants,
@@ -52,6 +205,18 @@ handleUpdateCategory,
 handleDeleteCategory,
 loadMenuForRestaurant,
 }) {
+  const [homeCategories, setHomeCategories] = useState([])
+
+  useEffect(() => {
+    let cancelled = false
+    loadHomeCategories({ includeInactive: true }).then(({ data }) => {
+      if (!cancelled) setHomeCategories(data)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   return (
     <section className="admin-section-card">
 
@@ -60,7 +225,7 @@ loadMenuForRestaurant,
           <h2>Food & Menu</h2>
 
           <p>
-            Manage categories and food items for each restaurant.
+            Manage menu sections, food items, sizes and photos for each restaurant.
           </p>
         </div>
       </div>
@@ -231,10 +396,10 @@ loadMenuForRestaurant,
             <div className="admin-section-heading">
 
               <div>
-                <h3>Categories</h3>
+                <h3>Menu sections</h3>
 
                 <p>
-                  Food categories for this restaurant.
+                  Sections inside this restaurant's menu (e.g. Burgers, Sides).
                 </p>
               </div>
 
@@ -247,7 +412,7 @@ loadMenuForRestaurant,
   setShowCategoryForm(true)
 }}
               >
-                + Add Category
+                + Add Section
               </Button>
 
             </div>
@@ -317,11 +482,11 @@ loadMenuForRestaurant,
 
             {categoryLoading ? (
               <div className="admin-empty">
-                Loading categories...
+                Loading sections...
               </div>
             ) : foodCategories.length === 0 ? (
               <div className="admin-empty">
-                No categories added yet.
+                No sections added yet.
               </div>
             ) : (
               <div className="admin-restaurant-list">
@@ -400,6 +565,7 @@ loadMenuForRestaurant,
                 variant="primary"
                 onClick={() => {
                   setEditingFood(null)
+                  setFoodForm(emptyFoodForm())
                   setShowFoodForm(true)
                 }}
               >
@@ -409,150 +575,93 @@ loadMenuForRestaurant,
             </div>
 
             {showFoodForm && (
-              <div className="admin-form-card">
+              <div className="admin-form-card food-form">
 
-                <div className="admin-form-group">
-                  <label>Food Name</label>
+                <div className="food-form-grid">
+                  <div className="food-form-main">
+                    <div className="admin-form-group">
+                      <label htmlFor="food-name">Food Name</label>
+                      <input
+                        id="food-name"
+                        type="text"
+                        value={foodForm.name}
+                        onChange={(e) => setFoodForm({ ...foodForm, name: e.target.value })}
+                        placeholder="e.g. Classic Burger"
+                      />
+                    </div>
 
-                  <input
-                    type="text"
-                    value={foodForm.name}
-                    onChange={(e) =>
-                      setFoodForm({
-                        ...foodForm,
-                        name: e.target.value,
-                      })
-                    }
-                    placeholder="e.g. Classic Burger"
-                  />
-                </div>
+                    <div className="food-form-row">
+                      <div className="admin-form-group">
+                        <label htmlFor="food-section">Menu section</label>
+                        <select
+                          id="food-section"
+                          value={foodForm.category_id}
+                          onChange={(e) => setFoodForm({ ...foodForm, category_id: e.target.value })}
+                        >
+                          <option value="">Select section</option>
+                          {foodCategories.map((category) => (
+                            <option key={category.id} value={category.id}>
+                              {category.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-                <div className="admin-form-group">
-                  <label>Category</label>
+                      <div className="admin-form-group">
+                        <label htmlFor="food-home-category">Home page category</label>
+                        <select
+                          id="food-home-category"
+                          value={foodForm.home_category_id || ''}
+                          onChange={(e) => setFoodForm({ ...foodForm, home_category_id: e.target.value })}
+                        >
+                          <option value="">Not shown on home</option>
+                          {homeCategories.map((category) => (
+                            <option key={category.id} value={category.id}>
+                              {category.icon ? `${category.icon} ` : ''}{category.name}
+                              {category.is_active ? '' : ' (hidden)'}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
 
-                  <select
-                    value={foodForm.category_id}
-                    onChange={(e) =>
-                      setFoodForm({
-                        ...foodForm,
-                        category_id: e.target.value,
-                      })
-                    }
-                  >
-                    <option value="">
-                      Select Category
-                    </option>
+                    <div className="admin-form-group">
+                      <label htmlFor="food-description">Description</label>
+                      <textarea
+                        id="food-description"
+                        value={foodForm.description}
+                        onChange={(e) => setFoodForm({ ...foodForm, description: e.target.value })}
+                        placeholder="What's in it?"
+                        rows="3"
+                      />
+                    </div>
+                  </div>
 
-                    {foodCategories.map((category) => (
-                      <option
-                        key={category.id}
-                        value={category.id}
-                      >
-                        {category.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="admin-form-group">
-                  <label>Description</label>
-
-                  <textarea
-                    value={foodForm.description}
-                    onChange={(e) =>
-                      setFoodForm({
-                        ...foodForm,
-                        description: e.target.value,
-                      })
-                    }
-                    placeholder="Food description"
-                    rows="3"
-                  />
-                </div>
-
-                <div className="admin-form-group">
-                  <label>Selling Price</label>
-
-                  <input
-                    type="number"
-                    min="0"
-                    value={foodForm.selling_price}
-                    onChange={(e) =>
-                      setFoodForm({
-                        ...foodForm,
-                        selling_price: e.target.value,
-                      })
-                    }
-                    placeholder="0"
-                  />
-                </div>
-
-                <div className="admin-form-group">
-                  <label>Cost Price</label>
-
-                  <input
-                    type="number"
-                    min="0"
-                    value={foodForm.cost_price}
-                    onChange={(e) =>
-                      setFoodForm({
-                        ...foodForm,
-                        cost_price: e.target.value,
-                      })
-                    }
-                    placeholder="0"
-                  />
-                </div>
-
-                <div className="admin-form-group">
-                  <label>Image URL</label>
-
-                  <input
-                    type="text"
+                  <ImageUploader
+                    label="Food photo"
+                    folder="food"
                     value={foodForm.image_url}
-                    onChange={(e) =>
-                      setFoodForm({
-                        ...foodForm,
-                        image_url: e.target.value,
-                      })
-                    }
-                    placeholder="https://..."
+                    onChange={(url) => setFoodForm((form) => ({ ...form, image_url: url }))}
                   />
                 </div>
 
-                <div className="admin-form-group">
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={foodForm.is_available}
-                      onChange={(e) =>
-                        setFoodForm({
-                          ...foodForm,
-                          is_available: e.target.checked,
-                        })
-                      }
-                    />
+                <SizesEditor foodForm={foodForm} setFoodForm={setFoodForm} />
 
-                    {' '}Available
-                  </label>
-                </div>
+                <label className="food-form-check">
+                  <input
+                    type="checkbox"
+                    checked={foodForm.is_available}
+                    onChange={(e) => setFoodForm({ ...foodForm, is_available: e.target.checked })}
+                  />
+                  Available to order
+                </label>
 
                 <div className="admin-form-actions">
-
                   <CancelButton
                     onClick={() => {
                       setShowFoodForm(false)
                       setEditingFood(null)
-
-                      setFoodForm({
-                        name: '',
-                        description: '',
-                        category_id: '',
-                        selling_price: '',
-                        cost_price: '',
-                        image_url: '',
-                        is_available: true,
-                      })
+                      setFoodForm(emptyFoodForm())
                     }}
                     disabled={foodSaving}
                   >
@@ -561,119 +670,72 @@ loadMenuForRestaurant,
 
                   <SaveButton
                     type="button"
-                    onClick={
-                      editingFood
-                        ? handleUpdateFood
-                        : handleSaveFood
-                    }
+                    onClick={editingFood ? handleUpdateFood : handleSaveFood}
                     disabled={foodSaving}
                   >
-                    {foodSaving
-                      ? 'Saving...'
-                      : editingFood
-                        ? 'Update Food'
-                        : 'Save Food'}
+                    {foodSaving ? 'Saving...' : editingFood ? 'Update Food' : 'Save Food'}
                   </SaveButton>
-
                 </div>
-
               </div>
             )}
 
             {foodLoading ? (
-              <div className="admin-empty">
-                Loading food items...
-              </div>
+              <div className="admin-empty">Loading food items...</div>
             ) : foodItems.length === 0 ? (
-              <div className="admin-empty">
-                No food items added yet.
-              </div>
+              <div className="admin-empty">No food items added yet.</div>
             ) : (
               <div className="admin-restaurant-list">
+                {foodItems.map((food) => {
+                  const sizes = availableSizes(food)
+                  const homeCategory = homeCategories.find((c) => c.id === food.home_category_id)
 
-                {foodItems.map((food) => (
-                  <div
-                    key={food.id}
-                    className="admin-restaurant-row"
-                  >
+                  return (
+                    <div key={food.id} className="admin-restaurant-row">
+                      <div className="admin-restaurant-left">
+                        {food.image_url ? (
+                          <img src={food.image_url} alt={food.name} />
+                        ) : (
+                          <div className="admin-restaurant-placeholder">🍔</div>
+                        )}
 
-                    <div className="admin-restaurant-left">
-
-                      {food.image_url ? (
-                        <img
-                          src={food.image_url}
-                          alt={food.name}
-                        />
-                      ) : (
-                        <div className="admin-restaurant-placeholder">
-                          🍔
+                        <div>
+                          <strong>{food.name}</strong>
+                          <span>{food.description || 'No description'}</span>
+                          <span className="food-price-line">
+                            {sizes.length > 0
+                              ? sizes.map((size) => `${size.name} ${formatEGP(size.selling_price)}`).join(' · ')
+                              : formatEGP(food.selling_price)}
+                          </span>
+                          {homeCategory && (
+                            <span className="food-home-tag">
+                              {homeCategory.icon} {homeCategory.name}
+                            </span>
+                          )}
                         </div>
-                      )}
-
-                      <div>
-                        <strong>
-                          {food.name}
-                        </strong>
-
-                        <span>
-                          {food.description ||
-                            'No description'}
-                        </span>
-
-                        <span>
-                          Selling Price: {food.selling_price}
-                        </span>
                       </div>
 
+                      <span className="admin-active-badge">
+                        {food.is_available ? 'Available' : 'Unavailable'}
+                      </span>
+
+                      <div className="admin-restaurant-actions">
+                        <EditButton
+                          onClick={() => {
+                            setEditingFood(food)
+                            setFoodForm(foodToForm(food))
+                            setShowFoodForm(true)
+                          }}
+                        >
+                          Edit
+                        </EditButton>
+
+                        <DeleteButton onClick={() => handleDeleteFood(food.id)}>
+                          Delete
+                        </DeleteButton>
+                      </div>
                     </div>
-
-                    <span className="admin-active-badge">
-                      {food.is_available
-                        ? 'Available'
-                        : 'Unavailable'}
-                    </span>
-
-                    <div className="admin-restaurant-actions">
-
-                      <EditButton
-                        onClick={() => {
-                          setEditingFood(food)
-
-                          setFoodForm({
-                            name: food.name || '',
-                            description:
-                              food.description || '',
-                            category_id:
-                              food.category_id || '',
-                            selling_price:
-                              food.selling_price ?? '',
-                            cost_price:
-                              food.cost_price ?? '',
-                            image_url:
-                              food.image_url || '',
-                            is_available:
-                              food.is_available,
-                          })
-
-                          setShowFoodForm(true)
-                        }}
-                      >
-                        Edit
-                      </EditButton>
-
-                      <DeleteButton
-                        onClick={() =>
-                          handleDeleteFood(food.id)
-                        }
-                      >
-                        Delete
-                      </DeleteButton>
-
-                    </div>
-
-                  </div>
-                ))}
-
+                  )
+                })}
               </div>
             )}
 

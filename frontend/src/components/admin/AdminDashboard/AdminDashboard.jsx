@@ -12,11 +12,13 @@ import RestaurantOrders from '../restaurants/RestaurantOrders'
 import UserManagement from '../users/UserManagement'
 import FinanceManagement from '../finances/FinanceManagement'
 import DriverManagement from '../drivers/DriverManagement'
+import HomeCategoryManagement from '../categories/HomeCategoryManagement'
 
 const ADMIN_NAV = [
   { key: 'dashboard', label: 'Dashboard', icon: '🏠' },
   { key: 'restaurants', label: 'Restaurants', icon: '🍔' },
   { key: 'food', label: 'Food & Menu', icon: '🍕' },
+  { key: 'home-categories', label: 'Home Categories', icon: '🏷️' },
   { key: 'orders', label: 'Orders', icon: '📦' },
   { key: 'restaurant-orders', label: 'Restaurant Orders', icon: '🍽️' },
   { key: 'delivery', label: 'Delivery', icon: '🚚' },
@@ -766,6 +768,10 @@ handleAssignDriver={handleAssignDriver}
 )}
 
 {/* Settings */}
+{adminSection === 'home-categories' && (
+  <HomeCategoryManagement />
+)}
+
 {adminSection === 'settings' && (
   <DeliverySettings />
 )}

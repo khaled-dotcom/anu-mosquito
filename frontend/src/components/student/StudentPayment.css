@@ -313,3 +313,14 @@
     opacity: 0;
   }
 }
+
+.payment-total-changed {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: var(--warning-bg);
+  color: var(--warning);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+}

@@ -6,6 +6,7 @@ import EditButton from '../../common/EditButton'
 import ToggleButton from '../../common/ToggleButton'
 import SaveButton from '../../common/SaveButton'
 import CancelButton from '../../common/CancelButton'
+import ImageUploader from '../../common/ImageUploader'
 
 function RestaurantManagement({
   restaurants,
@@ -135,17 +136,13 @@ onChange={(e) => setRestaurantDescription(e.target.value)}
               />
             </div>
 
-            {/* Image URL */}
+            {/* Image */}
             <div className="admin-form-group admin-form-full">
-              <label>
-                Restaurant Image URL
-              </label>
-
-              <input
-                type="text"
-                placeholder="https://example.com/image.jpg"
+              <ImageUploader
+                label="Restaurant photo"
+                folder="restaurant"
                 value={restaurantImageUrl}
-onChange={(e) => setRestaurantImageUrl(e.target.value)}
+                onChange={setRestaurantImageUrl}
               />
             </div>
 

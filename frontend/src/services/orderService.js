@@ -1,68 +1,29 @@
 import { supabase } from '../supabase'
 
+/**
+ * Place an order with its items in one database transaction.
+ * Prices, delivery fee and totals are set by the database from the menu.
+ */
 export async function createOrder(orderData) {
-  const {
-    data: order,
-    error: orderError,
-  } = await supabase
-    .from('orders')
-    .insert([
-      {
-        student_id: orderData.student_id,
-        restaurant_id: orderData.restaurant_id,
-        batch_id: orderData.batch_id,
-        food_subtotal: orderData.food_subtotal,
-        delivery_fee: orderData.delivery_fee,
-        total_amount: orderData.total_amount,
-        payment_method_id: orderData.payment_method_id,
-        payment_screenshot_path: orderData.payment_screenshot_path,
-        payment_status: 'UNDER_CONFIRMATION',
-        status: 'PAYMENT_UNDER_CONFIRMATION',
-      },
-    ])
-    .select()
-    .single()
-
-  if (orderError) {
-    return {
-      data: null,
-      error: orderError,
-    }
-  }
-
-  const orderItems = orderData.items.map((item) => ({
-    order_id: order.id,
+  const items = (orderData.items || []).map((item) => ({
     food_item_id: item.id,
-    food_name_snapshot: item.name,
+    size_id: item.size_id || null,
     quantity: item.quantity,
-    unit_selling_price: item.selling_price,
-    unit_cost_price: item.cost_price ?? 0,
-    line_total: item.selling_price * item.quantity,
-    line_cost_total: (item.cost_price ?? 0) * item.quantity,
   }))
 
-  const {
-    data: items,
-    error: itemsError,
-  } = await supabase
-    .from('order_items')
-    .insert(orderItems)
-    .select()
+  const { data, error } = await supabase.rpc('place_student_order', {
+    p_restaurant_id: orderData.restaurant_id,
+    p_batch_id: orderData.batch_id,
+    p_payment_method_id: orderData.payment_method_id,
+    p_payment_screenshot_path: orderData.payment_screenshot_path,
+    p_items: items,
+  })
 
-  if (itemsError) {
-    return {
-      data: null,
-      error: itemsError,
-    }
+  if (error) {
+    return { data: null, error }
   }
 
-  return {
-    data: {
-      order,
-      items,
-    },
-    error: null,
-  }
+  return { data: { order: data }, error: null }
 }
 
 export async function loadAvailableBatches() {
