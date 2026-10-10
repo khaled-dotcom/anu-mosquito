@@ -3,7 +3,10 @@ import { useEffect, useState } from 'react'
 import TopBar from '../common/TopBar'
 import Icon from '../common/Icon'
 import StudentTabBar from './StudentTabBar'
-import { loadStudentOrders } from '../../services/studentOrderService'
+import {
+  loadStudentOrders,
+  confirmStudentOrderReceived,
+} from '../../services/studentOrderService'
 import {
   ORDER_STEPS,
   orderStatusInfo,
@@ -82,6 +85,43 @@ function StudentOrders({ profile, setStudentPage, handleLogout }) {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [confirmingOrderId, setConfirmingOrderId] = useState(null)
+
+  async function confirmReceived(order) {
+    const confirmed = window.confirm(
+      `Confirm that you received order #${order.order_number}?`
+    )
+
+    if (!confirmed) return
+
+    setConfirmingOrderId(order.id)
+
+    const { data, error } = await confirmStudentOrderReceived(order.id)
+
+    setConfirmingOrderId(null)
+
+    if (error) {
+      console.error('Student order confirmation error:', error)
+      alert(error.message)
+      return
+    }
+
+    if (!data?.success) {
+      alert(data?.message || 'Unable to confirm the order.')
+      return
+    }
+
+    setOrders((currentOrders) =>
+      currentOrders.map((currentOrder) =>
+        currentOrder.id === order.id
+          ? {
+              ...currentOrder,
+              status: 'COMPLETED',
+            }
+          : currentOrder
+      )
+    )
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -194,6 +234,19 @@ function StudentOrders({ profile, setStudentPage, handleLogout }) {
                     </span>
                     <strong>{order.total_amount} EGP</strong>
                   </footer>
+
+                  {order.status === 'DELIVERED_BY_DRIVER' && (
+                    <button
+                      type="button"
+                      className="btn-primary btn-block student-confirm-order-button"
+                      disabled={confirmingOrderId === order.id}
+                      onClick={() => confirmReceived(order)}
+                    >
+                      {confirmingOrderId === order.id
+                        ? 'Confirming…'
+                        : '✓ Confirm order received'}
+                    </button>
+                  )}
                 </article>
               )
             })}
