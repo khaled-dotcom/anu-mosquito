@@ -185,3 +185,8 @@
     padding-bottom: calc(96px + var(--safe-bottom));
   }
 }
+
+
+.student-confirm-order-button {
+  margin-top: 12px;
+}
