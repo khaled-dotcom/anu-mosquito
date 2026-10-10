@@ -255,6 +255,49 @@
   color: var(--text);
 }
 
+/* Student Rating */
+
+.restaurant-order-rating {
+  margin: 4px 18px 12px;
+  padding: 12px;
+  background: #fffaf0;
+  border: 1px solid #f1dfb5;
+  border-radius: 8px;
+}
+
+.restaurant-order-rating-title {
+  margin-bottom: 6px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.restaurant-order-rating-stars {
+  color: #f59e0b;
+  font-size: 17px;
+  letter-spacing: 1px;
+}
+
+.restaurant-order-rating-stars span {
+  margin-left: 8px;
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.restaurant-order-feedback {
+  margin-top: 7px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.restaurant-order-not-rated {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
 /* Notes */
 
 .restaurant-order-notes {
@@ -351,6 +394,11 @@
   }
 
   .restaurant-order-notes {
+    margin-left: 14px;
+    margin-right: 14px;
+  }
+
+  .restaurant-order-rating {
     margin-left: 14px;
     margin-right: 14px;
   }
