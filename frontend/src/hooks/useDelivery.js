@@ -107,6 +107,7 @@ async function handleAssignDriver(batchId, driverId) {
       delivery_time: '',
       delivery_date: '',
       maximum_orders: 20,
+      driver_cost: 0,
       is_active: true,
     })
 
