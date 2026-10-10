@@ -6,6 +6,7 @@ import StudentTabBar from './StudentTabBar'
 import {
   loadStudentOrders,
   confirmStudentOrderReceived,
+  submitStudentOrderReview,
 } from '../../services/studentOrderService'
 import {
   ORDER_STEPS,
@@ -86,6 +87,66 @@ function StudentOrders({ profile, setStudentPage, handleLogout }) {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [confirmingOrderId, setConfirmingOrderId] = useState(null)
+  const [reviewingOrderId, setReviewingOrderId] = useState(null)
+  const [reviewRating, setReviewRating] = useState(0)
+  const [reviewFeedback, setReviewFeedback] = useState('')
+  const [submittingReview, setSubmittingReview] = useState(false)
+
+  function openReview(order) {
+    setReviewingOrderId(order.id)
+    setReviewRating(order.student_rating || 0)
+    setReviewFeedback(order.student_feedback || '')
+  }
+
+  function closeReview() {
+    if (submittingReview) return
+    setReviewingOrderId(null)
+    setReviewRating(0)
+    setReviewFeedback('')
+  }
+
+  async function submitReview(order) {
+    if (!reviewRating) {
+      alert('Please choose a rating from 1 to 5 stars.')
+      return
+    }
+
+    setSubmittingReview(true)
+
+    const { data, error } = await submitStudentOrderReview(
+      order.id,
+      reviewRating,
+      reviewFeedback
+    )
+
+    setSubmittingReview(false)
+
+    if (error) {
+      console.error('Student review error:', error)
+      alert(error.message)
+      return
+    }
+
+    if (!data?.success) {
+      alert(data?.message || 'Unable to submit your review.')
+      return
+    }
+
+    setOrders((currentOrders) =>
+      currentOrders.map((currentOrder) =>
+        currentOrder.id === order.id
+          ? {
+              ...currentOrder,
+              student_rating: reviewRating,
+              student_feedback: reviewFeedback.trim(),
+              student_reviewed_at: new Date().toISOString(),
+            }
+          : currentOrder
+      )
+    )
+
+    closeReview()
+  }
 
   async function confirmReceived(order) {
     const confirmed = window.confirm(
@@ -246,6 +307,68 @@ function StudentOrders({ profile, setStudentPage, handleLogout }) {
                         ? 'Confirming…'
                         : '✓ Confirm order received'}
                     </button>
+                  )}
+
+                  {order.status === 'COMPLETED' && !order.student_reviewed_at && (
+                    <button
+                      type="button"
+                      className="btn-primary btn-block student-review-order-button"
+                      onClick={() => openReview(order)}
+                    >
+                      ★ Rate your order
+                    </button>
+                  )}
+
+                  {order.status === 'COMPLETED' && order.student_reviewed_at && (
+                    <div className="student-order-review-summary">
+                      <span>★★★★★</span>
+                      <strong>{order.student_rating}/5</strong>
+                      {order.student_feedback && <p>{order.student_feedback}</p>}
+                    </div>
+                  )}
+
+                  {reviewingOrderId === order.id && (
+                    <div className="student-review-panel">
+                      <div className="student-review-title">Rate your order</div>
+                      <div className="student-review-stars" role="radiogroup" aria-label="Order rating">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            className={star <= reviewRating ? 'selected' : ''}
+                            onClick={() => setReviewRating(star)}
+                            aria-label={`${star} star${star > 1 ? 's' : ''}`}
+                          >
+                            ★
+                          </button>
+                        ))}
+                      </div>
+                      <textarea
+                        value={reviewFeedback}
+                        onChange={(event) => setReviewFeedback(event.target.value)}
+                        placeholder="Any problem or note? Tell us what happened..."
+                        rows={3}
+                        maxLength={500}
+                      />
+                      <div className="student-review-actions">
+                        <button
+                          type="button"
+                          className="btn-secondary"
+                          onClick={closeReview}
+                          disabled={submittingReview}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          className="btn-primary"
+                          onClick={() => submitReview(order)}
+                          disabled={submittingReview || !reviewRating}
+                        >
+                          {submittingReview ? 'Submitting…' : 'Submit review'}
+                        </button>
+                      </div>
+                    </div>
                   )}
                 </article>
               )
