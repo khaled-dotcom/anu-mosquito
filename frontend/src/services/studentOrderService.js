@@ -38,3 +38,11 @@ export async function loadStudentOrders(studentId) {
     error,
   }
 }
+
+export async function confirmStudentOrderReceived(orderId) {
+  const { data, error } = await supabase.rpc('student_confirm_order_received', {
+    p_order_id: orderId,
+  })
+
+  return { data, error }
+}
