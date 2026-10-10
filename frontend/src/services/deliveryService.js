@@ -66,6 +66,7 @@ export async function saveBatch(batchData) {
         delivery_time: batchData.delivery_time,
         delivery_date: batchData.delivery_date,
         maximum_orders: Number(batchData.maximum_orders),
+        driver_cost: Math.max(0, Number(batchData.driver_cost || 0)),
         is_active: batchData.is_active ?? true,
       },
     ])
@@ -130,6 +131,7 @@ export async function updateBatch(batchId, batchData) {
       delivery_time: batchData.delivery_time,
       delivery_date: batchData.delivery_date,
       maximum_orders: Number(batchData.maximum_orders),
+      driver_cost: Math.max(0, Number(batchData.driver_cost || 0)),
       is_active: batchData.is_active ?? true,
     })
     .eq('id', batchId)
