@@ -128,6 +128,24 @@ handleAssignDriver,
             </div>
 
             <div className="admin-form-group">
+              <label>Driver Cost (EGP)</label>
+
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={batchForm.driver_cost}
+                onChange={(event) =>
+                  setBatchForm((current) => ({
+                    ...current,
+                    driver_cost: event.target.value,
+                  }))
+                }
+                placeholder="Example: 60"
+              />
+            </div>
+
+            <div className="admin-form-group">
               <label>Delivery Date</label>
 
               <input
@@ -267,6 +285,10 @@ handleAssignDriver,
 
                     <span>
                       Maximum Orders: {batch.maximum_orders}
+                    </span>
+
+                    <span>
+                      Driver Cost: {Number(batch.driver_cost || 0).toFixed(2)} EGP
                     </span>
 
                     <span>
