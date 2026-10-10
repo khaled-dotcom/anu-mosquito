@@ -288,6 +288,27 @@ function RestaurantOrders({ restaurants, batches }) {
                     ))}
                   </div>
 
+                  {order.status === 'COMPLETED' && (
+                    <div className="restaurant-order-rating">
+                      <div className="restaurant-order-rating-title">⭐ Student Rating</div>
+                      {order.student_rating ? (
+                        <>
+                          <div className="restaurant-order-rating-stars">
+                            {'★'.repeat(Number(order.student_rating))}
+                            <span>{order.student_rating}/5</span>
+                          </div>
+                          {order.student_feedback && (
+                            <div className="restaurant-order-feedback">
+                              💬 {order.student_feedback}
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="restaurant-order-not-rated">Not rated yet</div>
+                      )}
+                    </div>
+                  )}
+
                   {order.order_items?.some(
                     (item) => item.notes
                   ) && (
