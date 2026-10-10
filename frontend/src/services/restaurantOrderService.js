@@ -15,7 +15,10 @@ export async function loadRestaurantOrders(restaurantId, batchId) {
         id,
         food_name_snapshot,
         quantity,
-        notes
+        notes,
+        unit_selling_price,
+        unit_cost_price,
+        line_total
       ),
 
       restaurants (
