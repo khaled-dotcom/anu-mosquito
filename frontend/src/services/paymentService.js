@@ -1,4 +1,5 @@
 import { supabase } from '../supabase'
+import { compressImage, IMAGE_PRESETS } from '../lib/image'
 
 export async function loadActivePaymentMethods() {
   const { data, error } = await supabase
@@ -67,17 +68,34 @@ export async function togglePaymentMethodStatus(id, isActive) {
 }
 
 export async function uploadPaymentProof(file, studentId) {
-  const fileExtension = file.name.split('.').pop()
-  const fileName = `${crypto.randomUUID()}.${fileExtension}`
-  const filePath = `${studentId}/${fileName}`
+  try {
+    const { blob, type } = await compressImage(
+      file,
+      IMAGE_PRESETS.payment
+    )
 
-  const { data, error } = await supabase.storage
-    .from('payment-proofs')
-    .upload(filePath, file)
+    const extension = type === 'image/webp' ? 'webp' : 'jpg'
+    const fileName = `${crypto.randomUUID()}.${extension}`
+    const filePath = `${studentId}/${fileName}`
 
-  return {
-    data,
-    error,
-    filePath,
+    const { data, error } = await supabase.storage
+      .from('payment-proofs')
+      .upload(filePath, blob, {
+        contentType: type,
+        cacheControl: '31536000',
+        upsert: false,
+      })
+
+    return {
+      data,
+      error,
+      filePath,
+    }
+  } catch (error) {
+    return {
+      data: null,
+      error,
+      filePath: null,
+    }
   }
 }
