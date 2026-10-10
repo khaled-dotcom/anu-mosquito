@@ -30,6 +30,7 @@ const [driverAssigning, setDriverAssigning] = useState(false)
     delivery_time: '',
     delivery_date: '',
     maximum_orders: 20,
+    driver_cost: 0,
     is_active: true,
   })
 
@@ -133,6 +134,7 @@ async function handleAssignDriver(batchId, driverId) {
         : '',
       delivery_date: batch.delivery_date || '',
       maximum_orders: batch.maximum_orders ?? 20,
+      driver_cost: batch.driver_cost ?? 0,
       is_active: batch.is_active ?? true,
     })
 
@@ -154,6 +156,7 @@ async function handleAssignDriver(batchId, driverId) {
       delivery_time: batchForm.delivery_time,
       delivery_date: batchForm.delivery_date,
       maximum_orders: batchForm.maximum_orders,
+      driver_cost: batchForm.driver_cost,
       is_active: batchForm.is_active,
     }
 
