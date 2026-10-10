@@ -182,6 +182,19 @@ handleDeleteCategory,
       const loadedProfile = await loadProfile(newSession.user.id)
       if (cancelled) return
 
+      // A valid Supabase Auth session is not enough to access the app.
+      // The matching profile must still exist and have a role. If an account
+      // was deleted from profiles, immediately sign the stale Auth session out.
+      if (!loadedProfile?.role) {
+        console.warn('Authenticated user has no valid profile. Signing out stale session.')
+        await supabase.auth.signOut()
+        if (cancelled) return
+        setSession(null)
+        setProfile(null)
+        setCheckingAuth(false)
+        return
+      }
+
       setCheckingAuth(false)
 
       setRestaurantsLoading(true)
