@@ -271,7 +271,19 @@ function StudentOrders({ profile, setStudentPage, handleLogout }) {
                   </header>
 
                   {order.status !== 'CANCELLED' && (
-                    <OrderTracker status={order.status} />
+                    <>
+                      <OrderTracker status={order.status} />
+
+                      <div className="student-pickup-location" role="note">
+                        <span className="student-pickup-location-icon" aria-hidden="true">
+                          📍
+                        </span>
+                        <div>
+                          <span className="student-pickup-location-label">Pickup Location</span>
+                          <strong>الاستلام من أمام بوابة الجراج</strong>
+                        </div>
+                      </div>
+                    </>
                   )}
 
                   <ul className="student-order-items">
