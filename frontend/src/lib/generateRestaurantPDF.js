@@ -59,7 +59,7 @@ export function generateRestaurantPDF({ restaurant, batch, orders }) {
 
     const rows = items.map((item) => {
       const quantity = Number(item.quantity || 0)
-      const unitPrice = Number(item.unit_selling_price || 0)
+      const unitPrice = Number(item.unit_cost_price || 0)
       const lineTotal = Number(item.line_total ?? unitPrice * quantity)
 
       return `
@@ -192,7 +192,7 @@ export function generateRestaurantPDF({ restaurant, batch, orders }) {
         <div class="summary-value">${activeOrders.length}</div>
       </div>
       <div class="summary-box main">
-        <div class="summary-label">TOTAL ALL ORDERS</div>
+        <div class="summary-label">TOTAL COST OF ALL ORDERS</div>
         <div class="summary-value">${formatMoney(grandTotal)}</div>
       </div>
     </section>
