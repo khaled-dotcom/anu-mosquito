@@ -8,6 +8,7 @@ export const IMAGE_PRESETS = {
   food: { maxSide: 1000, targetBytes: 220 * 1024 },
   restaurant: { maxSide: 1400, targetBytes: 320 * 1024 },
   category: { maxSide: 600, targetBytes: 120 * 1024 },
+  payment: { maxSide: 1600, targetBytes: 250 * 1024 },
 }
 
 export const MAX_SOURCE_BYTES = 15 * 1024 * 1024
