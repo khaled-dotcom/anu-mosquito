@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { loadRestaurantOrders } from '../../../services/restaurantOrderService'
+import { generateRestaurantPDF } from '../../../lib/generateRestaurantPDF'
 import './RestaurantOrders.css'
 
 function RestaurantOrders({ restaurants, batches }) {
@@ -194,7 +195,13 @@ function RestaurantOrders({ restaurants, batches }) {
             <button
               type="button"
               className="restaurant-orders-pdf-button"
-              onClick={() => window.print()}
+              onClick={() =>
+                generateRestaurantPDF({
+                  restaurant: selectedRestaurantData,
+                  batch: selectedBatchData,
+                  orders: preparationOrders,
+                })
+              }
               disabled={preparationOrders.length === 0}
             >
               🖨 Generate PDF
