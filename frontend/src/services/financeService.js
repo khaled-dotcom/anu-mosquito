@@ -22,7 +22,8 @@ export async function loadFinanceOrders() {
 
       delivery_batches (
         batch_number,
-        delivery_date
+        delivery_date,
+        driver_cost
       ),
 
       order_items (
@@ -41,6 +42,21 @@ export async function loadFinanceOrders() {
     }
   }
 
+  // Driver cost is a batch-level cost. Allocate it across the
+  // financially relevant orders only for per-order display/profit.
+  // The total allocation for each batch always equals the batch cost.
+  const batchOrderCounts = new Map()
+
+  ;(data || []).forEach((order) => {
+    if (!order.batch_id) return
+    if (order.status === 'CANCELLED') return
+
+    batchOrderCounts.set(
+      order.batch_id,
+      (batchOrderCounts.get(order.batch_id) || 0) + 1
+    )
+  })
+
   const financeOrders = (data || []).map((order) => {
     const foodCost = (order.order_items || []).reduce(
       (total, item) =>
@@ -50,15 +66,27 @@ export async function loadFinanceOrders() {
 
     const foodSales = Number(order.food_subtotal || 0)
     const deliveryFee = Number(order.delivery_fee || 0)
-    const driverCost = Number(order.driver_cost || 0)
+
+    const batchDriverCost =
+      order.delivery_batches?.driver_cost == null
+        ? Number(order.driver_cost || 0)
+        : Number(order.delivery_batches.driver_cost || 0)
+
+    const batchOrderCount = batchOrderCounts.get(order.batch_id) || 0
+
+    const allocatedDriverCost =
+      order.status === 'CANCELLED' || batchOrderCount === 0
+        ? 0
+        : batchDriverCost / batchOrderCount
 
     const foodProfit = foodSales - foodCost
-    const deliveryProfit = deliveryFee - driverCost
-
+    const deliveryProfit = deliveryFee - allocatedDriverCost
     const profit = foodProfit + deliveryProfit
 
     return {
       ...order,
+      driver_cost: allocatedDriverCost,
+      batch_driver_cost: batchDriverCost,
       food_cost_total: foodCost,
       food_profit: foodProfit,
       delivery_profit: deliveryProfit,
