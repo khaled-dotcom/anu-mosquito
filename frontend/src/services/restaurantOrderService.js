@@ -10,6 +10,9 @@ export async function loadRestaurantOrders(restaurantId, batchId) {
       batch_id,
       status,
       created_at,
+      student_rating,
+      student_feedback,
+      student_reviewed_at,
 
       order_items (
         id,
