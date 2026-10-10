@@ -13,11 +13,15 @@
 }
 
 .page-loader-logo {
-  width: 96px;
-  height: 96px;
-  border-radius: 28px;
-  background: #fff;
-  box-shadow: var(--shadow-lg);
+  width: 180px !important;
+  height: auto !important;
+  max-width: 58vw;
+  max-height: 180px;
+  object-fit: contain;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  mix-blend-mode: multiply;
   animation: loader-float 2.4s ease-in-out infinite;
 }
 
