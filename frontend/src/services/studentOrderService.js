@@ -13,6 +13,9 @@ export async function loadStudentOrders(studentId) {
       total_amount,
       payment_status,
       status,
+      student_rating,
+      student_feedback,
+      student_reviewed_at,
       payment_screenshot_path,
       created_at,
       restaurants (
@@ -42,6 +45,16 @@ export async function loadStudentOrders(studentId) {
 export async function confirmStudentOrderReceived(orderId) {
   const { data, error } = await supabase.rpc('student_confirm_order_received', {
     p_order_id: orderId,
+  })
+
+  return { data, error }
+}
+
+export async function submitStudentOrderReview(orderId, rating, feedback) {
+  const { data, error } = await supabase.rpc('submit_student_order_review', {
+    p_order_id: orderId,
+    p_rating: rating,
+    p_feedback: feedback || null,
   })
 
   return { data, error }
