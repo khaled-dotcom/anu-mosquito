@@ -52,7 +52,9 @@ export function generateRestaurantPDF({ restaurant, batch, orders }) {
   const orderCards = activeOrders.map((order) => {
     const items = order.order_items || []
     const orderTotal = items.reduce(
-      (sum, item) => sum + Number(item.line_total ?? Number(item.unit_selling_price || 0) * Number(item.quantity || 0)),
+      (sum, item) =>
+        sum +
+        Number(item.unit_cost_price || 0) * Number(item.quantity || 0),
       0
     )
     grandTotal += orderTotal
@@ -60,7 +62,7 @@ export function generateRestaurantPDF({ restaurant, batch, orders }) {
     const rows = items.map((item) => {
       const quantity = Number(item.quantity || 0)
       const unitPrice = Number(item.unit_cost_price || 0)
-      const lineTotal = Number(item.line_total ?? unitPrice * quantity)
+      const lineTotal = unitPrice * quantity
 
       return `
         <tr>
