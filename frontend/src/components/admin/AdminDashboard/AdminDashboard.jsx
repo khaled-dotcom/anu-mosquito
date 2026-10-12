@@ -13,6 +13,7 @@ import UserManagement from '../users/UserManagement'
 import FinanceManagement from '../finances/FinanceManagement'
 import DriverManagement from '../drivers/DriverManagement'
 import HomeCategoryManagement from '../categories/HomeCategoryManagement'
+import TeamsManagement from '../teams/TeamsManagement'
 
 const ADMIN_NAV = [
   { key: 'dashboard', label: 'Dashboard', icon: '🏠' },
@@ -23,6 +24,7 @@ const ADMIN_NAV = [
   { key: 'restaurant-orders', label: 'Restaurant Orders', icon: '🍽️' },
   { key: 'delivery', label: 'Delivery', icon: '🚚' },
   { key: 'users', label: 'Users', icon: '👥' },
+  { key: 'teams', label: 'Teams', icon: '🧑‍🤝‍🧑' },
   { key: 'finance', label: 'Finances', icon: '💰' },
   { key: 'drivers', label: 'Drivers', icon: '🚗' },
   { key: 'payment-methods', label: 'Payment Methods', icon: '💳' },
@@ -761,6 +763,10 @@ handleAssignDriver={handleAssignDriver}
 
 {adminSection === 'finance' && (
   <FinanceManagement />
+)}
+
+{adminSection === 'teams' && (
+  <TeamsManagement />
 )}
 
 {adminSection === 'drivers' && (
