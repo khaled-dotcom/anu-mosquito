@@ -211,3 +211,18 @@
   opacity: 0.55;
   cursor: not-allowed;
 }
+
+
+/* Discount */
+.checkout-discount{margin-bottom:8px}
+.checkout-discount-form{display:flex;gap:10px}
+.checkout-discount-form input{min-width:0;flex:1;border:1px solid #d9e2ec;border-radius:10px;padding:11px 12px;font:inherit;outline:0}
+.checkout-discount-form button,.checkout-discount-applied button{border:0;border-radius:10px;padding:10px 14px;background:#123b63;color:#fff;font:inherit;font-weight:700;cursor:pointer}
+.checkout-discount-form button:disabled{opacity:.5;cursor:not-allowed}
+.checkout-discount-applied{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.checkout-discount-applied>div{display:flex;align-items:center;gap:12px}
+.checkout-discount-applied span{font-weight:800}
+.checkout-discount-applied button{background:#edf4fa;color:#123b63}
+.checkout-discount-error{margin:10px 0 0;color:#b42318;font-size:13px}
+.checkout-discount-row strong{color:#18794e}
+@media(max-width:520px){.checkout-discount-form{flex-direction:column}.checkout-discount-form button{width:100%}}
