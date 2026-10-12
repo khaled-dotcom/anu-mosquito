@@ -6,6 +6,7 @@ import Icon from '../common/Icon'
 import { loadDeliverySettings, loadDeliveryFeeTiers } from '../../services/settingsService'
 import { cartSubtotal, deliveryFeeFor, formatEGP, lineLabel, nextTier } from '../../lib/pricing'
 import { loadAvailableBatches } from '../../services/orderService'
+import { validateDiscountCode } from '../../services/discountService'
 
 function validDate(value) {
   if (!value) return null
@@ -54,6 +55,10 @@ function StudentCheckout({
   const [baseFee, setBaseFee] = useState(0)
   const [feeTiers, setFeeTiers] = useState([])
   const [deliveryFeeLoading, setDeliveryFeeLoading] = useState(true)
+  const [discountCode, setDiscountCode] = useState('')
+  const [discountResult, setDiscountResult] = useState(null)
+  const [discountLoading, setDiscountLoading] = useState(false)
+  const [discountError, setDiscountError] = useState('')
 
   useEffect(() => {
     async function loadBatches() {
@@ -105,7 +110,28 @@ function StudentCheckout({
   const foodSubtotal = cartSubtotal(cart)
   const deliveryFee = deliveryFeeFor(foodSubtotal, feeTiers, baseFee)
   const upcomingTier = nextTier(foodSubtotal, feeTiers)
-  const totalAmount = foodSubtotal + deliveryFee
+  const discountAmount = Number(discountResult?.discount_amount || 0)
+  const totalAmount = Math.max(0, foodSubtotal + deliveryFee - discountAmount)
+
+  async function handleApplyDiscount() {
+    const code = discountCode.trim()
+    if (!code || !profile?.id || !selectedRestaurant?.id) return
+    setDiscountLoading(true)
+    setDiscountError('')
+    const { data, error } = await validateDiscountCode(code, profile.id, foodSubtotal, selectedRestaurant.id)
+    setDiscountLoading(false)
+    if (error) {
+      setDiscountResult(null)
+      setDiscountError(error.message)
+      return
+    }
+    setDiscountResult(data)
+  }
+
+  function removeDiscount() {
+    setDiscountResult(null)
+    setDiscountError('')
+  }
 
   if (showPayment) {
     return (
@@ -218,6 +244,23 @@ function StudentCheckout({
           </div>
         )}
 
+        {/* Discount */}
+        <h2 className="app-section-title">Discount code</h2>
+        <div className="app-card checkout-discount">
+          {discountResult ? (
+            <div className="checkout-discount-applied">
+              <div><strong>{discountResult.code}</strong><span>−{formatEGP(discountResult.discount_amount)}</span></div>
+              <button type="button" onClick={removeDiscount}>Remove</button>
+            </div>
+          ) : (
+            <div className="checkout-discount-form">
+              <input value={discountCode} onChange={(e) => { setDiscountCode(e.target.value.toUpperCase()); setDiscountError('') }} placeholder="Enter discount code" onKeyDown={(e) => { if (e.key === 'Enter') handleApplyDiscount() }} />
+              <button type="button" onClick={handleApplyDiscount} disabled={discountLoading || !discountCode.trim()}>{discountLoading ? 'Checking…' : 'Apply'}</button>
+            </div>
+          )}
+          {discountError && <p className="checkout-discount-error">{discountError}</p>}
+        </div>
+
         {/* Summary */}
         <h2 className="app-section-title">Summary</h2>
 
@@ -237,6 +280,8 @@ function StudentCheckout({
               Orders from {formatEGP(upcomingTier.min_order_total)} pay {formatEGP(upcomingTier.fee)} delivery.
             </p>
           )}
+
+          {discountAmount > 0 && <div className="checkout-summary-row checkout-discount-row"><span>Discount</span><strong>−{formatEGP(discountAmount)}</strong></div>}
 
           <div className="checkout-summary-row total">
             <span>Total</span>
