@@ -771,6 +771,10 @@ handleAssignDriver={handleAssignDriver}
   <TeamsManagement />
 )}
 
+{adminSection === 'discounts' && (
+  <DiscountManagement />
+)}
+
 {adminSection === 'drivers' && (
   <DriverManagement />
 )}
