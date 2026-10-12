@@ -1,0 +1,73 @@
+.teams-management {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.teams-page-header { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; }
+.teams-page-eyebrow { display:block; margin-bottom:6px; font-size:12px; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:.08em; }
+.teams-page-header h2 { margin:0; color:#102a43; font-size:30px; }
+.teams-page-header p { margin:8px 0 0; color:#6b7280; }
+.teams-primary-button,.teams-refresh-button,.team-card-actions button,.teams-member-actions button { border:0; border-radius:10px; padding:10px 14px; font:inherit; font-weight:700; cursor:pointer; }
+.teams-primary-button { background:#123b63; color:white; }
+.teams-primary-button:disabled,.teams-refresh-button:disabled { opacity:.6; cursor:not-allowed; }
+.teams-stats-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+.teams-stat-card { display:flex; align-items:center; gap:14px; padding:18px; background:white; border:1px solid #e6edf3; border-radius:16px; box-shadow:0 4px 16px rgba(16,42,67,.05); }
+.teams-stat-card>span { font-size:28px; }
+.teams-stat-card small { display:block; color:#6b7280; }
+.teams-stat-card strong { display:block; margin-top:3px; font-size:24px; color:#102a43; }
+.teams-section-card { padding:20px; background:white; border:1px solid #e6edf3; border-radius:16px; }
+.teams-toolbar,.teams-member-toolbar { display:flex; align-items:center; gap:12px; margin-bottom:18px; }
+.teams-search { display:flex; align-items:center; gap:8px; flex:1; min-width:0; padding:10px 12px; border:1px solid #d9e2ec; border-radius:10px; background:#fff; }
+.teams-search input { width:100%; border:0; outline:0; font:inherit; }
+.teams-refresh-button { background:#edf4fa; color:#123b63; }
+.teams-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:16px; }
+.team-card { padding:18px; border:1px solid #e6edf3; border-radius:14px; background:#fbfdff; }
+.team-card-top { display:flex; align-items:center; justify-content:space-between; }
+.team-icon { width:42px; height:42px; display:grid; place-items:center; border-radius:12px; background:#edf4fa; font-size:22px; }
+.team-status { padding:5px 9px; border-radius:999px; background:#f1f5f9; color:#64748b; font-size:12px; font-weight:700; }
+.team-status.active { background:#e8f7ef; color:#18794e; }
+.team-card h3 { margin:14px 0 5px; color:#102a43; }
+.team-card p { min-height:40px; margin:0; color:#6b7280; font-size:14px; }
+.team-card-meta { display:flex; justify-content:space-between; margin:16px 0; padding-top:12px; border-top:1px solid #e6edf3; color:#6b7280; }
+.team-card-meta strong { color:#102a43; }
+.team-card-actions { display:flex; flex-wrap:wrap; gap:8px; }
+.team-card-actions button { background:#edf4fa; color:#123b63; font-size:13px; }
+.team-card-actions button:first-child { flex:1 1 100%; background:#123b63; color:white; }
+.teams-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; min-height:150px; color:#6b7280; text-align:center; }
+.teams-modal-overlay { position:fixed; inset:0; z-index:1000; display:grid; place-items:center; padding:20px; background:rgba(15,23,42,.48); }
+.teams-modal { width:min(760px,100%); max-height:min(800px,92vh); overflow:hidden; display:flex; flex-direction:column; background:white; border-radius:18px; box-shadow:0 24px 70px rgba(15,23,42,.22); }
+.teams-modal.small { width:min(500px,100%); }
+.teams-modal-header,.teams-modal-footer { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:18px 20px; }
+.teams-modal-header { border-bottom:1px solid #e6edf3; }
+.teams-modal-header span { color:#6b7280; font-size:12px; font-weight:700; text-transform:uppercase; }
+.teams-modal-header h3 { margin:4px 0 0; color:#102a43; }
+.teams-modal-header>button { width:34px; height:34px; border:0; border-radius:8px; background:#f1f5f9; font-size:22px; cursor:pointer; }
+.teams-modal-body { display:flex; flex-direction:column; gap:16px; padding:20px; overflow:auto; }
+.teams-modal-body label { display:flex; flex-direction:column; gap:7px; color:#334e68; font-weight:700; }
+.teams-modal-body input[type=text],.teams-modal-body textarea { padding:11px 12px; border:1px solid #d9e2ec; border-radius:9px; outline:0; font:inherit; }
+.teams-checkbox { flex-direction:row!important; align-items:center; font-weight:600!important; }
+.teams-checkbox input { width:17px; height:17px; }
+.teams-modal-footer { justify-content:flex-end; border-top:1px solid #e6edf3; }
+.teams-modal-footer>button:first-child { border:0; background:#f1f5f9; color:#334e68; border-radius:10px; padding:10px 14px; font:inherit; font-weight:700; cursor:pointer; }
+.teams-student-list { max-height:470px; overflow:auto; padding:0 20px 8px; }
+.team-student { display:flex; align-items:center; gap:12px; padding:11px 8px; border-bottom:1px solid #edf2f7; cursor:pointer; }
+.team-student.selected { background:#f5f9fd; }
+.team-student input { width:18px; height:18px; }
+.team-student-avatar { width:38px; height:38px; display:grid; place-items:center; flex:0 0 38px; border-radius:50%; background:#edf4fa; color:#123b63; font-weight:800; }
+.team-student-info { min-width:0; }
+.team-student-info strong,.team-student-info span { display:block; }
+.team-student-info strong { color:#102a43; }
+.team-student-info span { margin-top:2px; color:#6b7280; font-size:13px; }
+.teams-member-toolbar { padding:18px 20px 0; flex-wrap:wrap; }
+.teams-member-actions { display:flex; gap:8px; }
+.teams-member-actions button { background:#edf4fa; color:#123b63; font-size:13px; }
+.teams-selection-summary { padding:10px 20px; color:#6b7280; font-size:14px; border-top:1px solid #e6edf3; }
+@media (max-width:700px) {
+  .teams-page-header { flex-direction:column; }
+  .teams-stats-grid { grid-template-columns:1fr; }
+  .teams-toolbar { flex-direction:column; align-items:stretch; }
+  .teams-member-toolbar { align-items:stretch; }
+  .teams-member-actions { width:100%; }
+  .teams-member-actions button { flex:1; }
+  .teams-section-card { padding:14px; }
+}
