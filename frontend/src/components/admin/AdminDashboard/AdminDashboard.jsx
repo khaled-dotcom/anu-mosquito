@@ -14,6 +14,7 @@ import FinanceManagement from '../finances/FinanceManagement'
 import DriverManagement from '../drivers/DriverManagement'
 import HomeCategoryManagement from '../categories/HomeCategoryManagement'
 import TeamsManagement from '../teams/TeamsManagement'
+import DiscountManagement from '../discounts/DiscountManagement'
 
 const ADMIN_NAV = [
   { key: 'dashboard', label: 'Dashboard', icon: '🏠' },
@@ -25,6 +26,7 @@ const ADMIN_NAV = [
   { key: 'delivery', label: 'Delivery', icon: '🚚' },
   { key: 'users', label: 'Users', icon: '👥' },
   { key: 'teams', label: 'Teams', icon: '🧑‍🤝‍🧑' },
+  { key: 'discounts', label: 'Discounts', icon: '🏷️' },
   { key: 'finance', label: 'Finances', icon: '💰' },
   { key: 'drivers', label: 'Drivers', icon: '🚗' },
   { key: 'payment-methods', label: 'Payment Methods', icon: '💳' },
