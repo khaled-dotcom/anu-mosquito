@@ -139,6 +139,7 @@ function StudentCheckout({
         cart={cart}
         selectedBatch={selectedBatch}
         deliveryFee={deliveryFee}
+        discountResult={discountResult}
         setShowPayment={setShowPayment}
         setShowCheckout={setShowCheckout}
         profile={profile}
