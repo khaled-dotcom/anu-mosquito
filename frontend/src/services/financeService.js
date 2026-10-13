@@ -10,6 +10,8 @@ export async function loadFinanceOrders() {
       batch_id,
       food_subtotal,
       delivery_fee,
+      discount_id,
+      discount_amount,
       driver_cost,
       total_amount,
       payment_status,
@@ -18,6 +20,10 @@ export async function loadFinanceOrders() {
 
       restaurants (
         name
+      ),
+
+      discounts (
+        code
       ),
 
       delivery_batches (
@@ -65,6 +71,7 @@ export async function loadFinanceOrders() {
     )
 
     const foodSales = Number(order.food_subtotal || 0)
+    const discountAmount = Number(order.discount_amount || 0)
     const deliveryFee = Number(order.delivery_fee || 0)
 
     const batchDriverCost =
@@ -79,7 +86,7 @@ export async function loadFinanceOrders() {
         ? 0
         : batchDriverCost / batchOrderCount
 
-    const foodProfit = foodSales - foodCost
+    const foodProfit = foodSales - foodCost - discountAmount
     const deliveryProfit = deliveryFee - allocatedDriverCost
     const profit = foodProfit + deliveryProfit
 
@@ -88,6 +95,7 @@ export async function loadFinanceOrders() {
       driver_cost: allocatedDriverCost,
       batch_driver_cost: batchDriverCost,
       food_cost_total: foodCost,
+      discount_amount: discountAmount,
       food_profit: foodProfit,
       delivery_profit: deliveryProfit,
       profit,
