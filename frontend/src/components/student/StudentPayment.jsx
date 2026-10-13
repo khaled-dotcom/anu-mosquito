@@ -139,6 +139,7 @@ function StudentPayment({
       total_amount: totalAmount,
       payment_method_id: selectedPaymentMethod.id,
       payment_screenshot_path: filePath,
+      discount_id: discountResult?.discount_id || discountResult?.id || null,
     })
 
     if (error) {
