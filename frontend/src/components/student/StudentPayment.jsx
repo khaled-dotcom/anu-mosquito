@@ -23,6 +23,7 @@ function StudentPayment({
   cart,
   selectedBatch,
   deliveryFee,
+  discountResult,
   setShowPayment,
   setShowCheckout,
   profile,
@@ -73,7 +74,8 @@ function StudentPayment({
   }, [orderResult])
 
   const foodSubtotal = cartSubtotal(cart)
-  const totalAmount = foodSubtotal + deliveryFee
+  const discountAmount = Number(discountResult?.discount_amount || 0)
+  const totalAmount = Math.max(0, foodSubtotal + deliveryFee - discountAmount)
 
   async function copyAccountNumber() {
     try {
@@ -263,6 +265,12 @@ function StudentPayment({
             <div className="payment-row">
               <span>Delivery</span>
               <strong>{formatBatch(selectedBatch)}</strong>
+            </div>
+          )}
+          {discountAmount > 0 && (
+            <div className="payment-row">
+              <span>Discount ({discountResult?.code})</span>
+              <strong>−{formatEGP(discountAmount)}</strong>
             </div>
           )}
           <div className="payment-row total">
