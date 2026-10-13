@@ -299,6 +299,14 @@ function StudentOrders({ profile, setStudentPage, handleLogout }) {
                       <span>Delivery</span>
                       <span>{order.delivery_fee} EGP</span>
                     </li>
+                    {Number(order.discount_amount || 0) > 0 && (
+                      <li className="student-order-discount">
+                        <span>
+                          Discount{order.discounts?.code ? ` (${order.discounts.code})` : ''}
+                        </span>
+                        <span>−{Number(order.discount_amount).toLocaleString('en-EG', { maximumFractionDigits: 2 })} EGP</span>
+                      </li>
+                    )}
                   </ul>
 
                   <footer className="student-order-foot">
