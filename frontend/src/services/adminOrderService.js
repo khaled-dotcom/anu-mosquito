@@ -198,15 +198,14 @@ export async function bulkUpdateOrderStatusByBatch(
 }
 
 export async function deleteOrder(orderId) {
-  const { data, error } = await supabase
-    .from('orders')
-    .delete()
-    .eq('id', orderId)
-    .select()
-    .single()
+  // The database RPC deletes discount usage and the order atomically.
+  // Related order rows keep their existing foreign-key delete behavior.
+  const { data, error } = await supabase.rpc('admin_delete_order', {
+    p_order_id: orderId,
+  })
 
   return {
-    data,
+    data: data ? { id: data } : null,
     error,
   }
 }
