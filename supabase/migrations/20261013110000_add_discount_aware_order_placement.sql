@@ -23,7 +23,9 @@ BEGIN
   SELECT * INTO v_order FROM public.orders
   WHERE id = p_order_id AND student_id = auth.uid() FOR UPDATE;
   IF NOT FOUND THEN RAISE EXCEPTION 'Order not found.'; END IF;
-  IF v_order.discount_id IS NOT NULL THEN RAISE EXCEPTION 'A discount is already applied to this order.'; END IF;
+  IF v_order.created_at < transaction_timestamp() OR v_order.discount_id IS NOT NULL THEN
+    RAISE EXCEPTION 'Discounts can only be applied while creating a new order.';
+  END IF;
 
   SELECT * INTO v_discount FROM public.discounts
   WHERE id = p_discount_id AND is_active = true FOR UPDATE;
