@@ -22,6 +22,9 @@ function DiscountManagement() {
   const [discounts, setDiscounts] = useState([])
   const [teams, setTeams] = useState([])
   const [restaurants, setRestaurants] = useState([])
+  const [usageRows, setUsageRows] = useState([])
+  const [usageDetails, setUsageDetails] = useState(null)
+  const [usageLoading, setUsageLoading] = useState(false)
   const [search, setSearch] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [editingDiscount, setEditingDiscount] = useState(null)
@@ -31,10 +34,11 @@ function DiscountManagement() {
 
   async function loadData() {
     setLoading(true)
-    const [discountResult, teamResult, restaurantResult] = await Promise.all([
+    const [discountResult, teamResult, restaurantResult, usageResult] = await Promise.all([
       supabase.from('discounts').select('*').order('created_at', { ascending: false }),
       supabase.from('teams').select('id,name,is_active').order('name'),
       supabase.from('restaurants').select('id,name,is_active').order('name'),
+      supabase.from('discount_usages').select('*').order('used_at', { ascending: false }),
     ])
 
     if (discountResult.error) {
@@ -45,12 +49,26 @@ function DiscountManagement() {
 
     if (!teamResult.error) setTeams(teamResult.data || [])
     if (!restaurantResult.error) setRestaurants(restaurantResult.data || [])
+    if (usageResult.error) alert('Could not load discount usage statistics: ' + usageResult.error.message)
+    else setUsageRows(usageResult.data || [])
     setLoading(false)
   }
 
   useEffect(() => {
     loadData()
   }, [])
+
+  const usageStats = useMemo(() => {
+    const stats = new Map()
+    for (const row of usageRows) {
+      const current = stats.get(row.discount_id) || { count: 0, total: 0, students: new Set() }
+      current.count += 1
+      current.total += Number(row.discount_amount || 0)
+      current.students.add(row.student_id)
+      stats.set(row.discount_id, current)
+    }
+    return stats
+  }, [usageRows])
 
   const filteredDiscounts = useMemo(() => {
     const query = search.trim().toLowerCase()
@@ -137,6 +155,26 @@ function DiscountManagement() {
     setShowForm(false)
   }
 
+  async function openUsageDetails(discount) {
+    setUsageLoading(true)
+    setUsageDetails({ discount, rows: [] })
+    const rows = usageRows.filter((row) => row.discount_id === discount.id)
+    const studentIds = [...new Set(rows.map((row) => row.student_id).filter(Boolean))]
+    const orderIds = [...new Set(rows.map((row) => row.order_id).filter(Boolean))]
+    const [studentsResult, ordersResult] = await Promise.all([
+      studentIds.length ? supabase.from('profiles').select('id,full_name,university_id').in('id', studentIds) : Promise.resolve({ data: [], error: null }),
+      orderIds.length ? supabase.from('orders').select('id,order_number,total_amount,created_at').in('id', orderIds) : Promise.resolve({ data: [], error: null }),
+    ])
+    if (studentsResult.error || ordersResult.error) {
+      setUsageLoading(false)
+      return alert(studentsResult.error?.message || ordersResult.error?.message)
+    }
+    const students = new Map((studentsResult.data || []).map((student) => [student.id, student]))
+    const orders = new Map((ordersResult.data || []).map((order) => [order.id, order]))
+    setUsageDetails({ discount, rows: rows.map((row) => ({ ...row, student: students.get(row.student_id), order: orders.get(row.order_id) })) })
+    setUsageLoading(false)
+  }
+
   async function toggleActive(discount) {
     const { data, error } = await supabase
       .from('discounts')
@@ -194,7 +232,14 @@ function DiscountManagement() {
                   {discount.max_discount_amount != null && <span>Max discount: {discount.max_discount_amount} EGP</span>}
                   {discount.usage_limit != null && <span>Usage limit: {discount.usage_limit}</span>}
                 </div>
+                <div className="discount-stats-grid">
+                  <div><span>Times used</span><strong>{usageStats.get(discount.id)?.count || 0}</strong></div>
+                  <div><span>Total discount</span><strong>{(usageStats.get(discount.id)?.total || 0).toLocaleString('en-EG', { maximumFractionDigits: 2 })} EGP</strong></div>
+                  <div><span>Unique students</span><strong>{usageStats.get(discount.id)?.students.size || 0}</strong></div>
+                  {discount.usage_limit != null && <div><span>Remaining uses</span><strong>{Math.max(0, discount.usage_limit - (usageStats.get(discount.id)?.count || 0))}</strong></div>}
+                </div>
                 <div className="discount-actions">
+                  <button type="button" onClick={() => openUsageDetails(discount)}>📊 Usage details</button>
                   <button type="button" onClick={() => openEdit(discount)}>✏️ Edit</button>
                   <button type="button" onClick={() => toggleActive(discount)}>
                     {discount.is_active ? '⏸ Deactivate' : '▶ Activate'}
@@ -205,6 +250,24 @@ function DiscountManagement() {
           </div>
         )}
       </section>
+
+      {usageDetails && (
+        <div className="discount-modal-overlay" role="presentation">
+          <div className="discount-modal discount-usage-modal">
+            <div className="discount-modal-header">
+              <div><span>Discount analytics</span><h3>{usageDetails.discount.code} — Usage details</h3></div>
+              <button type="button" onClick={() => setUsageDetails(null)}>×</button>
+            </div>
+            <div className="discount-usage-content">
+              {usageLoading ? <div className="discounts-empty">Loading usage details...</div> : usageDetails.rows.length === 0 ? <div className="discounts-empty"><strong>No uses recorded yet.</strong><span>Usage details will appear here after successful discounted orders are recorded.</span></div> : (
+                <div className="discount-usage-table-wrap"><table className="discount-usage-table"><thead><tr><th>Student</th><th>University ID</th><th>Order</th><th>Discount</th><th>Order total</th><th>Used at</th></tr></thead><tbody>
+                  {usageDetails.rows.map((row) => <tr key={row.id}><td>{row.student?.full_name || 'Unknown student'}</td><td>{row.student?.university_id || '—'}</td><td>{row.order?.order_number || row.order_id?.slice(0, 8) || '—'}</td><td>{Number(row.discount_amount || 0).toLocaleString('en-EG', { maximumFractionDigits: 2 })} EGP</td><td>{row.order?.total_amount != null ? Number(row.order.total_amount).toLocaleString('en-EG', { maximumFractionDigits: 2 }) + ' EGP' : '—'}</td><td>{row.used_at ? new Date(row.used_at).toLocaleString() : '—'}</td></tr>)}
+                </tbody></table></div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {showForm && (
         <div className="discount-modal-overlay">
