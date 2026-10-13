@@ -316,3 +316,15 @@
     padding: 14px;
   }
 }
+
+.finance-discount-value {
+  color: #18794e !important;
+  font-weight: 700;
+}
+
+.finance-discount-code {
+  display: block;
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 11px;
+}
