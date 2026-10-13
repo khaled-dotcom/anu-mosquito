@@ -175,6 +175,36 @@ function DiscountManagement() {
     setUsageLoading(false)
   }
 
+  async function deleteDiscount(discount) {
+    const uses = usageStats.get(discount.id)?.count || 0
+    const message = uses > 0
+      ? `This discount has been used ${uses} time(s). It will be deactivated instead of permanently deleted so historical finance records remain accurate. Continue?`
+      : `Permanently delete unused discount ${discount.code}?`
+
+    if (!window.confirm(message)) return
+
+    if (uses > 0) {
+      const { data, error } = await supabase
+        .from('discounts')
+        .update({ is_active: false, updated_at: new Date().toISOString() })
+        .eq('id', discount.id)
+        .select()
+        .single()
+
+      if (error) return alert(error.message)
+      setDiscounts((current) => current.map((item) => item.id === data.id ? data : item))
+      return
+    }
+
+    const { error } = await supabase
+      .from('discounts')
+      .delete()
+      .eq('id', discount.id)
+
+    if (error) return alert(error.message)
+    setDiscounts((current) => current.filter((item) => item.id !== discount.id))
+  }
+
   async function toggleActive(discount) {
     const { data, error } = await supabase
       .from('discounts')
@@ -244,6 +274,7 @@ function DiscountManagement() {
                   <button type="button" onClick={() => toggleActive(discount)}>
                     {discount.is_active ? '⏸ Deactivate' : '▶ Activate'}
                   </button>
+                  <button type="button" className="discount-delete-button" onClick={() => deleteDiscount(discount)}>🗑 Delete</button>
                 </div>
               </article>
             ))}
