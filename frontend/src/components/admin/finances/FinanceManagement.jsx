@@ -23,7 +23,8 @@ function getProfit(order) {
   const deliveryFee = Number(order.delivery_fee || 0)
   const driverCost = Number(order.driver_cost || 0)
 
-  const foodProfit = foodRevenue - foodCost
+  const discountAmount = Number(order.discount_amount || 0)
+  const foodProfit = foodRevenue - foodCost - discountAmount
   const deliveryProfit = deliveryFee - driverCost
 
   return foodProfit + deliveryProfit
@@ -134,6 +135,7 @@ function FinanceManagement() {
     let foodSales = 0
     let deliveryRevenue = 0
     let foodCost = 0
+    let discountTotal = 0
     let driverCost = 0
     let totalRevenue = 0
     let totalProfit = 0
@@ -142,6 +144,7 @@ function FinanceManagement() {
       foodSales += Number(order.food_subtotal || 0)
       deliveryRevenue += Number(order.delivery_fee || 0)
       foodCost += Number(order.food_cost_total || 0)
+      discountTotal += Number(order.discount_amount || 0)
       driverCost += Number(order.driver_cost || 0)
       totalRevenue += Number(order.total_amount || 0)
       totalProfit += getProfit(order)
@@ -152,6 +155,7 @@ function FinanceManagement() {
       foodSales,
       deliveryRevenue,
       foodCost,
+      discountTotal,
       driverCost,
       totalRevenue,
       totalProfit,
@@ -358,6 +362,18 @@ function FinanceManagement() {
         </div>
 
         <div className="finance-stat-card">
+          <span className="finance-stat-icon">🎟️</span>
+          <div>
+            <span className="finance-stat-label">
+              Discount Total
+            </span>
+            <strong>
+              {formatMoney(stats.discountTotal)}
+            </strong>
+          </div>
+        </div>
+
+        <div className="finance-stat-card">
           <span className="finance-stat-icon">📉</span>
           <div>
             <span className="finance-stat-label">
@@ -481,6 +497,7 @@ function FinanceManagement() {
                   <th>Restaurant</th>
                   <th>Date</th>
                   <th>Food Sales</th>
+                  <th>Discount</th>
                   <th>Delivery</th>
                   <th>Total</th>
                   <th>Food Cost</th>
@@ -513,6 +530,10 @@ function FinanceManagement() {
                       )}
                     </td>
 
+                    <td className={Number(order.discount_amount || 0) > 0 ? 'finance-discount-value' : undefined}>
+                      {Number(order.discount_amount || 0) > 0 ? `−${formatMoney(order.discount_amount)}` : formatMoney(0)}
+                      {order.discounts?.code && Number(order.discount_amount || 0) > 0 ? <small className="finance-discount-code">{order.discounts.code}</small> : null}
+                    </td>
                     <td>
                       {formatMoney(
                         order.delivery_fee
