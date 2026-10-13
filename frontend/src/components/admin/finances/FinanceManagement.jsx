@@ -176,6 +176,7 @@ function FinanceManagement() {
           name: restaurantName,
           orders: 0,
           foodSales: 0,
+          discountTotal: 0,
           foodCost: 0,
           profit: 0,
         })
@@ -185,6 +186,7 @@ function FinanceManagement() {
 
       item.orders += 1
       item.foodSales += Number(order.food_subtotal || 0)
+      item.discountTotal += Number(order.discount_amount || 0)
       item.foodCost += Number(order.food_cost_total || 0)
       item.profit += getProfit(order)
     })
@@ -432,6 +434,7 @@ function FinanceManagement() {
                   <th>Restaurant</th>
                   <th>Orders</th>
                   <th>Food Sales</th>
+                  <th>Discounts</th>
                   <th>Food Cost</th>
                   <th>Profit</th>
                 </tr>
@@ -452,6 +455,10 @@ function FinanceManagement() {
                       {formatMoney(
                         restaurant.foodSales
                       )}
+                    </td>
+
+                    <td className={restaurant.discountTotal > 0 ? 'finance-discount-value' : undefined}>
+                      {formatMoney(restaurant.discountTotal)}
                     </td>
 
                     <td>
