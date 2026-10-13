@@ -11,13 +11,21 @@ export async function createOrder(orderData) {
     quantity: item.quantity,
   }))
 
-  const { data, error } = await supabase.rpc('place_student_order', {
+  const rpcName = orderData.discount_id
+    ? 'place_student_order_with_discount'
+    : 'place_student_order'
+
+  const rpcParams = {
     p_restaurant_id: orderData.restaurant_id,
     p_batch_id: orderData.batch_id,
     p_payment_method_id: orderData.payment_method_id,
     p_payment_screenshot_path: orderData.payment_screenshot_path,
     p_items: items,
-  })
+  }
+
+  if (orderData.discount_id) rpcParams.p_discount_id = orderData.discount_id
+
+  const { data, error } = await supabase.rpc(rpcName, rpcParams)
 
   if (error) {
     return { data: null, error }
