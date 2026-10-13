@@ -10,6 +10,8 @@ export async function loadStudentOrders(studentId) {
       batch_id,
       food_subtotal,
       delivery_fee,
+      discount_amount,
+      discount_id,
       total_amount,
       payment_status,
       status,
@@ -20,6 +22,9 @@ export async function loadStudentOrders(studentId) {
       created_at,
       restaurants (
         name
+      ),
+      discounts (
+        code
       ),
       delivery_batches (
         batch_number,
