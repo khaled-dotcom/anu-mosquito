@@ -71,3 +71,28 @@
   .teams-member-actions button { flex:1; }
   .teams-section-card { padding:14px; }
 }
+
+.team-card-member-preview {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0 14px;
+}
+.team-card-member-preview span,
+.team-card-member-preview small {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #edf4fa;
+  color: #234e70;
+  font-size: 12px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.team-card-member-preview small {
+  background: #f1f5f9;
+  color: #64748b;
+}
