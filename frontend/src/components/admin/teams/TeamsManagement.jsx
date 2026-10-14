@@ -6,6 +6,8 @@ function TeamsManagement() {
   const [teams, setTeams] = useState([])
   const [students, setStudents] = useState([])
   const [members, setMembers] = useState([])
+  const [memberCounts, setMemberCounts] = useState({})
+  const [teamMemberIds, setTeamMemberIds] = useState({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
@@ -31,6 +33,29 @@ function TeamsManagement() {
 
     if (error) throw error
     setTeams(data || [])
+    await loadTeamMemberSummaries(data || [])
+  }
+
+  async function loadTeamMemberSummaries(teamRows = teams) {
+    const { data, error } = await supabase
+      .from('team_members')
+      .select('team_id, student_id')
+
+    if (error) throw error
+
+    const idsByTeam = {}
+    ;(data || []).forEach(({ team_id, student_id }) => {
+      if (!idsByTeam[team_id]) idsByTeam[team_id] = []
+      idsByTeam[team_id].push(student_id)
+    })
+
+    const counts = {}
+    teamRows.forEach((team) => {
+      counts[team.id] = (idsByTeam[team.id] || []).length
+    })
+
+    setTeamMemberIds(idsByTeam)
+    setMemberCounts(counts)
   }
 
   async function loadStudents() {
@@ -243,42 +268,45 @@ function TeamsManagement() {
 
     setSaving(true)
 
-    const { error: deleteError } = await supabase
-      .from('team_members')
-      .delete()
-      .eq('team_id', selectedTeam.id)
+    const existingIds = new Set(members.map((member) => member.student_id))
+    const idsToAdd = [...selectedStudentIds].filter((id) => !existingIds.has(id))
+    const idsToRemove = [...existingIds].filter((id) => !selectedStudentIds.has(id))
 
-    if (deleteError) {
-      setSaving(false)
-      alert(deleteError.message)
-      return
-    }
-
-    const rows = [...selectedStudentIds].map((studentId) => ({
-      team_id: selectedTeam.id,
-      student_id: studentId,
-    }))
-
-    if (rows.length > 0) {
-      const { error: insertError } = await supabase
+    // Apply only the changes. This avoids deleting all memberships first,
+    // which could leave the team empty if a later insert fails.
+    if (idsToRemove.length > 0) {
+      const { error } = await supabase
         .from('team_members')
-        .insert(rows)
+        .delete()
+        .eq('team_id', selectedTeam.id)
+        .in('student_id', idsToRemove)
 
-      if (insertError) {
+      if (error) {
         setSaving(false)
-        alert(insertError.message)
-        await loadMembers(selectedTeam.id)
+        alert(error.message)
         return
       }
     }
 
-    setMembers(
-      rows.map((row) => ({
-        id: row.student_id,
-        student_id: row.student_id,
-      }))
-    )
+    if (idsToAdd.length > 0) {
+      const { error } = await supabase
+        .from('team_members')
+        .insert(idsToAdd.map((studentId) => ({
+          team_id: selectedTeam.id,
+          student_id: studentId,
+        })))
 
+      if (error) {
+        setSaving(false)
+        alert(error.message)
+        await loadMembers(selectedTeam.id)
+        await loadTeamMemberSummaries()
+        return
+      }
+    }
+
+    await loadMembers(selectedTeam.id)
+    await loadTeamMemberSummaries()
     setSaving(false)
     alert('Team members saved successfully.')
   }
@@ -366,10 +394,24 @@ function TeamsManagement() {
 
                 <div className="team-card-meta">
                   <span>Members</span>
-                  <strong>
-                    {selectedTeam?.id === team.id ? selectedStudentIds.size : '—'}
-                  </strong>
+                  <strong>{memberCounts[team.id] ?? 0}</strong>
                 </div>
+
+                {(teamMemberIds[team.id] || []).length > 0 && (
+                  <div className="team-card-member-preview">
+                    {(teamMemberIds[team.id] || []).slice(0, 3).map((studentId) => {
+                      const student = students.find((item) => item.id === studentId)
+                      return (
+                        <span key={studentId}>
+                          {student?.full_name || student?.university_id || 'Student'}
+                        </span>
+                      )
+                    })}
+                    {(teamMemberIds[team.id] || []).length > 3 && (
+                      <small>+{teamMemberIds[team.id].length - 3} more</small>
+                    )}
+                  </div>
+                )}
 
                 <div className="team-card-actions">
                   <button type="button" onClick={() => openMembers(team)}>
