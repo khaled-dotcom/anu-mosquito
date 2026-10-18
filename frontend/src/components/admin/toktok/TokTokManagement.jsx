@@ -10,6 +10,8 @@ const TABS = [
   { id: 'overview', label: 'Overview', icon: '📊' },
   { id: 'stores', label: 'Stores', icon: '🏪' },
   { id: 'products', label: 'Products', icon: '🛍️' },
+  { id: 'categories', label: 'Categories', icon: '🏷️' },
+  { id: 'finance', label: 'Finance', icon: '💰' },
   { id: 'batches', label: 'Delivery batches', icon: '🛺' },
   { id: 'orders', label: 'Orders', icon: '📦' },
 ]
@@ -20,29 +22,42 @@ export default function TokTokManagement() {
   const [products, setProducts] = useState([])
   const [batches, setBatches] = useState([])
   const [orders, setOrders] = useState([])
+  const [categories, setCategories] = useState([])
+  const [orderItems, setOrderItems] = useState([])
+  const [search, setSearch] = useState('')
+  const [editing, setEditing] = useState(null)
+  const [categoryForm, setCategoryForm] = useState({ store_id: '', name: '', description: '', sort_order: '0' })
+  const [showCategoryForm, setShowCategoryForm] = useState(false)
   const [loading, setLoading] = useState(true)
   const [busyId, setBusyId] = useState('')
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [showAdd, setShowAdd] = useState(false)
-  const [form, setForm] = useState({ name: '', slug: '', description: '', store_id: '', selling_price: '', cost_price: '', stock_quantity: '', registration_start: '', registration_end: '', delivery_time: '', capacity: '' })
+  const emptyForm = { name: '', slug: '', description: '', image_url: '', store_id: '', category_id: '', selling_price: '', cost_price: '', stock_quantity: '', sort_order: '0', registration_start: '', registration_end: '', delivery_time: '', capacity: '' }
+  const [form, setForm] = useState(emptyForm)
 
   const refresh = useCallback(async () => {
     setLoading(true)
     setError('')
     try {
       const [storeResult, productResult, batchResult, orderResult] = await Promise.all([
-        supabase.from('toktok_stores').select('id,name,description,is_active,is_open,sort_order').order('sort_order'),
-        supabase.from('toktok_products').select('id,store_id,name,selling_price,is_available,stock_quantity').order('name'),
+        supabase.from('toktok_stores').select('id,name,slug,description,image_url,is_active,is_open,sort_order').order('sort_order'),
+        supabase.from('toktok_products').select('id,store_id,category_id,name,description,image_url,selling_price,cost_price,is_available,stock_quantity,sort_order').order('sort_order').order('name'),
         supabase.from('toktok_batches').select('id,store_id,registration_start,registration_end,delivery_time,capacity,is_active').order('delivery_time', { ascending: false }).limit(100),
         supabase.from('toktok_orders').select('id,order_number,order_date,store_name_snapshot,delivery_address,items_subtotal,delivery_fee,total_amount,payment_status,status,created_at').order('created_at', { ascending: false }).limit(100),
       ])
-      const failed = [storeResult, productResult, batchResult, orderResult].find((result) => result.error)
+      const categoryResult = await supabase.from('toktok_categories').select('id,store_id,name,description,image_url,is_active,sort_order').order('sort_order').order('name')
+      const failed = [storeResult, productResult, batchResult, orderResult, categoryResult].find((result) => result.error)
       if (failed) throw failed.error
       setStores(storeResult.data || [])
       setProducts(productResult.data || [])
       setBatches(batchResult.data || [])
       setOrders(orderResult.data || [])
+      setCategories(categoryResult.data || [])
+      if ((orderResult.data || []).length) {
+        const itemsResult = await supabase.from('toktok_order_items').select('id,order_id,product_name_snapshot,quantity,unit_price,line_total,notes').in('order_id', orderResult.data.map((o) => o.id))
+        setOrderItems(itemsResult.error ? [] : (itemsResult.data || []))
+      } else setOrderItems([])
     } catch (err) {
       console.error('TokTok admin load failed:', err)
       setError('Could not load TokTok management data. Check the TokTok admin database permissions and try again.')
@@ -61,7 +76,8 @@ export default function TokTokManagement() {
   function openAddForm() {
     setError('')
     setNotice('')
-    setForm({ name: '', slug: '', description: '', store_id: stores[0]?.id || '', selling_price: '', cost_price: '', stock_quantity: '', registration_start: '', registration_end: '', delivery_time: '', capacity: '' })
+    setEditing(null)
+    setForm({ ...emptyForm, store_id: stores[0]?.id || '' })
     setShowAdd(true)
   }
 
