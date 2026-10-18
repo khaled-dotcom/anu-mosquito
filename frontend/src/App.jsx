@@ -15,6 +15,7 @@ const DriverDashboard = lazy(() => import('./components/driver/DriverDashboard')
 const StudentHome = lazy(() => import('./components/student/StudentHome'))
 const StudentMenu = lazy(() => import('./components/student/StudentMenu'))
 const StudentOrders = lazy(() => import('./components/student/StudentOrders'))
+const TokTokPortal = lazy(() => import('./components/toktok/TokTokPortal'))
 const Auth = lazy(() => import('./components/auth/Auth'))
 
 function App() {
@@ -479,6 +480,13 @@ if (session && studentPage === 'orders') {
 }
 
  // =========================
+// INDEPENDENT ANU TOKTOK APP
+// =========================
+if (session && studentPage === 'toktok') {
+  return <TokTokPortal mode="customer" onBack={goToStudentHome} />
+}
+
+// =========================
 // STUDENT HOME
 // =========================
 if (session && studentPage === 'menu') {
