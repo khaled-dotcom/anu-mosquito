@@ -57,7 +57,7 @@ export default function TokTokManagement() {
         supabase.from('toktok_stores').select('id,name,code,slug,description,image_url,is_active,is_open,sort_order').order('sort_order'),
         supabase.from('toktok_products').select('id,store_id,category_id,name,description,image_url,selling_price,cost_price,is_available,sort_order').order('sort_order').order('name'),
         supabase.from('toktok_batches').select('id,store_id,registration_start,registration_end,delivery_time,capacity,is_active').order('delivery_time', { ascending: false }).limit(100),
-        supabase.from('toktok_orders').select('id,order_number,order_date,store_name_snapshot,delivery_address,items_subtotal,delivery_fee,total_amount,payment_status,status,created_at').order('created_at', { ascending: false }).limit(100),
+        supabase.from('toktok_orders').select('id,order_number,order_date,store_id,batch_id,student_id,student_name_snapshot,student_phone_snapshot,store_name_snapshot,delivery_address,items_subtotal,delivery_fee,total_amount,payment_status,status,payment_method_snapshot,payment_proof_url,batch_time_snapshot,created_at').order('created_at', { ascending: false }).limit(100),
       ])
       const [categoryResult, deliveryFeeResult] = await Promise.all([
         supabase.from('toktok_categories').select('id,store_id,name,description,image_url,is_active,sort_order').order('sort_order').order('name'),
@@ -68,7 +68,13 @@ export default function TokTokManagement() {
       setStores(storeResult.data || [])
       setProducts(productResult.data || [])
       setBatches(batchResult.data || [])
-      setOrders(orderResult.data || [])
+      const orderRows = orderResult.data || []
+      const ordersWithProof = await Promise.all(orderRows.map(async (order) => {
+        if (!order.payment_proof_url) return order
+        const { data: signed, error: signedError } = await supabase.storage.from('payment-proofs').createSignedUrl(order.payment_proof_url, 60 * 30)
+        return { ...order, payment_proof_signed_url: signedError ? '' : signed?.signedUrl || '' }
+      }))
+      setOrders(ordersWithProof)
       setCategories(categoryResult.data || [])
       const settingsRows = deliveryFeeResult.data || []
       const tiersRow = settingsRows.find((row) => row.setting_key === 'delivery_fee_tiers')
@@ -242,6 +248,27 @@ export default function TokTokManagement() {
     finally { setBusyId('') }
   }
 
+  async function prepareAllPaidOrders() {
+    setError('')
+    setNotice('')
+    setBusyId('prepare-all')
+    try {
+      const eligible = orders.filter((order) => order.payment_status === 'paid' && ['pending', 'confirmed'].includes(String(order.status || '').toLowerCase()))
+      if (!eligible.length) {
+        setNotice('No paid orders are waiting to be prepared.')
+        return
+      }
+      const { error: prepareError } = await supabase.from('toktok_orders').update({ status: 'preparing' }).in('id', eligible.map((order) => order.id))
+      if (prepareError) throw prepareError
+      setNotice(eligible.length + ' paid order(s) moved to Preparing.')
+      await refresh()
+    } catch (err) {
+      setError(err?.message || 'Could not prepare the TokTok orders.')
+    } finally {
+      setBusyId('')
+    }
+  }
+
   async function toggleRecord(table, id, field, currentValue, label) {
     setBusyId(id)
     setError('')
@@ -361,8 +388,15 @@ export default function TokTokManagement() {
             <div className="toktok-admin-callout"><strong>Net profit still needs driver-cost history</strong><p>Product gross margin uses cost snapshots saved on TokTok order items. Net profit is not shown because driver costs are not currently saved as a historical per-order snapshot. Totals cover the latest loaded orders, not lifetime figures.</p></div>
           </div>}
 
-          {tab === 'orders' && <div className="toktok-admin-panel"><div className="toktok-admin-panel-heading"><div><h3>TokTok orders</h3><p>Search orders, inspect item details, and update status/payment.</p></div><span>{orders.length} recent orders</span></div><label className="toktok-admin-search">Search orders<input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Order number, store, location, status…" /></label>
-            {orders.length === 0 ? <p className="toktok-admin-empty">No TokTok orders found.</p> : <div className="toktok-admin-table-wrap"><table className="toktok-admin-table"><thead><tr><th>Order</th><th>Store</th><th>Date</th><th>Status</th><th>Payment</th><th>Total</th><th>Delivery location</th><th>Items</th><th>Update status / payment</th></tr></thead><tbody>{orders.filter((order) => [order.order_number, order.store_name_snapshot, order.delivery_address, order.status, order.payment_status].some((value) => String(value || '').toLowerCase().includes(search.toLowerCase()))).map((order) => <tr key={order.id}><td><strong>{order.order_number || String(order.id).slice(0, 8)}</strong></td><td>{order.store_name_snapshot || '—'}</td><td>{order.created_at ? new Date(order.created_at).toLocaleString('en-EG', { dateStyle: 'short', timeStyle: 'short' }) : order.order_date || '—'}</td><td><span className="toktok-admin-status">{order.status || '—'}</span></td><td>{order.payment_status || '—'}</td><td><strong>{money(order.total_amount)}</strong><small className="toktok-admin-fees">Items {money(order.items_subtotal)} · Delivery {money(order.delivery_fee)}</small></td><td>{order.delivery_address || '—'}</td><td>{orderItems.filter((item) => item.order_id === order.id).map((item) => item.product_name_snapshot + ' × ' + item.quantity).join(', ') || '—'}</td><td><select aria-label={'Status for ' + order.order_number} value={order.status || 'pending'} disabled={busyId === order.id} onChange={(e) => updateOrder(order, { status: e.target.value })}>{['pending','confirmed','preparing','ready','out_for_delivery','delivered','completed','cancelled'].map((status) => <option key={status} value={status}>{status}</option>)}</select><select aria-label={'Payment for ' + order.order_number} value={order.payment_status || 'pending'} disabled={busyId === order.id} onChange={(e) => updateOrder(order, { payment_status: e.target.value })}>{['pending','paid','failed','refunded'].map((status) => <option key={status} value={status}>{status}</option>)}</select></td></tr>)}</tbody></table></div>}
+          {tab === 'orders' && <div className="toktok-admin-panel"><div className="toktok-admin-panel-heading"><div><h3>TokTok orders & payment review</h3><p>Review proof, confirm or cancel orders, contact students, and prepare paid orders.</p></div><span>{orders.length} recent orders</span></div>
+            <div className="toktok-admin-order-toolbar"><label className="toktok-admin-search">Search orders<input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Order, student, store, location, status…" /></label><button className="toktok-admin-action" type="button" onClick={prepareAllPaidOrders} disabled={busyId !== ''}>🧾 Prepare all paid orders</button></div>
+            {orders.length === 0 ? <p className="toktok-admin-empty">No TokTok orders found.</p> : <div className="toktok-admin-order-cards">{orders.filter((order) => [order.order_number, order.student_name_snapshot, order.student_phone_snapshot, order.store_name_snapshot, order.delivery_address, order.status, order.payment_status, order.payment_method_snapshot].some((value) => String(value || '').toLowerCase().includes(search.toLowerCase()))).map((order) => <article className="toktok-admin-order-card" key={order.id}>
+              <div className="toktok-admin-order-top"><div><strong>{order.order_number || String(order.id).slice(0, 8)}</strong><small>{order.store_name_snapshot} · {new Date(order.created_at).toLocaleString('en-EG', { dateStyle: 'medium', timeStyle: 'short' })}</small></div><strong>{money(order.total_amount)}</strong></div>
+              <div className="toktok-admin-order-meta"><span>Student: {order.student_name_snapshot || '—'}</span><span>Phone: {order.student_phone_snapshot || '—'}</span><span>Payment: {order.payment_method_snapshot || 'Not specified'}</span><span>Payment status: <b>{order.payment_status || 'pending'}</b></span><span>Order status: <b>{order.status || 'pending'}</b></span><span>Batch: {order.batch_time_snapshot ? new Date(order.batch_time_snapshot).toLocaleString('en-EG', { dateStyle: 'medium', timeStyle: 'short' }) : batches.find((batch) => batch.id === order.batch_id) ? new Date(batches.find((batch) => batch.id === order.batch_id).delivery_time).toLocaleString('en-EG', { dateStyle: 'medium', timeStyle: 'short' }) : '—'}</span><span>Location: {order.delivery_address || '—'}</span></div>
+              <div className="toktok-admin-order-items"><strong>Items</strong><p>{orderItems.filter((item) => item.order_id === order.id).map((item) => item.product_name_snapshot + ' × ' + item.quantity).join(', ') || '—'}</p></div>
+              <div className="toktok-admin-proof">{order.payment_proof_signed_url ? <a href={order.payment_proof_signed_url} target="_blank" rel="noreferrer">View payment proof ↗</a> : <span>{order.payment_proof_url ? 'Payment proof unavailable (permissions)' : 'No payment proof uploaded'}</span>}</div>
+              <div className="toktok-admin-order-actions"><button type="button" onClick={() => updateOrder(order, { payment_status: 'paid', status: 'confirmed' })} disabled={busyId === order.id || order.payment_status === 'paid'}>✓ Confirm payment</button><button type="button" onClick={() => updateOrder(order, { status: 'cancelled', payment_status: order.payment_status === 'paid' ? 'refunded' : 'failed' })} disabled={busyId === order.id || order.status === 'cancelled'}>✕ Cancel order</button>{order.student_phone_snapshot && <a href={'https://wa.me/' + (String(order.student_phone_snapshot).replace(/\D/g, '').startsWith('0') ? '2' + String(order.student_phone_snapshot).replace(/\D/g, '') : String(order.student_phone_snapshot).replace(/\D/g, ''))} target="_blank" rel="noreferrer">Contact student ↗</a>}<select aria-label={'Status for ' + order.order_number} value={order.status || 'pending'} disabled={busyId === order.id} onChange={(e) => updateOrder(order, { status: e.target.value })}>{['pending','confirmed','preparing','ready','out_for_delivery','delivered','completed','cancelled'].map((status) => <option key={status} value={status}>{status}</option>)}</select></div>
+            </article>)}</div>}
           </div>}
         </>
       )}
