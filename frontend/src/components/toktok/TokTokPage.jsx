@@ -320,7 +320,7 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
                     </div>
                   </article>)}
                 </section>}
-                {cartOpen && <div className="toktok-cart-backdrop" role="presentation" onClick={() => setCartOpen(false)}>
+                {cartOpen && (<div className="toktok-cart-backdrop" role="presentation" onClick={() => setCartOpen(false)}>
                   <section className="toktok-checkout toktok-cart-panel" role="dialog" aria-modal="true" aria-label="Cart and checkout" onClick={(event) => event.stopPropagation()}>
                     <div className="toktok-cart-panel-heading">
                       <div><span className="toktok-kicker">CHECKOUT · {checkoutStep === 'cart' ? 'STEP 1 OF 2' : 'STEP 2 OF 2'}</span><h2>{checkoutStep === 'cart' ? 'Review & delivery' : 'Payment'}</h2><p>{count} {count === 1 ? 'item' : 'items'} · <strong>{money(subtotal)}</strong> subtotal</p></div>
@@ -344,7 +344,7 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
                       <small className="toktok-payment-pending-note">Your order will wait for the TokTok admin to confirm your payment.</small>
                     </div>
                   </section>
-                </div>}
+                </div>)}
                 <div className="toktok-cart-bar">
                   <div><strong>{count} {count === 1 ? 'item' : 'items'}</strong><span>{money(subtotal)} subtotal</span></div>
                   <button type="button" onClick={() => setCartOpen(true)} disabled={count === 0}>View cart &amp; checkout →</button>
