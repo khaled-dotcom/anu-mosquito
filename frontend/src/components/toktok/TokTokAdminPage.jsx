@@ -81,49 +81,64 @@ export default function TokTokAdminPage() {
   }
 
   async function saveRow(table, form, kind) {
-    setSaving(true); setError(''); setMessage('')
-    let payload = { ...form }
-    if (kind === 'store') {
-      payload.name = payload.name.trim()
-      const slugSource = (payload.slug.trim() || payload.name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-      payload.slug = slugSource || `store-${Date.now()}`
-      payload.sort_order = Number(payload.sort_order || 0)
+    setSaving(true)
+    setError('')
+    setMessage('')
+    try {
+      let payload = { ...form }
+      if (kind === 'store') {
+        payload.name = payload.name.trim()
+        if (!payload.name) throw new Error('Store name is required.')
+        const slugSource = (payload.slug.trim() || payload.name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+        payload.slug = slugSource || `store-${Date.now()}`
+        payload.sort_order = Number(payload.sort_order || 0)
+      }
+      if (kind === 'category') {
+        payload = { ...payload, store_id: storeId, name: payload.name.trim(), sort_order: Number(payload.sort_order || 0) }
+        if (!storeId) throw new Error('Choose a store first.')
+        if (!payload.name) throw new Error('Category name is required.')
+      }
+      if (kind === 'product') {
+        if (!storeId) throw new Error('Choose a store first.')
+        const sellingPrice = Number(payload.selling_price)
+        const costPrice = payload.cost_price === '' ? null : Number(payload.cost_price)
+        const stockQuantity = payload.stock_quantity === '' ? null : Number(payload.stock_quantity)
+        if (!payload.name.trim()) throw new Error('Product name is required.')
+        if (!Number.isFinite(sellingPrice) || sellingPrice < 0) throw new Error('Selling price must be a valid non-negative amount.')
+        if (costPrice !== null && (!Number.isFinite(costPrice) || costPrice < 0)) throw new Error('Cost price must be a valid non-negative amount.')
+        if (stockQuantity !== null && (!Number.isInteger(stockQuantity) || stockQuantity < 0)) throw new Error('Stock must be a non-negative whole number or left blank.')
+        payload = { ...payload, store_id: storeId, category_id: payload.category_id || null, name: payload.name.trim(), selling_price: sellingPrice, cost_price: costPrice, stock_quantity: stockQuantity, sort_order: Number(payload.sort_order || 0) }
+      }
+      if (kind === 'batch') {
+        if (!storeId) throw new Error('Choose a store first.')
+        const start = new Date(payload.registration_start)
+        const end = new Date(payload.registration_end)
+        const delivery = new Date(payload.delivery_time)
+        if (![start, end, delivery].every((date) => Number.isFinite(date.getTime()))) throw new Error('Enter valid registration and delivery dates.')
+        if (end <= start) throw new Error('Registration closing time must be after the opening time.')
+        if (delivery < start) throw new Error('Delivery time cannot be before registration opens.')
+        if (payload.capacity !== '' && (!Number.isInteger(Number(payload.capacity)) || Number(payload.capacity) < 1)) throw new Error('Batch capacity must be a positive whole number or left blank.')
+        payload = { ...payload, store_id: storeId, registration_start: start.toISOString(), registration_end: end.toISOString(), delivery_time: delivery.toISOString(), capacity: payload.capacity === '' ? null : Number(payload.capacity) }
+      }
+
+      delete payload.id
+      delete payload.created_at
+      delete payload.updated_at
+      const isEdit = editing?.kind === kind && Boolean(editing.id)
+      const query = isEdit ? supabase.from(table).update(payload).eq('id', editing.id) : supabase.from(table).insert(payload)
+      const { error: saveError } = await query
+      if (saveError) throw saveError
+
+      setMessage('Saved successfully.')
+      resetForms()
+      if (kind === 'store') await load()
+      else await loadStoreData(storeId)
+    } catch (saveError) {
+      console.error('TokTok admin save failed:', saveError)
+      setError(saveError?.message || 'Save failed. Please try again.')
+    } finally {
+      setSaving(false)
     }
-    if (kind === 'category') payload = { ...payload, store_id: storeId, name: payload.name.trim(), sort_order: Number(payload.sort_order || 0) }
-    if (kind === 'product') payload = { ...payload, store_id: storeId, category_id: payload.category_id || null, name: payload.name.trim(), selling_price: Number(payload.selling_price), cost_price: payload.cost_price === '' ? null : Number(payload.cost_price), stock_quantity: payload.stock_quantity === '' ? null : Number(payload.stock_quantity), sort_order: Number(payload.sort_order || 0) }
-    if (kind === 'batch') {
-      const start = new Date(payload.registration_start)
-      const end = new Date(payload.registration_end)
-      const delivery = new Date(payload.delivery_time)
-      if (![start, end, delivery].every((date) => Number.isFinite(date.getTime()))) {
-        setSaving(false)
-        setError('Enter valid registration and delivery dates.')
-        return
-      }
-      if (end <= start) {
-        setSaving(false)
-        setError('Registration closing time must be after the opening time.')
-        return
-      }
-      if (payload.capacity !== '' && (!Number.isInteger(Number(payload.capacity)) || Number(payload.capacity) < 1)) {
-        setSaving(false)
-        setError('Batch capacity must be a positive whole number or left blank.')
-        return
-      }
-      payload = { ...payload, store_id: storeId, registration_start: start.toISOString(), registration_end: end.toISOString(), delivery_time: delivery.toISOString(), capacity: payload.capacity === '' ? null : Number(payload.capacity) }
-    }
-    delete payload.id
-    delete payload.created_at
-    delete payload.updated_at
-    const isEdit = editing?.kind === kind && Boolean(editing.id)
-    const query = isEdit ? supabase.from(table).update(payload).eq('id', editing.id) : supabase.from(table).insert(payload)
-    const { error: saveError } = await query
-    setSaving(false)
-    if (saveError) { setError(saveError.message || 'Save failed.'); return }
-    setMessage('Saved successfully.')
-    resetForms()
-    if (kind === 'store') await load()
-    else await loadStoreData(storeId)
   }
 
   async function removeRow(table, row, label) {
