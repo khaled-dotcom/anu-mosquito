@@ -16,6 +16,8 @@ function RestaurantManagement({
 
   showRestaurantForm,
   setShowRestaurantForm,
+  openAddRestaurantForm,
+  closeRestaurantForm,
 
   editingRestaurant,
 
@@ -50,14 +52,7 @@ function RestaurantManagement({
 
         <Button
           variant="primary"
-         onClick={() => {
-  setRestaurantName('')
-  setRestaurantCode('')
-  setRestaurantDescription('')
-  setRestaurantImageUrl('')
-  setRestaurantIsActive(true)
-  setShowRestaurantForm(true)
-}}
+          onClick={openAddRestaurantForm}
         >
           + Add Restaurant
         </Button>
@@ -85,9 +80,7 @@ function RestaurantManagement({
             <button
               type="button"
               className="admin-close-button"
-              onClick={() =>
-                setShowRestaurantForm(false)
-              }
+              onClick={closeRestaurantForm}
             >
               ×
             </button>
@@ -165,9 +158,7 @@ onChange={(e) => setRestaurantIsActive(e.target.checked)}
           <div className="admin-form-actions">
 
             <CancelButton
-              onClick={() =>
-                setShowRestaurantForm(false)
-              }
+              onClick={closeRestaurantForm}
             >
               Cancel
             </CancelButton>
