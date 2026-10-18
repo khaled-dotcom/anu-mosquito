@@ -1096,3 +1096,90 @@ button.quick-card:hover {
     transform: none;
   }
 }
+
+
+/* Independent ANU TokTok entry point */
+.toktok-entry-section {
+  margin: 0 0 24px;
+}
+
+.toktok-entry-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px;
+  border: 1px solid #c8ead8;
+  border-radius: 18px;
+  background: linear-gradient(110deg, #f0fbf5 0%, #ffffff 100%);
+  color: #176a50;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 5px 18px rgba(23, 106, 80, 0.06);
+  transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.toktok-entry-card:hover {
+  border-color: #7dc9a5;
+  box-shadow: 0 8px 22px rgba(23, 106, 80, 0.1);
+  transform: translateY(-1px);
+}
+
+.toktok-entry-card:focus-visible {
+  outline: 3px solid rgba(33, 150, 107, 0.35);
+  outline-offset: 3px;
+}
+
+.toktok-entry-card__mark {
+  display: grid;
+  flex: 0 0 54px;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border-radius: 15px;
+  background: #d8f2e4;
+  font-size: 28px;
+}
+
+.toktok-entry-card__copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.toktok-entry-card__title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.toktok-entry-card__description {
+  color: #426c59;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.toktok-entry-card__arrow {
+  flex: 0 0 auto;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+@media (max-width: 480px) {
+  .toktok-entry-card {
+    gap: 11px;
+    padding: 13px;
+  }
+
+  .toktok-entry-card__mark {
+    flex-basis: 46px;
+    width: 46px;
+    height: 46px;
+    font-size: 24px;
+  }
+
+  .toktok-entry-card__description {
+    font-size: 0.8rem;
+  }
+}
