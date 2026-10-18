@@ -21,7 +21,8 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null)
   const [paymentProof, setPaymentProof] = useState(null)
   const [paymentMethodsLoading, setPaymentMethodsLoading] = useState(false)
-  const [deliveryFee, setDeliveryFee] = useState(0)
+  const [deliveryFeeTiers, setDeliveryFeeTiers] = useState([])
+  const [baseDeliveryFee, setBaseDeliveryFee] = useState(0)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -107,10 +108,8 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
       const tiersRow = settings.find((row) => row.setting_key === 'delivery_fee_tiers')
       const legacyRow = settings.find((row) => row.setting_key === 'delivery_fee')
       const tiers = Array.isArray(tiersRow?.setting_value) ? tiersRow.setting_value : []
-      const fee = tiers.length
-        ? Number([...tiers].filter((tier) => Number(tier.min_order_total) <= subtotal).sort((a,b) => Number(b.min_order_total) - Number(a.min_order_total))[0]?.fee ?? 0)
-        : Number(legacyRow?.setting_value ?? 0)
-      setDeliveryFee(Number.isFinite(fee) ? fee : 0)
+      setDeliveryFeeTiers(tiers)
+      setBaseDeliveryFee(Number(legacyRow?.setting_value ?? 0))
       setPaymentMethodsLoading(false)
     }
     loadPaymentMethods()
@@ -142,6 +141,8 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
   const shownProducts = useMemo(() => categoryId === 'all' ? products : products.filter((product) => product.category_id === categoryId), [products, categoryId])
   const cartItems = useMemo(() => products.filter((product) => Number(cart[product.id] || 0) > 0).map((product) => ({ ...product, quantity: Number(cart[product.id]) })), [products, cart])
   const subtotal = cartItems.reduce((sum, item) => sum + Number(item.selling_price) * item.quantity, 0)
+  const matchingDeliveryTier = [...deliveryFeeTiers].filter((tier) => Number(tier.min_order_total) <= subtotal).sort((a, b) => Number(b.min_order_total) - Number(a.min_order_total))[0]
+  const deliveryFee = Number(matchingDeliveryTier?.fee ?? baseDeliveryFee)
   const count = cartItems.reduce((sum, item) => sum + item.quantity, 0)
 
   function changeQuantity(product, delta) {
