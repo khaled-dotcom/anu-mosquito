@@ -16,6 +16,11 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
   const [batchId, setBatchId] = useState('')
   const [cart, setCart] = useState({})
   const [cartOpen, setCartOpen] = useState(false)
+  const [checkoutStep, setCheckoutStep] = useState('cart')
+  const [paymentMethods, setPaymentMethods] = useState([])
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null)
+  const [paymentProof, setPaymentProof] = useState(null)
+  const [paymentMethodsLoading, setPaymentMethodsLoading] = useState(false)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -83,6 +88,25 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
 
   useEffect(() => { loadCatalog() }, [loadCatalog]) // load when the TokTok screen opens
 
+  useEffect(() => {
+    let alive = true
+    async function loadPaymentMethods() {
+      setPaymentMethodsLoading(true)
+      const { data, error: methodsError } = await supabase.from('payment_methods').select('id,name,type,account_number,instructions').eq('is_active', true).order('created_at')
+      if (!alive) return
+      if (methodsError) {
+        console.error('TokTok payment methods failed:', methodsError)
+        setError('Could not load payment methods. Please try again.')
+      } else {
+        setPaymentMethods(data || [])
+        setSelectedPaymentMethod(data?.[0] || null)
+      }
+      setPaymentMethodsLoading(false)
+    }
+    loadPaymentMethods()
+    return () => { alive = false }
+  }, [])
+
   function switchStore(nextId) {
     setStoreId(nextId)
     setSelectedStoreOpen(true)
@@ -134,7 +158,7 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
 
       const { data, error: ordersError } = await supabase
         .from('toktok_orders')
-        .select('id,order_number,order_date,store_name_snapshot,delivery_address,delivery_fee,items_subtotal,total_amount,payment_status,status,notes,created_at')
+        .select('id,order_number,order_date,store_name_snapshot,delivery_address,delivery_fee,items_subtotal,total_amount,payment_status,status,notes,created_at,batch_id,batch_time_snapshot,payment_method_snapshot,payment_proof_url')
         .eq('student_id', userResult.user.id)
         .order('created_at', { ascending: false })
         .limit(50)
@@ -180,39 +204,53 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
     setError('')
     setNotice('')
     if (!cartItems.length) return setError('Add at least one product to your cart.')
-    if (!batchId) return setError('There is no open delivery batch. Please check back soon.')
+    if (!batchId) return setError('Choose a delivery batch before continuing.')
+    if (!selectedPaymentMethod) return setError('Choose a payment method.')
+    if (!paymentProof) return setError('Upload your payment screenshot.')
+    const { data: userResult, error: userError } = await supabase.auth.getUser()
+    if (userError || !userResult.user) return setError('Please sign in again before placing your order.')
     setSubmitting(true)
+    let uploadedPath = ''
     try {
+      const file = paymentProof
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) throw new Error('Upload a JPG, PNG, or WEBP screenshot.')
+      if (file.size > 8 * 1024 * 1024) throw new Error('Payment screenshot must be 8 MB or smaller.')
+      const extension = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg'
+      uploadedPath = userResult.user.id + '/toktok-' + crypto.randomUUID() + '.' + extension
+      const { error: uploadError } = await supabase.storage.from('payment-proofs').upload(uploadedPath, file, { contentType: file.type, upsert: false })
+      if (uploadError) throw uploadError
       const { data, error: orderError } = await supabase.rpc('toktok_place_order', {
-        p_store_id: storeId,
-        p_batch_id: batchId,
+        p_store_id: storeId, p_batch_id: batchId,
         p_items: cartItems.map(({ id, quantity }) => ({ product_id: id, quantity })),
-        p_delivery_address: address.trim() || null,
-        p_notes: notes.trim() || null,
+        p_delivery_address: address.trim() || null, p_notes: notes.trim() || null,
       })
       if (orderError) throw orderError
-
+      const order = Array.isArray(data) ? data[0] : data
+      const { error: paymentSaveError } = await supabase.from('toktok_orders').update({
+        payment_method_id: selectedPaymentMethod.id,
+        payment_method_snapshot: selectedPaymentMethod.name,
+        payment_proof_url: uploadedPath,
+        payment_status: 'pending_confirmation',
+        batch_time_snapshot: batches.find((batch) => batch.id === batchId)?.delivery_time || null,
+      }).eq('id', order.id).eq('student_id', userResult.user.id)
+      if (paymentSaveError) throw paymentSaveError
       setCart({})
       setCartOpen(false)
+      setCheckoutStep('cart')
       setAddress('')
       setNotes('')
-      setNotice(data?.order_number
-        ? `Order ${data.order_number} placed successfully.`
-        : 'Order placed successfully.')
+      setPaymentProof(null)
+      setNotice('Order ' + order.order_number + ' submitted. Your payment proof is waiting for admin confirmation.')
       await loadCatalog()
+      await loadMyOrders()
     } catch (orderError) {
       console.error('TokTok order placement failed:', orderError)
+      if (uploadedPath) await supabase.storage.from('payment-proofs').remove([uploadedPath])
       const message = String(orderError?.message || '').toLowerCase()
-      if (/stock|out of stock|quantity/.test(message)) {
-        setError('One or more items may no longer be available in that quantity. Refresh the menu and try again.')
-      } else if (/batch|capacity|registration|delivery time/.test(message)) {
-        setError('That delivery batch is no longer available. Refresh the menu and choose another batch.')
-      } else {
-        setError('Could not place your order. Please refresh and try again.')
-      }
-    } finally {
-      setSubmitting(false)
-    }
+      if (/stock|out of stock|quantity/.test(message)) setError('One or more items are no longer available. Refresh the menu and try again.')
+      else if (/batch|capacity|registration|delivery time/.test(message)) setError('That delivery batch is no longer available. Refresh the menu and choose another batch.')
+      else setError(orderError?.message || 'Could not place your order. Please refresh and try again.')
+    } finally { setSubmitting(false) }
   }
 
   return (
@@ -271,7 +309,7 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
                 {shownProducts.length === 0 ? <div className="toktok-empty">No available products in this category yet.</div> : <section className="toktok-product-grid">
                   {shownProducts.map((product) => <article className="toktok-product" key={product.id}>
                     {product.image_url ? <img className="toktok-product-image" src={product.image_url} alt="" loading="lazy" /> : <div className="toktok-product-placeholder">🛍️</div>}
-                    <div className="toktok-product-body"><h3>{product.name}</h3><p>{product.description || 'Available for campus delivery.'}</p><strong>{money(product.selling_price)}</strong>
+                    <div className="toktok-product-body"><h3>{product.name}</h3><strong className="toktok-product-price">{money(product.selling_price)}</strong>
                       <div className="toktok-quantity"><button type="button" aria-label={`Remove one ${product.name}`} onClick={() => changeQuantity(product, -1)} disabled={!cart[product.id]}>−</button><span>{cart[product.id] || 0}</span><button type="button" aria-label={`Add one ${product.name}`} onClick={() => changeQuantity(product, 1)}>+</button></div>
                     </div>
                   </article>)}
@@ -279,14 +317,25 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
                 {cartOpen && <div className="toktok-cart-backdrop" role="presentation" onClick={() => setCartOpen(false)}>
                   <section className="toktok-checkout toktok-cart-panel" role="dialog" aria-modal="true" aria-label="Cart and checkout" onClick={(event) => event.stopPropagation()}>
                     <div className="toktok-cart-panel-heading">
-                      <div><span className="toktok-kicker">YOUR CART</span><h2>{count} {count === 1 ? 'item' : 'items'}</h2><p>Subtotal: <strong>{money(subtotal)}</strong></p><small>Delivery fee is calculated at checkout.</small></div>
+                      <div><span className="toktok-kicker">CHECKOUT · {checkoutStep === 'cart' ? 'STEP 1 OF 2' : 'STEP 2 OF 2'}</span><h2>{checkoutStep === 'cart' ? 'Review & delivery' : 'Payment'}</h2><p>{count} {count === 1 ? 'item' : 'items'} · <strong>{money(subtotal)}</strong> subtotal</p></div>
                       <button type="button" className="toktok-cart-close" onClick={() => setCartOpen(false)} aria-label="Close cart">×</button>
                     </div>
-                    <div className="toktok-checkout-fields">
-                      <label>Delivery batch<select value={batchId} onChange={(event) => setBatchId(event.target.value)}><option value="">Choose an available batch</option>{batches.map((batch) => <option key={batch.id} value={batch.id}>{new Date(batch.delivery_time).toLocaleString('en-EG', { dateStyle: 'medium', timeStyle: 'short' })}</option>)}</select></label>
+                    {checkoutStep === 'cart' ? <div className="toktok-checkout-fields">
+                      <div className="toktok-cart-lines">{cartItems.map((item) => <div key={item.id} className="toktok-cart-line"><span>{item.name} × {item.quantity}</span><strong>{money(Number(item.selling_price) * item.quantity)}</strong></div>)}</div>
+                      <h3>Choose a delivery batch</h3>
+                      {batches.length === 0 ? <p>No delivery batches are accepting orders right now.</p> : <div className="toktok-batch-options">{batches.map((batch) => <button key={batch.id} type="button" className={batchId === batch.id ? 'selected' : ''} onClick={() => setBatchId(batch.id)}><span><strong>{new Date(batch.delivery_time).toLocaleDateString('en-EG', { weekday: 'short', month: 'short', day: 'numeric' })}</strong><small>{new Date(batch.delivery_time).toLocaleTimeString('en-EG', { hour: 'numeric', minute: '2-digit' })}</small></span><span>{batchId === batch.id ? '✓' : '○'}</span></button>)}</div>}
                       <label>Delivery location<input value={address} onChange={(event) => setAddress(event.target.value)} maxLength={300} placeholder="Where should we meet you on campus?" /></label>
                       <label>Order notes (optional)<input value={notes} onChange={(event) => setNotes(event.target.value)} maxLength={500} placeholder="Any instructions?" /></label>
-                      <button className="toktok-place-order" type="button" onClick={placeOrder} disabled={submitting || count === 0 || !batchId}>{submitting ? 'Placing order…' : `Place order · ${money(subtotal)} + delivery`}</button>
+                      <button className="toktok-place-order" type="button" onClick={() => setCheckoutStep('payment')} disabled={count === 0 || !batchId}>Continue to payment →</button>
+                    </div> : <div className="toktok-checkout-fields">
+                      <div className="toktok-payment-total"><span>Items subtotal</span><strong>{money(subtotal)}</strong><small>Delivery fee is added to the order total.</small></div>
+                      <h3>Choose payment method</h3>
+                      {paymentMethodsLoading ? <p>Loading payment methods…</p> : paymentMethods.length === 0 ? <p>No active payment methods are available. Contact TokTok administration.</p> : <div className="toktok-payment-methods">{paymentMethods.map((method) => <button key={method.id} type="button" className={selectedPaymentMethod?.id === method.id ? 'selected' : ''} onClick={() => setSelectedPaymentMethod(method)}><strong>{method.name}</strong><small>{method.type}</small><span>{selectedPaymentMethod?.id === method.id ? '✓' : '○'}</span></button>)}</div>}
+                      {selectedPaymentMethod && <div className="toktok-payment-instructions"><span>Transfer to</span><strong>{selectedPaymentMethod.account_number}</strong>{selectedPaymentMethod.instructions && <p>{selectedPaymentMethod.instructions}</p>}</div>}
+                      <label className="toktok-proof-upload">Payment screenshot<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => setPaymentProof(event.target.files?.[0] || null)} /><small>{paymentProof ? paymentProof.name : 'JPG, PNG or WEBP · up to 8 MB'}</small></label>
+                      {paymentProof && <div className="toktok-proof-preview-name">{paymentProof.name}</div>}
+                      <div className="toktok-checkout-step-actions"><button type="button" onClick={() => setCheckoutStep('cart')}>← Back</button><button className="toktok-place-order" type="button" onClick={placeOrder} disabled={submitting || !selectedPaymentMethod || !paymentProof || !batchId}>{submitting ? 'Submitting…' : 'Confirm order & send payment proof'}</button></div>
+                      <small className="toktok-payment-pending-note">Your order will wait for the TokTok admin to confirm your payment.</small>
                     </div>
                   </section>
                 </div>}
