@@ -91,12 +91,18 @@ function StudentHome({
 
   useEffect(() => {
     let cancelled = false
-    supabase.rpc('get_toktok_enabled')
-      .then(({ data, error }) => {
-        if (cancelled || error || typeof data !== 'boolean') return
-        setToktokEnabled(data)
-      })
-    return () => { cancelled = true }
+    const refreshTokTokVisibility = async () => {
+      const { data, error } = await supabase.rpc('get_toktok_enabled')
+      if (!cancelled && !error && typeof data === 'boolean') setToktokEnabled(data)
+    }
+    refreshTokTokVisibility()
+    const interval = window.setInterval(refreshTokTokVisibility, 15000)
+    window.addEventListener('focus', refreshTokTokVisibility)
+    return () => {
+      cancelled = true
+      window.clearInterval(interval)
+      window.removeEventListener('focus', refreshTokTokVisibility)
+    }
   }, [])
   // Students only see restaurants the admin has switched on.
   const openRestaurants = useMemo(
