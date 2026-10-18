@@ -16,6 +16,7 @@ import DriverManagement from '../drivers/DriverManagement'
 import HomeCategoryManagement from '../categories/HomeCategoryManagement'
 import TeamsManagement from '../teams/TeamsManagement'
 import DiscountManagement from '../discounts/DiscountManagement'
+import TokTokManagement from '../toktok/TokTokManagement'
 
 const ADMIN_NAV = [
   { key: 'dashboard', label: 'Dashboard', icon: '🏠' },
@@ -32,6 +33,7 @@ const ADMIN_NAV = [
   { key: 'drivers', label: 'Drivers', icon: '🚗' },
   { key: 'payment-methods', label: 'Payment Methods', icon: '💳' },
   { key: 'settings', label: 'Settings', icon: '⚙️' },
+  { key: 'toktok', label: 'ANU TokTok', icon: '🛺' },
 ]
 
 function AdminDashboard({
@@ -789,6 +791,11 @@ handleAssignDriver={handleAssignDriver}
 
 {adminSection === 'settings' && (
   <DeliverySettings />
+)}
+
+{/* TokTok service management */}
+{adminSection === 'toktok' && (
+  <TokTokManagement />
 )}
       </main>
 
