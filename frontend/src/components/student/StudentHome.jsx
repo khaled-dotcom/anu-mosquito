@@ -172,6 +172,10 @@ function StudentHome({
         </div>
 
         <div className="home-header-actions">
+          <button className="header-orders-button toktok-entry-button" onClick={() => setStudentPage('toktok')} aria-label="Open ANU TokTok">
+            <span aria-hidden="true">🛺</span>
+            <span>TokTok</span>
+          </button>
           <button className="header-orders-button" onClick={() => setStudentPage('orders')}>
             <Icon name="bag" size={18} />
             <span>My Orders</span>

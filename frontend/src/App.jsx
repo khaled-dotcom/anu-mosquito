@@ -15,6 +15,7 @@ const DriverDashboard = lazy(() => import('./components/driver/DriverDashboard')
 const StudentHome = lazy(() => import('./components/student/StudentHome'))
 const StudentMenu = lazy(() => import('./components/student/StudentMenu'))
 const StudentOrders = lazy(() => import('./components/student/StudentOrders'))
+const TokTokPage = lazy(() => import('./components/toktok/TokTokPage'))
 const Auth = lazy(() => import('./components/auth/Auth'))
 
 function App() {
@@ -461,6 +462,18 @@ if (
     <DriverDashboard
       profile={profile}
       handleLogout={handleLogout}
+    />
+  )
+}
+
+// =========================
+// ANU TOKTOK — isolated student service
+// =========================
+if (session && studentPage === 'toktok' && profile?.role === 'student') {
+  return (
+    <TokTokPage
+      onBack={goToStudentHome}
+      onOpenOrders={() => setStudentPage('orders')}
     />
   )
 }

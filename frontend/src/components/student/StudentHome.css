@@ -291,7 +291,7 @@
 
 .quick-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -1096,3 +1096,12 @@ button.quick-card:hover {
     transform: none;
   }
 }
+
+
+/* ANU TokTok entry point — isolated from existing Mosquito styles */
+.home-header-actions .toktok-entry-button{background:#ffd447;border-color:#e4b91c;color:#29251b;font-weight:800}
+.home-header-actions .toktok-entry-button:hover{background:#ffcf24}
+
+/* TokTok tab — only affects the mobile student navigation */
+.student-tabbar .toktok-tab-icon { font-size: 22px; line-height: 22px; }
+.student-tabbar button.toktok-tab.active { color: #8b6900; }
