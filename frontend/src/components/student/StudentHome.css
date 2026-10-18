@@ -1105,3 +1105,37 @@ button.quick-card:hover {
 /* TokTok tab — only affects the mobile student navigation */
 .student-tabbar .toktok-tab-icon { font-size: 22px; line-height: 22px; }
 .student-tabbar button.toktok-tab.active { color: #8b6900; }
+
+
+/* Visible TokTok shortcut below the search bar */
+.toktok-home-entry {
+  margin: 18px 0 22px !important;
+}
+.toktok-home-entry .toktok-entry-button {
+  width: auto;
+  min-width: 164px;
+  height: 46px;
+  padding: 0 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid #e4b91c;
+  border-radius: 14px;
+  background: #ffd447;
+  color: #29251b;
+  box-shadow: 0 5px 14px rgba(126, 93, 0, 0.16);
+  font-size: 14px;
+  font-weight: 800;
+}
+.toktok-home-entry .toktok-entry-button span {
+  display: inline !important;
+}
+.toktok-home-entry .toktok-entry-button span:first-child {
+  font-size: 22px;
+  line-height: 1;
+}
+.toktok-home-entry .toktok-entry-button:hover {
+  background: #ffcf24;
+  transform: translateY(-1px);
+}
