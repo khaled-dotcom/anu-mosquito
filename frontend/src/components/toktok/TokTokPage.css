@@ -19,3 +19,69 @@
 .toktok-order-items li { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; font-size: .9rem; }
 .toktok-order-items li span { overflow-wrap: anywhere; }
 .toktok-order-items li strong { white-space: nowrap; }
+
+
+/* TokTok student storefront redesign — TokTok-only */
+.toktok-page{background:#f5f8fc;color:#142a43}
+.toktok-header{background:rgba(255,255,255,.96);border-bottom:1px solid #e3eaf2;box-shadow:0 4px 18px rgba(22,47,78,.04)}
+.toktok-back,.toktok-orders{border-color:#dbe5f0;border-radius:12px;color:#153b63;background:#fff}
+.toktok-mark{background:#e2efff;color:#153b63;border-radius:15px}
+.toktok-brand strong{color:#12385e;letter-spacing:-.02em}
+.toktok-brand small{color:#718198}
+.toktok-main{width:min(1240px,calc(100% - 36px));padding-top:24px}
+.toktok-hero{position:relative;overflow:hidden;border-radius:24px;background:linear-gradient(110deg,#0b2a4a 0%,#174b7c 65%,#367bb0 100%);color:#fff;padding:clamp(26px,5vw,52px);margin-bottom:28px;box-shadow:0 14px 32px rgba(12,42,74,.13)}
+.toktok-hero:after{content:"🛍️";position:absolute;right:5%;bottom:-22px;font-size:clamp(76px,13vw,150px);opacity:.14;transform:rotate(-12deg);pointer-events:none}
+.toktok-hero .toktok-kicker{color:#a9d3ff}
+.toktok-hero h1{position:relative;z-index:1;color:#fff;letter-spacing:-.04em}
+.toktok-hero p{position:relative;z-index:1;color:#e1efff}
+.toktok-directory-heading{margin:0 0 18px}
+.toktok-directory-heading .toktok-kicker,.toktok-inside-store-heading .toktok-kicker{color:#3875ae}
+.toktok-directory-heading h2,.toktok-inside-store-heading h2{margin:7px 0 5px;color:#12385e;font-size:clamp(23px,3vw,32px);letter-spacing:-.035em}
+.toktok-directory-heading p{margin:0;color:#6d7d91}
+.toktok-store-row{display:grid;grid-template-columns:1fr;gap:15px;overflow:visible;padding:2px 0 18px}
+.toktok-store{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:flex-end;gap:18px;width:100%;min-height:clamp(155px,22vw,230px);padding:clamp(20px,3vw,30px);border:0;border-radius:22px;background-color:#194d78;background-size:cover;background-position:center;color:#fff;box-shadow:0 9px 24px rgba(20,53,88,.12);transition:transform .18s ease,box-shadow .18s ease}
+.toktok-store:before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(5,20,39,.88) 0%,rgba(5,20,39,.55) 46%,rgba(5,20,39,.08) 100%)}
+.toktok-store:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(20,53,88,.19)}
+.toktok-store:focus-visible{outline:3px solid #65aef2;outline-offset:3px}
+.toktok-store-icon{width:62px;height:62px;border-radius:18px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);color:#fff;font-size:30px;backdrop-filter:blur(8px)}
+.toktok-store-copy{display:flex;flex-direction:column;align-items:flex-start;gap:5px;max-width:min(620px,90%);min-width:0}
+.toktok-store-copy strong{display:block;color:#fff;font-size:clamp(23px,4vw,36px);line-height:1.1;letter-spacing:-.035em}
+.toktok-store-copy small{display:block;color:rgba(255,255,255,.86);font-size:14px;white-space:normal;overflow-wrap:anywhere;max-width:100%}
+.toktok-store-copy em{display:inline-flex;gap:8px;align-items:center;margin-top:8px;padding:9px 13px;border-radius:10px;background:#fff;color:#12385e;font-style:normal;font-size:13px;font-weight:850}
+.toktok-inside-store-heading{display:flex;align-items:center;gap:16px;margin:4px 0 14px}
+.toktok-inside-store-heading>button{flex-shrink:0;border:1px solid #d7e4f2;border-radius:11px;padding:10px 13px;background:#fff;color:#16466f;font:inherit;font-weight:800;cursor:pointer}
+.toktok-inside-store-heading h2{margin:3px 0 0}
+.toktok-categories{position:sticky;top:72px;z-index:4;gap:9px;padding:12px 2px 18px;margin-bottom:5px;background:rgba(245,248,252,.94);backdrop-filter:blur(12px)}
+.toktok-categories button{border:1px solid #dbe5f0;border-radius:12px;padding:10px 16px;background:#fff;color:#34516e;font-size:13px;font-weight:750;box-shadow:0 2px 6px rgba(21,55,88,.03)}
+.toktok-categories button.active{background:#12385e;color:#fff;border-color:#12385e;box-shadow:0 5px 13px rgba(18,56,94,.17)}
+.toktok-product-grid{gap:17px}
+.toktok-product{border:1px solid #e2eaf3;border-radius:18px;box-shadow:0 5px 18px rgba(24,54,85,.045);transition:transform .18s ease,box-shadow .18s ease}
+.toktok-product:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(24,54,85,.09)}
+.toktok-product-image,.toktok-product-placeholder{height:190px;background:#eaf2fa}
+.toktok-product-body h3{color:#183a5d}
+.toktok-product-body p{color:#718198;line-height:1.45}
+.toktok-product-body>strong{color:#164f82;font-size:17px}
+.toktok-quantity{border-color:#dbe5f0;border-radius:12px}
+.toktok-quantity button{background:#e1efff;color:#12385e;font-weight:800}
+.toktok-checkout{border:1px solid #e0e9f3;background:#fff;border-radius:22px;box-shadow:0 8px 26px rgba(20,53,88,.05)}
+.toktok-checkout .toktok-kicker{color:#3875ae}
+.toktok-checkout-fields input,.toktok-checkout-fields select{border-color:#dbe5f0;color:#183a5d}
+.toktok-place-order{background:#12385e;border-radius:12px}
+.toktok-empty{border-color:#dbe5f0;background:#fff;color:#708096}
+.toktok-empty h2{color:#12385e}
+.toktok-message.is-success{background:#e8f7ef;color:#176447}
+@media(max-width:600px){
+ .toktok-main{width:calc(100% - 22px);padding-top:15px}
+ .toktok-hero{border-radius:19px;margin-bottom:22px}
+ .toktok-store-row{gap:12px}
+ .toktok-store{min-height:170px;padding:18px;border-radius:18px;gap:12px;background-position:center}
+ .toktok-store-icon{width:48px;height:48px;border-radius:14px;font-size:24px}
+ .toktok-store-copy strong{font-size:25px}
+ .toktok-store-copy small{font-size:12px}
+ .toktok-categories{top:65px;gap:7px;padding:10px 0 14px}
+ .toktok-categories button{padding:9px 12px}
+ .toktok-product-image,.toktok-product-placeholder{height:138px}
+ .toktok-inside-store-heading{align-items:flex-start;gap:10px}
+ .toktok-inside-store-heading>button{padding:9px 10px;font-size:12px}
+}
+@media(min-width:900px){.toktok-store-row{grid-template-columns:repeat(2,minmax(0,1fr))}.toktok-store{min-height:210px}}
