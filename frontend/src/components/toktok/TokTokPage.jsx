@@ -9,6 +9,7 @@ const money = (value) => new Intl.NumberFormat('en-EG', {
 export default function TokTokPage({ onBack, onOpenOrders }) {
   const [stores, setStores] = useState([])
   const [storeId, setStoreId] = useState('')
+  const [selectedStoreOpen, setSelectedStoreOpen] = useState(false)
   const [categories, setCategories] = useState([])
   const [products, setProducts] = useState([])
   const [batches, setBatches] = useState([])
@@ -81,12 +82,20 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
   useEffect(() => { loadCatalog() }, [loadCatalog]) // load when the TokTok screen opens
 
   function switchStore(nextId) {
-    if (nextId === storeId) return
     setStoreId(nextId)
+    setSelectedStoreOpen(true)
     setCart({})
     setCategoryId('all')
     setBatchId('')
     setLoading(true)
+    setError('')
+    setNotice('')
+  }
+
+  function backToStores() {
+    setSelectedStoreOpen(false)
+    setCategoryId('all')
+    setCart({})
     setError('')
     setNotice('')
   }
@@ -234,28 +243,35 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
           <div className="toktok-empty"><span>🛺</span><h2>TokTok is getting ready</h2><p>No stores are open yet. Please check back soon.</p></div>
         ) : (
           <>
-            <section className="toktok-store-row" aria-label="Stores">
-              {stores.map((store) => <button key={store.id} className={store.id === storeId ? 'toktok-store active' : 'toktok-store'} onClick={() => switchStore(store.id)} type="button">
-                {store.image_url ? <img src={store.image_url} alt="" /> : <span className="toktok-store-icon">🛺</span>}
-                <span><strong>{store.name}</strong><small>{store.description || 'Browse available items'}</small></span>
-              </button>)}
-            </section>
-
-            {categories.length > 0 && <nav className="toktok-categories" aria-label="Product categories">
-              <button className={categoryId === 'all' ? 'active' : ''} onClick={() => setCategoryId('all')} type="button">All items</button>
-              {categories.map((category) => <button key={category.id} className={categoryId === category.id ? 'active' : ''} onClick={() => setCategoryId(category.id)} type="button">{category.name}</button>)}
-            </nav>}
-
-            {shownProducts.length === 0 ? <div className="toktok-empty">No available products in this category yet.</div> : <section className="toktok-product-grid">
-              {shownProducts.map((product) => <article className="toktok-product" key={product.id}>
-                {product.image_url ? <img className="toktok-product-image" src={product.image_url} alt="" loading="lazy" /> : <div className="toktok-product-placeholder">🛍️</div>}
-                <div className="toktok-product-body"><h3>{product.name}</h3><p>{product.description || 'Available for campus delivery.'}</p><strong>{money(product.selling_price)}</strong>
-                  <div className="toktok-quantity"><button type="button" aria-label={`Remove one ${product.name}`} onClick={() => changeQuantity(product, -1)} disabled={!cart[product.id]}>−</button><span>{cart[product.id] || 0}</span><button type="button" aria-label={`Add one ${product.name}`} onClick={() => changeQuantity(product, 1)}>+</button></div>
+            {!selectedStoreOpen ? (
+              <section className="toktok-store-directory" aria-label="Choose a store">
+                <div className="toktok-directory-heading"><span className="toktok-kicker">SHOP BY STORE</span><h2>What are you looking for?</h2><p>Choose a store to explore its menu.</p></div>
+                <div className="toktok-store-row">
+                  {stores.map((store) => <button key={store.id} className="toktok-store" onClick={() => switchStore(store.id)} type="button" style={store.image_url ? { backgroundImage: `linear-gradient(90deg, rgba(5,18,35,.82), rgba(5,18,35,.18)), url("${store.image_url}")` } : undefined}>
+                    <span className="toktok-store-icon">{store.image_url ? null : '🛍️'}</span>
+                    <span className="toktok-store-copy"><strong>{store.name}</strong><small>{store.description || 'Explore store'}</small><em>Explore menu <span aria-hidden="true">→</span></em></span>
+                  </button>)}
                 </div>
-              </article>)}
-            </section>}
-
-            <section className="toktok-checkout">
+              </section>
+            ) : (
+              <>
+                <div className="toktok-inside-store-heading">
+                  <button type="button" onClick={backToStores}>← All stores</button>
+                  <div><span className="toktok-kicker">NOW SHOPPING AT</span><h2>{stores.find((store) => store.id === storeId)?.name || 'Store menu'}</h2></div>
+                </div>
+                {categories.length > 0 && <nav className="toktok-categories" aria-label="Product categories">
+                  <button className={categoryId === 'all' ? 'active' : ''} onClick={() => setCategoryId('all')} type="button">All items</button>
+                  {categories.map((category) => <button key={category.id} className={categoryId === category.id ? 'active' : ''} onClick={() => setCategoryId(category.id)} type="button">{category.name}</button>)}
+                </nav>}
+                {shownProducts.length === 0 ? <div className="toktok-empty">No available products in this category yet.</div> : <section className="toktok-product-grid">
+                  {shownProducts.map((product) => <article className="toktok-product" key={product.id}>
+                    {product.image_url ? <img className="toktok-product-image" src={product.image_url} alt="" loading="lazy" /> : <div className="toktok-product-placeholder">🛍️</div>}
+                    <div className="toktok-product-body"><h3>{product.name}</h3><p>{product.description || 'Available for campus delivery.'}</p><strong>{money(product.selling_price)}</strong>
+                      <div className="toktok-quantity"><button type="button" aria-label={`Remove one ${product.name}`} onClick={() => changeQuantity(product, -1)} disabled={!cart[product.id]}>−</button><span>{cart[product.id] || 0}</span><button type="button" aria-label={`Add one ${product.name}`} onClick={() => changeQuantity(product, 1)}>+</button></div>
+                    </div>
+                  </article>)}
+                </section>}
+                <section className="toktok-checkout">
               <div><span className="toktok-kicker">YOUR CART</span><h2>{count} {count === 1 ? 'item' : 'items'}</h2><p>Subtotal: <strong>{money(subtotal)}</strong></p><small>Delivery fee is calculated by the server at checkout.</small></div>
               <div className="toktok-checkout-fields">
                 <label>Delivery batch<select value={batchId} onChange={(event) => setBatchId(event.target.value)}><option value="">Choose an available batch</option>{batches.map((batch) => <option key={batch.id} value={batch.id}>{new Date(batch.delivery_time).toLocaleString('en-EG', { dateStyle: 'medium', timeStyle: 'short' })}</option>)}</select></label>
@@ -263,7 +279,9 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
                 <label>Order notes (optional)<input value={notes} onChange={(event) => setNotes(event.target.value)} maxLength={500} placeholder="Any instructions?" /></label>
                 <button className="toktok-place-order" type="button" onClick={placeOrder} disabled={submitting || count === 0 || !batchId}>{submitting ? 'Placing order…' : `Place order · ${money(subtotal)} + delivery`}</button>
               </div>
-            </section>
+                </section>
+              </>
+            )}
           </>
         )}
       </main>
