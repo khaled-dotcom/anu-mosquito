@@ -33,9 +33,9 @@ export default function TokTokManagement() {
   const [orders, setOrders] = useState([])
   const [categories, setCategories] = useState([])
   const [orderItems, setOrderItems] = useState([])
-  const [deliveryFee, setDeliveryFee] = useState('0')
-  const [savedDeliveryFee, setSavedDeliveryFee] = useState(0)
-  const [savingDeliveryFee, setSavingDeliveryFee] = useState(false)
+  const [deliveryTiers, setDeliveryTiers] = useState([{ min_order_total: '0', fee: '25' }, { min_order_total: '500', fee: '30' }])
+  const [savedDeliveryTiers, setSavedDeliveryTiers] = useState([{ min_order_total: 0, fee: 25 }, { min_order_total: 500, fee: 30 }])
+  const [savingDeliveryTiers, setSavingDeliveryTiers] = useState(false)
   const [search, setSearch] = useState('')
   const [selectedStoreId, setSelectedStoreId] = useState('')
   const [editing, setEditing] = useState(null)
@@ -61,7 +61,7 @@ export default function TokTokManagement() {
       ])
       const [categoryResult, deliveryFeeResult] = await Promise.all([
         supabase.from('toktok_categories').select('id,store_id,name,description,image_url,is_active,sort_order').order('sort_order').order('name'),
-        supabase.from('toktok_settings').select('setting_value').eq('setting_key', 'delivery_fee').maybeSingle(),
+        supabase.from('toktok_settings').select('setting_key,setting_value').in('setting_key', ['delivery_fee_tiers', 'delivery_fee']),
       ])
       const failed = [storeResult, productResult, batchResult, orderResult, categoryResult, deliveryFeeResult].find((result) => result.error)
       if (failed) throw failed.error
@@ -70,10 +70,14 @@ export default function TokTokManagement() {
       setBatches(batchResult.data || [])
       setOrders(orderResult.data || [])
       setCategories(categoryResult.data || [])
-      const feeValue = Number(deliveryFeeResult.data?.setting_value ?? 0)
-      const normalizedFee = Number.isFinite(feeValue) && feeValue >= 0 ? feeValue : 0
-      setDeliveryFee(String(normalizedFee))
-      setSavedDeliveryFee(normalizedFee)
+      const settingsRows = deliveryFeeResult.data || []
+      const tiersRow = settingsRows.find((row) => row.setting_key === 'delivery_fee_tiers')
+      const legacyFeeRow = settingsRows.find((row) => row.setting_key === 'delivery_fee')
+      const rawTiers = Array.isArray(tiersRow?.setting_value) ? tiersRow.setting_value : [{ min_order_total: 0, fee: Number(legacyFeeRow?.setting_value ?? 0) }]
+      const normalizedTiers = rawTiers.map((tier) => ({ min_order_total: Number(tier.min_order_total), fee: Number(tier.fee) })).filter((tier) => Number.isFinite(tier.min_order_total) && tier.min_order_total >= 0 && Number.isFinite(tier.fee) && tier.fee >= 0).sort((a, b) => a.min_order_total - b.min_order_total)
+      const finalTiers = normalizedTiers.length && normalizedTiers[0].min_order_total === 0 ? normalizedTiers : [{ min_order_total: 0, fee: Number(legacyFeeRow?.setting_value ?? 0) }]
+      setDeliveryTiers(finalTiers.map((tier) => ({ min_order_total: String(tier.min_order_total), fee: String(tier.fee) })))
+      setSavedDeliveryTiers(finalTiers)
       if ((orderResult.data || []).length) {
         const itemsResult = await supabase.from('toktok_order_items').select('id,order_id,product_name_snapshot,quantity,unit_price,unit_cost_snapshot,line_total,notes').in('order_id', orderResult.data.map((o) => o.id))
         setOrderItems(itemsResult.error ? [] : (itemsResult.data || []))
@@ -183,29 +187,29 @@ export default function TokTokManagement() {
     } finally { setBusyId('') }
   }
 
-  async function saveDeliveryFee(event) {
+  async function saveDeliveryTiers(event) {
     event.preventDefault()
     setError('')
     setNotice('')
-    const amount = Number(deliveryFee)
-    if (deliveryFee === '' || !Number.isFinite(amount) || amount < 0 || amount > 100000) {
-      setError('Enter a valid delivery price between EGP 0 and EGP 100,000.')
-      return
-    }
-    setSavingDeliveryFee(true)
+    const normalized = deliveryTiers.map((tier) => ({ min_order_total: Number(tier.min_order_total), fee: Number(tier.fee) })).sort((a, b) => a.min_order_total - b.min_order_total)
+    if (!normalized.length || normalized.some((tier) => !Number.isFinite(tier.min_order_total) || tier.min_order_total < 0 || !Number.isFinite(tier.fee) || tier.fee < 0 || tier.min_order_total > 1000000 || tier.fee > 100000)) { setError('Enter valid minimum order totals and delivery prices. Values cannot be negative.'); return }
+    if (normalized[0].min_order_total !== 0 || normalized.some((tier, index) => index > 0 && tier.min_order_total === normalized[index - 1].min_order_total)) { setError('The first range must start at EGP 0, and each minimum order total must be unique.'); return }
+    setSavingDeliveryTiers(true)
     try {
       const { data: authData, error: authError } = await supabase.auth.getUser()
       if (authError) throw authError
-      const { error: saveError } = await supabase.from('toktok_settings').upsert({ setting_key: 'delivery_fee', setting_value: amount, updated_by: authData.user?.id || null, updated_at: new Date().toISOString() }, { onConflict: 'setting_key' })
+      const { error: saveError } = await supabase.from('toktok_settings').upsert({ setting_key: 'delivery_fee_tiers', setting_value: normalized, updated_by: authData.user?.id || null, updated_at: new Date().toISOString() }, { onConflict: 'setting_key' })
       if (saveError) throw saveError
-      setSavedDeliveryFee(amount)
-      setDeliveryFee(String(amount))
-      setNotice('TokTok delivery price saved. New orders will use this price; existing orders will remain unchanged.')
-    } catch (err) {
-      console.error('TokTok delivery price save failed:', err)
-      setError(err?.message || 'Could not save the TokTok delivery price. Make sure you are signed in as an admin.')
-    } finally { setSavingDeliveryFee(false) }
+      setSavedDeliveryTiers(normalized)
+      setDeliveryTiers(normalized.map((tier) => ({ min_order_total: String(tier.min_order_total), fee: String(tier.fee) })))
+      setNotice('TokTok delivery ranges saved. New orders will use the matching range; existing orders remain unchanged.')
+    } catch (err) { console.error('TokTok delivery ranges save failed:', err); setError(err?.message || 'Could not save TokTok delivery ranges. Make sure you are signed in as an admin.') }
+    finally { setSavingDeliveryTiers(false) }
   }
+
+  function updateDeliveryTier(index, field, value) { setDeliveryTiers((current) => current.map((tier, i) => i === index ? { ...tier, [field]: value } : tier)) }
+  function addDeliveryTier() { setDeliveryTiers((current) => [...current, { min_order_total: '', fee: '' }]) }
+  function removeDeliveryTier(index) { setDeliveryTiers((current) => current.filter((_, i) => i !== index)) }
 
   async function saveCategory(event) {
     event.preventDefault()
@@ -320,12 +324,19 @@ export default function TokTokManagement() {
             </div>}
           </div>}
           {tab === 'delivery-fee' && <div className="toktok-admin-panel toktok-delivery-fee-panel">
-            <div className="toktok-admin-panel-heading"><div><h3>TokTok delivery price</h3><p>One delivery fee for every TokTok store. This setting is separate from Mosquito restaurant delivery prices.</p></div><span className="toktok-admin-status on">TokTok only</span></div>
-            <div className="toktok-delivery-fee-summary"><span className="toktok-delivery-fee-icon">🛺</span><div><small>Current delivery fee</small><strong>{money(savedDeliveryFee)}</strong><p>Applied automatically to new TokTok orders at checkout.</p></div></div>
-            <form className="toktok-admin-form toktok-delivery-fee-form" onSubmit={saveDeliveryFee}>
-              <label htmlFor="toktok-delivery-fee">Delivery price (EGP)<input id="toktok-delivery-fee" type="number" min="0" max="100000" step="0.01" inputMode="decimal" value={deliveryFee} onChange={(event) => setDeliveryFee(event.target.value)} required /></label>
-              <p className="toktok-delivery-fee-note">Changing this price affects new orders only. Delivery prices saved on existing orders will not change.</p>
-              <div className="toktok-admin-form-actions"><button type="button" disabled={savingDeliveryFee || Number(deliveryFee) === savedDeliveryFee} onClick={() => setDeliveryFee(String(savedDeliveryFee))}>Reset</button><button type="submit" disabled={savingDeliveryFee}>{savingDeliveryFee ? 'Saving…' : 'Save delivery price'}</button></div>
+            <div className="toktok-admin-panel-heading"><div><h3>TokTok delivery price ranges</h3><p>Set delivery fees based on the items subtotal, just like Mosquito. This configuration is TokTok-only.</p></div><span className="toktok-admin-status on">TokTok only</span></div>
+            <div className="toktok-delivery-fee-summary"><span className="toktok-delivery-fee-icon">🛺</span><div><small>Configured ranges</small><strong>{savedDeliveryTiers.length} ranges</strong><p>The matching range is selected automatically for each new order.</p></div></div>
+            <form className="toktok-admin-form toktok-delivery-fee-form" onSubmit={saveDeliveryTiers}>
+              <div className="toktok-delivery-tiers-heading"><strong>Order subtotal range rules</strong><span>EGP</span></div>
+              {deliveryTiers.map((tier, index) => <div className="toktok-delivery-tier-row" key={index}>
+                <label>Minimum order subtotal<input aria-label={'Minimum order subtotal for range ' + (index + 1)} type="number" min="0" max="1000000" step="0.01" value={tier.min_order_total} onChange={(event) => updateDeliveryTier(index, 'min_order_total', event.target.value)} required /></label>
+                <label>Delivery fee<input aria-label={'Delivery fee for range ' + (index + 1)} type="number" min="0" max="100000" step="0.01" value={tier.fee} onChange={(event) => updateDeliveryTier(index, 'fee', event.target.value)} required /></label>
+                <button type="button" className="toktok-tier-remove" disabled={deliveryTiers.length <= 1} onClick={() => removeDeliveryTier(index)}>Remove</button>
+              </div>)}
+              <button type="button" className="toktok-tier-add" onClick={addDeliveryTier}>+ Add range</button>
+              <p className="toktok-delivery-fee-note">Each minimum marks where that fee starts and continues until the next minimum. The first range must start at EGP 0. New orders only; existing orders are unchanged.</p>
+              <div className="toktok-delivery-tiers-preview"><strong>Current rules</strong>{savedDeliveryTiers.map((tier, index) => <div key={index}><span>{money(tier.min_order_total)}{index + 1 < savedDeliveryTiers.length ? ' and above until ' + money(savedDeliveryTiers[index + 1].min_order_total) : ' and above'}</span><strong>{money(tier.fee)}</strong></div>)}</div>
+              <div className="toktok-admin-form-actions"><button type="button" disabled={savingDeliveryTiers} onClick={() => setDeliveryTiers(savedDeliveryTiers.map((tier) => ({ min_order_total: String(tier.min_order_total), fee: String(tier.fee) })))}>Reset</button><button type="submit" disabled={savingDeliveryTiers}>{savingDeliveryTiers ? 'Saving…' : 'Save delivery ranges'}</button></div>
             </form>
           </div>}
 
