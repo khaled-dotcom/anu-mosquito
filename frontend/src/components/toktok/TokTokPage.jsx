@@ -70,27 +70,15 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
 
   useEffect(() => { loadCatalog() }, [loadCatalog]) // load when the TokTok screen opens
 
-  async function switchStore(nextId) {
+  function switchStore(nextId) {
+    if (nextId === storeId) return
     setStoreId(nextId)
     setCart({})
     setCategoryId('all')
     setBatchId('')
     setLoading(true)
     setError('')
-    const [categoryResult, productResult, batchResult] = await Promise.all([
-      supabase.from('toktok_categories').select('id,name,sort_order').eq('store_id', nextId).eq('is_active', true).order('sort_order'),
-      supabase.from('toktok_products').select('id,store_id,category_id,name,description,image_url,selling_price,stock_quantity').eq('store_id', nextId).eq('is_available', true).order('sort_order'),
-      supabase.from('toktok_batches').select('id,store_id,registration_start,registration_end,delivery_time,capacity').eq('store_id', nextId).eq('is_active', true).gte('registration_end', new Date().toISOString()).order('delivery_time'),
-    ])
-    if (categoryResult.error || productResult.error || batchResult.error) setError('Could not load this store menu or delivery times.')
-    else {
-      setCategories(categoryResult.data || [])
-      setProducts(productResult.data || [])
-      const openBatches = (batchResult.data || []).filter((batch) => new Date(batch.registration_start) <= new Date() && new Date(batch.registration_end) >= new Date())
-      setBatches(openBatches)
-      setBatchId(openBatches[0]?.id || '')
-    }
-    setLoading(false)
+    setNotice('')
   }
 
   const shownProducts = useMemo(() => categoryId === 'all' ? products : products.filter((product) => product.category_id === categoryId), [products, categoryId])
