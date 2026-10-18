@@ -1,5 +1,5 @@
 name: Deploy to GitHub Pages
-# Re-run deployment to publish the latest ANU Mosquito frontend.
+# Redeploy latest ANU Mosquito frontend after deployment verification.
 
 on:
   push:
