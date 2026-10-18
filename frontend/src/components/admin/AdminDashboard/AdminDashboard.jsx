@@ -32,7 +32,7 @@ const ADMIN_NAV = [
   { key: 'finance', label: 'Finances', icon: '💰' },
   { key: 'drivers', label: 'Drivers', icon: '🚗' },
   { key: 'payment-methods', label: 'Payment Methods', icon: '💳' },
-  { key: 'settings', label: 'Settings', icon: '⚙️' },
+  { key: 'delivery-prices', label: 'Delivery Prices', icon: '💵' },
   { key: 'toktok', label: 'ANU TokTok', icon: '🛺' },
 ]
 
@@ -789,7 +789,7 @@ handleAssignDriver={handleAssignDriver}
   <HomeCategoryManagement />
 )}
 
-{adminSection === 'settings' && (
+{adminSection === 'delivery-prices' && (
   <DeliverySettings />
 )}
 
