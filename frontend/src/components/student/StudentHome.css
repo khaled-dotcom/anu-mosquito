@@ -1096,3 +1096,8 @@ button.quick-card:hover {
     transform: none;
   }
 }
+
+
+/* ANU TokTok entry point — isolated from existing Mosquito styles */
+.home-header-actions .toktok-entry-button{background:#ffd447;border-color:#e4b91c;color:#29251b;font-weight:800}
+.home-header-actions .toktok-entry-button:hover{background:#ffcf24}
