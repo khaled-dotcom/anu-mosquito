@@ -10,6 +10,7 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
   const [stores, setStores] = useState([])
   const [storeId, setStoreId] = useState('')
   const [selectedStoreOpen, setSelectedStoreOpen] = useState(false)
+  const [activeProduct, setActiveProduct] = useState(null)
   const [categories, setCategories] = useState([])
   const [products, setProducts] = useState([])
   const [batches, setBatches] = useState([])
@@ -259,9 +260,9 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
   return (
     <div className="toktok-page">
       <header className="toktok-header">
-        <button className="toktok-back" type="button" onClick={onBack}>← Back to Mosquito</button>
+        <button className="toktok-back" type="button" onClick={onBack}>← <span>Back to Mosquito</span></button>
         <div className="toktok-brand"><span className="toktok-mark">🛺</span><div><strong>ANU TokTok</strong><small>Campus essentials, delivered</small></div></div>
-        <button className="toktok-orders" type="button" onClick={openTokTokOrders}>My TokTok Orders</button>
+        <button className="toktok-orders" type="button" onClick={openTokTokOrders}><span className="toktok-orders-icon">▤</span><span>My Orders</span></button>
       </header>
       <main className="toktok-main">
         {!selectedStoreOpen && !showOrders && <section className="toktok-hero"><span className="toktok-kicker">THE TOKTOK SERVICE</span><h1>Need something? We’ll bring it.</h1><p>Choose a store, add your items, and select an available delivery batch.</p></section>}
@@ -331,14 +332,31 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
             </nav>}
             {shownProducts.length === 0 && <div className="toktok-empty">No available products in this category yet.</div>}
             {shownProducts.length > 0 && <section className="toktok-product-grid">
-              {shownProducts.map((product) => <article className="toktok-product" key={product.id}>
+              {shownProducts.map((product) => <article className="toktok-product" key={product.id} role="button" tabIndex={0} onClick={() => setActiveProduct(product)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setActiveProduct(product) } }} aria-label={'View ' + product.name + ' details'}>
                 {product.image_url ? <img className="toktok-product-image" src={product.image_url} alt="" loading="lazy" /> : <div className="toktok-product-placeholder">🛍️</div>}
                 <div className="toktok-product-body"><h3>{product.name}</h3><strong className="toktok-product-price">{money(product.selling_price)}</strong>
-                  <div className="toktok-quantity"><button type="button" aria-label={'Remove one ' + product.name} onClick={() => changeQuantity(product, -1)} disabled={!cart[product.id]}>−</button><span>{cart[product.id] || 0}</span><button type="button" aria-label={'Add one ' + product.name} onClick={() => changeQuantity(product, 1)}>+</button></div>
+                  {Number(cart[product.id] || 0) > 0 && <small className="toktok-product-in-cart">{cart[product.id]} in bag</small>}
                 </div>
               </article>)}
             </section>}
 
+            {activeProduct && (
+              <div className="toktok-product-modal-backdrop" role="presentation" onClick={() => setActiveProduct(null)}>
+                <section className="toktok-product-modal" role="dialog" aria-modal="true" aria-label={activeProduct.name} onClick={(event) => event.stopPropagation()}>
+                  <button type="button" className="toktok-product-modal-close" onClick={() => setActiveProduct(null)} aria-label="Close item details">×</button>
+                  {activeProduct.image_url ? <img className="toktok-product-modal-image" src={activeProduct.image_url} alt={activeProduct.name} /> : <div className="toktok-product-modal-placeholder">🛍️</div>}
+                  <div className="toktok-product-modal-content">
+                    <span className="toktok-kicker">TOKTOK ITEM</span><h2>{activeProduct.name}</h2>
+                    {activeProduct.description && <p>{activeProduct.description}</p>}
+                    <strong className="toktok-product-modal-price">{money(activeProduct.selling_price)}</strong>
+                    <div className="toktok-product-modal-actions">
+                      <div className="toktok-quantity"><button type="button" aria-label={'Remove one ' + activeProduct.name} onClick={() => changeQuantity(activeProduct, -1)} disabled={!cart[activeProduct.id]}>−</button><span>{cart[activeProduct.id] || 0}</span><button type="button" aria-label={'Add one ' + activeProduct.name} onClick={() => changeQuantity(activeProduct, 1)}>+</button></div>
+                      <button type="button" className="toktok-product-add-button" onClick={() => { if (!cart[activeProduct.id]) changeQuantity(activeProduct, 1); setActiveProduct(null) }}>{Number(cart[activeProduct.id] || 0) > 0 ? 'Done' : 'Add to bag'}</button>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            )}
             {cartOpen && (
               <div className="toktok-cart-backdrop" role="presentation" onClick={() => setCartOpen(false)}>
                 <section className="toktok-checkout toktok-cart-panel" role="dialog" aria-modal="true" aria-label="Cart and checkout" onClick={(event) => event.stopPropagation()}>

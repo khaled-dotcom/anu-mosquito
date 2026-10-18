@@ -1,5 +1,6 @@
 import './StudentHome.css'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { supabase } from '../../supabase'
 import Icon from '../common/Icon'
 import StudentTabBar from './StudentTabBar'
 import { loadCategoryDishes, loadHomeCategories } from '../../services/homeCategoryService'
@@ -65,6 +66,7 @@ function StudentHome({
   const [activeCategory, setActiveCategory] = useState(null)
   const [extrasLoading, setExtrasLoading] = useState(true)
   const [now, setNow] = useState(() => Date.now())
+  const [toktokEnabled, setToktokEnabled] = useState(true)
 
   useEffect(() => {
     let cancelled = false
@@ -87,6 +89,16 @@ function StudentHome({
     }
   }, [])
 
+  useEffect(() => {
+    let cancelled = false
+    supabase.from('toktok_settings').select('setting_value').eq('setting_key', 'toktok_enabled').maybeSingle()
+      .then(({ data, error }) => {
+        if (cancelled || error || !data) return
+        const value = data.setting_value
+        setToktokEnabled(value === true || value === 'true')
+      })
+    return () => { cancelled = true }
+  }, [])
   // Students only see restaurants the admin has switched on.
   const openRestaurants = useMemo(
     () => restaurants.filter((restaurant) => restaurant.is_active !== false),
@@ -216,7 +228,7 @@ function StudentHome({
           )}
         </label>
 
-        <section className="toktok-home-entry" aria-labelledby="toktok-section-heading">
+        {toktokEnabled && <section className="toktok-home-entry" aria-labelledby="toktok-section-heading">
           <div className="toktok-section-header">
             <div className="toktok-section-title-icon" aria-hidden="true">✨</div>
             <div>
@@ -237,7 +249,7 @@ function StudentHome({
             </span>
             <span className="toktok-service-arrow" aria-hidden="true">→</span>
           </button>
-        </section>
+        </section>}
 
         {(extrasLoading || usableCategories.length > 0) && (
           <section className="section" aria-label="Categories">

@@ -143,3 +143,12 @@
   outline: 2px solid #ffdf00;
   outline-offset: 1px;
 }
+
+.toktok-admin-visibility-card{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:22px;border:1px solid #e6e6e6;border-radius:18px;background:#fff}
+.toktok-admin-visibility-card>span{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:#fff3a5;font-size:22px}
+.toktok-admin-visibility-card>small{font-size:12px;color:#777}
+.toktok-admin-visibility-card>strong{font-size:18px;color:#171717}
+.toktok-admin-visibility-card>em{font-size:12px;color:#777;font-style:normal;line-height:1.45}
+.toktok-admin-visibility-card>button{margin-top:5px;padding:10px 13px;border:0;border-radius:10px;background:#171717;color:#ffd600;font-weight:850;cursor:pointer}
+.toktok-admin-visibility-card>button.is-disabled{background:#ffd600;color:#171717}
+.toktok-admin-visibility-card>button:disabled{opacity:.6;cursor:wait}

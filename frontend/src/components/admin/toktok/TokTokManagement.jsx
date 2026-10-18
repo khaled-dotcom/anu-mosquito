@@ -36,6 +36,8 @@ export default function TokTokManagement() {
   const [deliveryTiers, setDeliveryTiers] = useState([{ min_order_total: '0', fee: '25' }, { min_order_total: '500', fee: '30' }])
   const [savedDeliveryTiers, setSavedDeliveryTiers] = useState([{ min_order_total: 0, fee: 25 }, { min_order_total: 500, fee: 30 }])
   const [savingDeliveryTiers, setSavingDeliveryTiers] = useState(false)
+  const [toktokEnabled, setToktokEnabled] = useState(true)
+  const [savingToktokEnabled, setSavingToktokEnabled] = useState(false)
   const [search, setSearch] = useState('')
   const [selectedStoreId, setSelectedStoreId] = useState('')
   const [editing, setEditing] = useState(null)
@@ -61,7 +63,7 @@ export default function TokTokManagement() {
       ])
       const [categoryResult, deliveryFeeResult] = await Promise.all([
         supabase.from('toktok_categories').select('id,store_id,name,description,image_url,is_active,sort_order').order('sort_order').order('name'),
-        supabase.from('toktok_settings').select('setting_key,setting_value').in('setting_key', ['delivery_fee_tiers', 'delivery_fee']),
+        supabase.from('toktok_settings').select('setting_key,setting_value').in('setting_key', ['delivery_fee_tiers', 'delivery_fee', 'toktok_enabled']),
       ])
       const failed = [storeResult, productResult, batchResult, orderResult, categoryResult, deliveryFeeResult].find((result) => result.error)
       if (failed) throw failed.error
@@ -77,6 +79,8 @@ export default function TokTokManagement() {
       setOrders(ordersWithProof)
       setCategories(categoryResult.data || [])
       const settingsRows = deliveryFeeResult.data || []
+      const toktokEnabledRow = settingsRows.find((row) => row.setting_key === 'toktok_enabled')
+      setToktokEnabled(toktokEnabledRow ? (toktokEnabledRow.setting_value === true || toktokEnabledRow.setting_value === 'true') : true)
       const tiersRow = settingsRows.find((row) => row.setting_key === 'delivery_fee_tiers')
       const legacyFeeRow = settingsRows.find((row) => row.setting_key === 'delivery_fee')
       const rawTiers = Array.isArray(tiersRow?.setting_value) ? tiersRow.setting_value : [{ min_order_total: 0, fee: Number(legacyFeeRow?.setting_value ?? 0) }]
@@ -193,6 +197,26 @@ export default function TokTokManagement() {
     } finally { setBusyId('') }
   }
 
+  async function toggleToktokVisibility() {
+    const nextValue = !toktokEnabled
+    setSavingToktokEnabled(true)
+    setError('')
+    setNotice('')
+    try {
+      const { data: authData, error: authError } = await supabase.auth.getUser()
+      if (authError) throw authError
+      const { error: saveError } = await supabase.from('toktok_settings').upsert({
+        setting_key: 'toktok_enabled', setting_value: nextValue,
+        updated_by: authData.user?.id || null, updated_at: new Date().toISOString(),
+      }, { onConflict: 'setting_key' })
+      if (saveError) throw saveError
+      setToktokEnabled(nextValue)
+      setNotice(nextValue ? 'ANU TokTok is now visible to students on the home page.' : 'ANU TokTok is hidden from students on the home page.')
+    } catch (err) {
+      console.error('TokTok visibility update failed:', err)
+      setError(err?.message || 'Could not update TokTok visibility. Check admin permissions and try again.')
+    } finally { setSavingToktokEnabled(false) }
+  }
   async function saveDeliveryTiers(event) {
     event.preventDefault()
     setError('')
@@ -352,6 +376,7 @@ export default function TokTokManagement() {
             <article><span>🛍️</span><small>Products</small><strong>{products.length}</strong><em>{products.filter((product) => product.is_available).length} available</em></article>
             <article><span>📦</span><small>Orders needing attention</small><strong>{activeOrders}</strong><em>Across TokTok stores</em></article>
             <article><span>💰</span><small>Recent order total</small><strong>{money(revenue)}</strong><em>Latest {orders.length} orders loaded</em></article>
+            <article className="toktok-admin-visibility-card"><span>👁️</span><small>Student home page</small><strong>{toktokEnabled ? 'TokTok is visible' : 'TokTok is hidden'}</strong><em>{toktokEnabled ? 'Students can open ANU TokTok' : 'Students will not see the TokTok entry'}</em><button type="button" onClick={toggleToktokVisibility} disabled={savingToktokEnabled} className={toktokEnabled ? 'is-enabled' : 'is-disabled'}>{savingToktokEnabled ? 'Saving…' : toktokEnabled ? 'Hide from students' : 'Show to students'}</button></article>
             <div className="toktok-admin-callout"><strong>Quick guide</strong><p>Use the tabs above to switch between TokTok stores, product availability, delivery batches, and incoming orders. Changes to availability are saved directly to the database.</p></div>
           </div>}
 
