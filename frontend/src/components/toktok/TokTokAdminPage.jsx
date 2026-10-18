@@ -84,7 +84,11 @@ export default function TokTokAdminPage() {
     if (kind === 'category') payload = { ...payload, store_id: storeId, name: payload.name.trim(), sort_order: Number(payload.sort_order || 0) }
     if (kind === 'product') payload = { ...payload, store_id: storeId, category_id: payload.category_id || null, name: payload.name.trim(), selling_price: Number(payload.selling_price), cost_price: payload.cost_price === '' ? null : Number(payload.cost_price), stock_quantity: payload.stock_quantity === '' ? null : Number(payload.stock_quantity), sort_order: Number(payload.sort_order || 0) }
     if (kind === 'batch') payload = { ...payload, store_id: storeId, registration_start: new Date(payload.registration_start).toISOString(), registration_end: new Date(payload.registration_end).toISOString(), delivery_time: new Date(payload.delivery_time).toISOString(), capacity: payload.capacity === '' ? null : Number(payload.capacity) }
-    const query = editing?.kind === kind ? supabase.from(table).update(payload).eq('id', editing.id) : supabase.from(table).insert(payload)
+    delete payload.id
+    delete payload.created_at
+    delete payload.updated_at
+    const isEdit = editing?.kind === kind && Boolean(editing.id)
+    const query = isEdit ? supabase.from(table).update(payload).eq('id', editing.id) : supabase.from(table).insert(payload)
     const { error: saveError } = await query
     setSaving(false)
     if (saveError) { setError(saveError.message || 'Save failed.'); return }
