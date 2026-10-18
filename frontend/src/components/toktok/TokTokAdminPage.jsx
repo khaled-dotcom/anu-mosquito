@@ -41,7 +41,7 @@ export default function TokTokAdminPage() {
     setStoreId((current) => safeStores.some((s) => s.id === current) ? current : (safeStores[0]?.id || ''))
     if (orderRes.error) setError((current) => current || 'Orders could not be loaded with current permissions.')
     else setOrders(orderRes.data || [])
-    if (!feeRes.error && feeRes.data?.setting_value != null) setDeliveryFee(String(feeRes.data.setting_value?.amount ?? feeRes.data.setting_value))
+    if (!feeRes.error && feeRes.data?.setting_value != null) setDeliveryFee(String(feeRes.data.setting_value))
     setLoading(false)
   }, [])
 
@@ -115,7 +115,7 @@ export default function TokTokAdminPage() {
     if (!Number.isFinite(amount) || amount < 0) { setError('Enter a valid non-negative delivery fee.'); return }
     setSaving(true); setError(''); setMessage('')
     const { data: userData } = await supabase.auth.getUser()
-    const { error: feeError } = await supabase.from('toktok_settings').upsert({ setting_key: 'delivery_fee', setting_value: { amount }, updated_by: userData.user?.id }, { onConflict: 'setting_key' })
+    const { error: feeError } = await supabase.from('toktok_settings').upsert({ setting_key: 'delivery_fee', setting_value: amount, updated_by: userData.user?.id }, { onConflict: 'setting_key' })
     setSaving(false)
     if (feeError) setError(feeError.message)
     else setMessage('Delivery fee saved.')
