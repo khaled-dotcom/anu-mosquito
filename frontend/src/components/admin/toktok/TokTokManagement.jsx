@@ -95,12 +95,11 @@ export default function TokTokManagement() {
     const table = tab === 'stores' ? 'toktok_stores' : tab === 'products' ? 'toktok_products' : 'toktok_batches'
     let payload
     if (tab === 'stores') {
-      const slug = String(form.slug || form.name || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+      const slug = String(form.slug || form.name || '').trim().toLowerCase().normalize('NFKC').replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '')
       if (!(form.name || '').trim() || !slug) { setError('Enter a valid store name.'); return }
       payload = { name: form.name.trim(), slug, description: (form.description || '').trim() || null, image_url: (form.image_url || '').trim() || null, sort_order: Number(form.sort_order) || 0, is_active: editing ? editing.is_active : true, is_open: editing ? editing.is_open : true }
     } else if (tab === 'products') {
       if (!form.store_id) { setError('Choose a store before adding a product.'); return }
-      if (!(form.name || '').trim()) { setError('Enter a product name.'); return }
       if (!(form.name || '').trim()) { setError('Enter a product name.'); return }
       if (form.selling_price === '' || !Number.isFinite(Number(form.selling_price)) || Number(form.selling_price) < 0) { setError('Enter a valid selling price.'); return }
       if (form.cost_price !== '' && (!Number.isFinite(Number(form.cost_price)) || Number(form.cost_price) < 0)) { setError('Enter a valid cost price.'); return }
