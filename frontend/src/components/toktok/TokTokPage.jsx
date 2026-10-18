@@ -262,7 +262,7 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
               <>
                 <div className="toktok-inside-store-heading">
                   <button type="button" onClick={backToStores}>← All stores</button>
-                  <div><span className="toktok-kicker">NOW SHOPPING AT</span><h2>{stores.find((store) => store.id === storeId)?.name || 'Store menu'}</h2></div>
+                  <div className="toktok-current-store">{stores.find((store) => store.id === storeId)?.image_url && <img src={stores.find((store) => store.id === storeId)?.image_url} alt="" />}<div><span className="toktok-kicker">NOW SHOPPING AT</span><h2>{stores.find((store) => store.id === storeId)?.name || 'Store menu'}</h2></div></div>
                 </div>
                 {categories.length > 0 && <nav className="toktok-categories" aria-label="Product categories">
                   <button className={categoryId === 'all' ? 'active' : ''} onClick={() => setCategoryId('all')} type="button">All items</button>
@@ -276,15 +276,24 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
                     </div>
                   </article>)}
                 </section>}
-                <section className="toktok-checkout">
-              <div><span className="toktok-kicker">YOUR CART</span><h2>{count} {count === 1 ? 'item' : 'items'}</h2><p>Subtotal: <strong>{money(subtotal)}</strong></p><small>Delivery fee is calculated by the server at checkout.</small></div>
-              <div className="toktok-checkout-fields">
-                <label>Delivery batch<select value={batchId} onChange={(event) => setBatchId(event.target.value)}><option value="">Choose an available batch</option>{batches.map((batch) => <option key={batch.id} value={batch.id}>{new Date(batch.delivery_time).toLocaleString('en-EG', { dateStyle: 'medium', timeStyle: 'short' })}</option>)}</select></label>
-                <label>Delivery location<input value={address} onChange={(event) => setAddress(event.target.value)} maxLength={300} placeholder="Where should we meet you on campus?" /></label>
-                <label>Order notes (optional)<input value={notes} onChange={(event) => setNotes(event.target.value)} maxLength={500} placeholder="Any instructions?" /></label>
-                <button className="toktok-place-order" type="button" onClick={placeOrder} disabled={submitting || count === 0 || !batchId}>{submitting ? 'Placing order…' : `Place order · ${money(subtotal)} + delivery`}</button>
-              </div>
-                </section>
+                {cartOpen && <div className="toktok-cart-backdrop" role="presentation" onClick={() => setCartOpen(false)}>
+                  <section className="toktok-checkout toktok-cart-panel" role="dialog" aria-modal="true" aria-label="Cart and checkout" onClick={(event) => event.stopPropagation()}>
+                    <div className="toktok-cart-panel-heading">
+                      <div><span className="toktok-kicker">YOUR CART</span><h2>{count} {count === 1 ? 'item' : 'items'}</h2><p>Subtotal: <strong>{money(subtotal)}</strong></p><small>Delivery fee is calculated at checkout.</small></div>
+                      <button type="button" className="toktok-cart-close" onClick={() => setCartOpen(false)} aria-label="Close cart">×</button>
+                    </div>
+                    <div className="toktok-checkout-fields">
+                      <label>Delivery batch<select value={batchId} onChange={(event) => setBatchId(event.target.value)}><option value="">Choose an available batch</option>{batches.map((batch) => <option key={batch.id} value={batch.id}>{new Date(batch.delivery_time).toLocaleString('en-EG', { dateStyle: 'medium', timeStyle: 'short' })}</option>)}</select></label>
+                      <label>Delivery location<input value={address} onChange={(event) => setAddress(event.target.value)} maxLength={300} placeholder="Where should we meet you on campus?" /></label>
+                      <label>Order notes (optional)<input value={notes} onChange={(event) => setNotes(event.target.value)} maxLength={500} placeholder="Any instructions?" /></label>
+                      <button className="toktok-place-order" type="button" onClick={placeOrder} disabled={submitting || count === 0 || !batchId}>{submitting ? 'Placing order…' : `Place order · ${money(subtotal)} + delivery`}</button>
+                    </div>
+                  </section>
+                </div>}
+                <div className="toktok-cart-bar">
+                  <div><strong>{count} {count === 1 ? 'item' : 'items'}</strong><span>{money(subtotal)} subtotal</span></div>
+                  <button type="button" onClick={() => setCartOpen(true)} disabled={count === 0}>View cart &amp; checkout →</button>
+                </div>
               </>
             )}
           </>
