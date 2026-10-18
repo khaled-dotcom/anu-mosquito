@@ -43,7 +43,6 @@ function App() {
   setRestaurantSearch,
 
   showRestaurantForm,
-  setShowRestaurantForm,
 
   editingRestaurant,
 
@@ -330,7 +329,6 @@ if (
       setRestaurantSearch={setRestaurantSearch}
 
       showRestaurantForm={showRestaurantForm}
-      setShowRestaurantForm={setShowRestaurantForm}
       openAddRestaurantForm={openAddRestaurantForm}
       closeRestaurantForm={closeRestaurantForm}
 
