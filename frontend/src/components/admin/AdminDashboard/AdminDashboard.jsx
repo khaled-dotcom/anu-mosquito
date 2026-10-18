@@ -46,7 +46,6 @@ handleLogout,
   restaurantSearch,
   setRestaurantSearch,
   showRestaurantForm,
-  setShowRestaurantForm,
   openAddRestaurantForm,
   closeRestaurantForm,
   editingRestaurant,
@@ -618,7 +617,6 @@ handleAssignDriver,
             restaurantSearch={restaurantSearch}
             setRestaurantSearch={setRestaurantSearch}
             showRestaurantForm={showRestaurantForm}
-            setShowRestaurantForm={setShowRestaurantForm}
             openAddRestaurantForm={openAddRestaurantForm}
             closeRestaurantForm={closeRestaurantForm}
             editingRestaurant={editingRestaurant}
