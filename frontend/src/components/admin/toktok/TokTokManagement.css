@@ -3,3 +3,27 @@
 .toktok-admin-search{display:grid;gap:7px;margin:0 0 16px;color:#42536b;font-size:13px;font-weight:750}.toktok-admin-search input{box-sizing:border-box;width:100%;padding:10px;border:1px solid #d4dfed;border-radius:9px;background:#fff;color:#17243b;font:inherit}.toktok-admin-table td select{display:block;margin:0 0 6px;max-width:100%;padding:8px;border:1px solid #d4dfed;border-radius:8px;background:#fff;color:#17243b;font:inherit;font-size:12px}
 .toktok-admin-row-icon img{width:100%;height:100%;object-fit:cover;border-radius:14px}.toktok-admin-product-thumb{width:42px;height:42px;object-fit:cover;border-radius:8px;vertical-align:middle;margin-right:9px}
 .toktok-admin-store-image{min-width:0;padding:14px;border:1px solid #dce8f5;border-radius:12px;background:#fff}.toktok-admin-store-image>p{margin:7px 0 0;color:#64748b;font-size:12px;line-height:1.5}.toktok-admin-store-code{font-weight:800;color:#245c91!important}.toktok-admin-form>label:has(input[name="code"]){max-width:100%}.toktok-admin-form>label:has(input[name="slug"]){max-width:100%}.toktok-admin-form>label:has(input[name="name"]),.toktok-admin-form>label:has(input[name="code"]){font-weight:800}.toktok-admin-store-image .image-uploader{width:100%;max-width:100%}@media(max-width:600px){.toktok-admin-store-image{padding:11px}}
+
+/* Product catalog cards */
+.toktok-product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:18px}
+.toktok-product-card{min-width:0;overflow:hidden;border:1px solid #e1eaf4;border-radius:17px;background:#fff;box-shadow:0 5px 18px #17365d0a;transition:transform .18s ease,box-shadow .18s ease}
+.toktok-product-card:hover{transform:translateY(-2px);box-shadow:0 10px 26px #17365d12}
+.toktok-product-card-image{position:relative;display:grid;place-items:center;height:185px;overflow:hidden;background:#f1f6fc}
+.toktok-product-card-image>img{width:100%;height:100%;object-fit:cover}
+.toktok-product-card-image>span:first-child{font-size:44px}
+.toktok-product-card-image>.toktok-admin-status{position:absolute;top:12px;right:12px;box-shadow:0 2px 8px #17243b15}
+.toktok-product-card-body{display:grid;gap:9px;padding:16px}
+.toktok-product-store{color:#60758f;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.toktok-product-card-body h4{margin:0;color:#1b2b43;font-size:17px;overflow-wrap:anywhere}
+.toktok-product-card-body>p{margin:0;min-height:36px;color:#64748b;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.toktok-product-prices{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding-top:10px;border-top:1px solid #edf1f6}
+.toktok-product-prices strong{color:#1b5689;font-size:19px}
+.toktok-product-prices small{color:#718096;font-size:11px}
+.toktok-product-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:5px}
+.toktok-product-actions button{min-width:0;padding:9px 5px;border:1px solid #d7e3f0;border-radius:9px;background:#f8fbff;color:#1d416a;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
+.toktok-product-actions button:hover{background:#eaf3ff}
+.toktok-product-actions button.danger{border-color:#f3d7d7;background:#fff7f7;color:#a13333}
+.toktok-product-actions button:disabled{opacity:.55;cursor:wait}
+.toktok-product-form .toktok-product-image{margin-top:2px}
+.toktok-product-form .toktok-admin-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:600px){.toktok-product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.toktok-product-card-image{height:135px}.toktok-product-card-body{padding:11px;gap:8px}.toktok-product-card-body h4{font-size:14px}.toktok-product-prices{align-items:flex-start;flex-direction:column;gap:3px}.toktok-product-prices strong{font-size:16px}.toktok-product-actions{grid-template-columns:1fr;gap:6px}.toktok-product-actions button{padding:9px}.toktok-product-form .toktok-admin-form-grid{grid-template-columns:1fr}}
