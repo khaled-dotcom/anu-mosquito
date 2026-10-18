@@ -275,12 +275,21 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
             {!ordersLoading && myOrders.length === 0 && <div className="toktok-empty">You haven't placed any TokTok orders yet.</div>}
             {!ordersLoading && myOrders.length > 0 && <div className="toktok-order-list">{myOrders.map((order) => (
               <article className="toktok-order-card" key={order.id}>
-                <div><strong>{order.order_number}</strong><small>{order.store_name_snapshot} · {new Date(order.created_at).toLocaleString('en-EG', { dateStyle: 'medium', timeStyle: 'short' })}</small></div>
-                <span className="toktok-order-status">{order.status}</span>
-                <p>Total: <strong>{money(order.total_amount)}</strong> · Payment: {order.payment_status}</p>
-                {order.items?.length > 0 && <ul className="toktok-order-items">{order.items.map((item, index) => <li key={order.id + '-' + index}><span>{item.product_name_snapshot} × {item.quantity}</span><strong>{money(item.line_total)}</strong></li>)}</ul>}
-                <small>Payment method: {order.payment_method_snapshot || '—'} · Payment status: {order.payment_status || 'pending'}</small>
-                {order.batch_time_snapshot && <small>Delivery batch: {new Date(order.batch_time_snapshot).toLocaleString('en-EG', { dateStyle: 'medium', timeStyle: 'short' })}</small>}
+                <div className="toktok-order-topline"><div><span className="toktok-order-number-label">ORDER</span><strong className="toktok-order-number">#{order.order_number}</strong><small>{order.store_name_snapshot} · {new Date(order.created_at).toLocaleString('en-EG', { dateStyle: 'medium', timeStyle: 'short' })}</small></div><span className={'toktok-order-status status-' + String(order.status || '').toLowerCase().replace(/[^a-z]+/g, '-')}>{String(order.status || 'pending').replace(/_/g, ' ')}</span></div>
+                <div className="toktok-order-summary"><div><small>ORDER TOTAL</small><strong>{money(order.total_amount)}</strong></div><div><small>PAYMENT</small><strong className={'toktok-payment-status status-' + String(order.payment_status || 'pending').toLowerCase().replace(/[^a-z]+/g, '-')}>{String(order.payment_status || 'pending').replace(/_/g, ' ')}</strong></div></div>
+                {order.batch_time_snapshot && <div className="toktok-order-delivery-time"><span>Expected delivery</span><strong>{new Date(order.batch_time_snapshot).toLocaleTimeString('en-EG', { hour: 'numeric', minute: '2-digit' })}</strong><small>{new Date(order.batch_time_snapshot).toLocaleDateString('en-EG', { weekday: 'short', month: 'short', day: 'numeric' })}</small></div>}
+                <div className="toktok-order-tracking" aria-label="Order progress">
+                  {['pending', 'confirmed', 'preparing', 'ready', 'delivered'].map((step, index) => {
+                    const currentStatus = String(order.status || 'pending').toLowerCase().replace(/\s+/g, '_')
+                    const steps = ['pending', 'confirmed', 'preparing', 'ready', 'delivered']
+                    const cancelled = currentStatus.includes('cancel')
+                    const currentIndex = steps.indexOf(currentStatus)
+                    const activeIndex = currentIndex >= 0 ? currentIndex : (currentStatus.includes('complete') ? 4 : 0)
+                    const complete = !cancelled && index <= activeIndex
+                    return <div key={step} className={'toktok-track-step' + (complete ? ' is-complete' : '') + (index === activeIndex && !cancelled ? ' is-current' : '') + (cancelled ? ' is-cancelled' : '')}><span className="toktok-track-dot">{cancelled && index === 0 ? '!' : complete ? '✓' : index + 1}</span><small>{step === 'pending' ? 'Placed' : step === 'confirmed' ? 'Confirmed' : step === 'preparing' ? 'Preparing' : step === 'ready' ? 'On the way' : 'Delivered'}</small></div>
+                  })}
+                </div>
+                {String(order.status || '').toLowerCase().includes('cancel') && <p className="toktok-order-cancelled-note">This order was cancelled.</p>}
               </article>
             ))}</div>}
             <button type="button" className="toktok-refresh-orders" onClick={loadMyOrders} disabled={ordersLoading}>Refresh orders</button>
@@ -306,8 +315,8 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
             <div className="toktok-inside-store-heading">
               <button type="button" onClick={backToStores}>← All stores</button>
               <div className="toktok-current-store">
-                {stores.find((store) => store.id === storeId)?.image_url && <img src={stores.find((store) => store.id === storeId)?.image_url} alt="" />}
-                <div><span className="toktok-kicker">NOW SHOPPING AT</span><h2>{stores.find((store) => store.id === storeId)?.name || 'Store menu'}</h2></div>
+                {stores.find((store) => store.id === storeId)?.image_url ? <img src={stores.find((store) => store.id === storeId)?.image_url} alt="" /> : <div className="toktok-store-image-fallback">🛺</div>}
+                <div><span className="toktok-kicker">NOW SHOPPING AT</span><h2>{stores.find((store) => store.id === storeId)?.name || 'Store menu'}</h2><p>Pick your essentials</p></div>
               </div>
             </div>
             {categories.length > 0 && <nav className="toktok-categories" aria-label="Product categories">
@@ -336,7 +345,7 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
                       <div className="toktok-cart-lines">{cartItems.map((item) => <div key={item.id} className="toktok-cart-line"><span>{item.name} × {item.quantity}</span><strong>{money(Number(item.selling_price) * item.quantity)}</strong></div>)}</div>
                       <h3>Choose your delivery time</h3>
                       {batches.length === 0 && <p>No delivery batches are accepting orders right now.</p>}
-                      {batches.length > 0 && <div className="toktok-batch-options">{batches.map((batch) => <button key={batch.id} type="button" disabled={new Date(batch.registration_start) > new Date()} className={batchId === batch.id ? 'selected' : ''} onClick={() => setBatchId(batch.id)}><span><strong>{new Date(batch.delivery_time).toLocaleDateString('en-EG', { weekday: 'short', month: 'short', day: 'numeric' })}</strong><small>{new Date(batch.delivery_time).toLocaleTimeString('en-EG', { hour: 'numeric', minute: '2-digit' })}</small>{new Date(batch.registration_start) > new Date() && <small>Opens at {new Date(batch.registration_start).toLocaleTimeString('en-EG', { hour: 'numeric', minute: '2-digit' })}</small>}</span><span>{batchId === batch.id ? '✓' : '○'}</span></button>)}</div>}
+                      {batches.length > 0 && <div className="toktok-batch-options">{batches.map((batch) => <button key={batch.id} type="button" disabled={new Date(batch.registration_start) > new Date()} className={batchId === batch.id ? 'selected' : ''} onClick={() => setBatchId(batch.id)}><span className="toktok-batch-time-copy"><small>{new Date(batch.delivery_time).toLocaleDateString('en-EG', { weekday: 'short', month: 'short', day: 'numeric' })}</small><strong className="toktok-batch-time">{new Date(batch.delivery_time).toLocaleTimeString('en-EG', { hour: 'numeric', minute: '2-digit' })}</strong>{new Date(batch.registration_start) > new Date() && <small>Booking opens {new Date(batch.registration_start).toLocaleTimeString('en-EG', { hour: 'numeric', minute: '2-digit' })}</small>}</span><span className="toktok-choice-check">{batchId === batch.id ? '✓' : ''}</span></button>)}</div>}
                       <button className="toktok-place-order" type="button" onClick={() => setCheckoutStep('payment')} disabled={count === 0 || !batchId}>Continue to payment <span aria-hidden="true">→</span></button>
                     </div>
                   )}
@@ -348,7 +357,7 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
                       {!paymentMethodsLoading && paymentMethods.length === 0 && <p>No active payment methods are available. Contact TokTok administration.</p>}
                       {!paymentMethodsLoading && paymentMethods.length > 0 && <div className="toktok-payment-methods">{paymentMethods.map((method) => <button key={method.id} type="button" className={selectedPaymentMethod?.id === method.id ? 'selected' : ''} onClick={() => setSelectedPaymentMethod(method)}><strong>{method.name}</strong><small>{method.type}</small><span className="toktok-choice-check" aria-hidden="true">{selectedPaymentMethod?.id === method.id ? '✓' : ''}</span></button>)}</div>}
                       {selectedPaymentMethod && <div className="toktok-payment-instructions"><span>Transfer to</span><strong>{selectedPaymentMethod.account_number}</strong>{selectedPaymentMethod.instructions && <p>{selectedPaymentMethod.instructions}</p>}</div>}
-                      <label className="toktok-proof-upload">Payment screenshot<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => setPaymentProof(event.target.files?.[0] || null)} /><small>{paymentProof ? 'Selected: ' + paymentProof.name : 'Tap to upload · JPG, PNG or WEBP · max 8 MB'}</small></label>
+                      <label className="toktok-proof-upload"><span className="toktok-upload-icon">↑</span><strong>{paymentProof ? 'Screenshot selected' : 'Upload payment screenshot'}</strong><span className="toktok-upload-button">Choose file</span><input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => setPaymentProof(event.target.files?.[0] || null)} /><small>{paymentProof ? paymentProof.name : 'JPG, PNG or WEBP · maximum 8 MB'}</small></label>
                       {paymentProof && <div className="toktok-proof-preview-name">{paymentProof.name}</div>}
                       <div className="toktok-checkout-step-actions"><button type="button" onClick={() => setCheckoutStep('cart')}>← Back</button><button className="toktok-place-order" type="button" onClick={placeOrder} disabled={submitting || !selectedPaymentMethod || !paymentProof || !batchId}>{submitting ? 'Sending order…' : 'Place order'}</button></div>
                       <small className="toktok-payment-pending-note">Your order will be sent for payment review. You’ll see its status in My TokTok Orders.</small>
