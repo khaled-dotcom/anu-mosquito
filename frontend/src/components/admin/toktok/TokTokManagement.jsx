@@ -55,7 +55,7 @@ export default function TokTokManagement() {
       setOrders(orderResult.data || [])
       setCategories(categoryResult.data || [])
       if ((orderResult.data || []).length) {
-        const itemsResult = await supabase.from('toktok_order_items').select('id,order_id,product_name_snapshot,quantity,unit_price,line_total,notes').in('order_id', orderResult.data.map((o) => o.id))
+        const itemsResult = await supabase.from('toktok_order_items').select('id,order_id,product_name_snapshot,quantity,unit_price,unit_cost_snapshot,line_total,notes').in('order_id', orderResult.data.map((o) => o.id))
         setOrderItems(itemsResult.error ? [] : (itemsResult.data || []))
       } else setOrderItems([])
     } catch (err) {
@@ -259,8 +259,10 @@ export default function TokTokManagement() {
             <article><span>💰</span><small>Loaded orders gross total</small><strong>{money(orders.reduce((sum, order) => sum + Number(order.total_amount || 0), 0))}</strong><em>Latest {orders.length} orders only</em></article>
             <article><span>🛒</span><small>Items subtotal</small><strong>{money(orders.reduce((sum, order) => sum + Number(order.items_subtotal || 0), 0))}</strong><em>Before delivery fees</em></article>
             <article><span>🛺</span><small>Delivery fees</small><strong>{money(orders.reduce((sum, order) => sum + Number(order.delivery_fee || 0), 0))}</strong><em>Collected delivery charges</em></article>
+            <article><span>📉</span><small>Product cost snapshots</small><strong>{money(orderItems.reduce((sum, item) => sum + Number(item.unit_cost_snapshot || 0) * Number(item.quantity || 0), 0))}</strong><em>For loaded orders only</em></article>
+            <article><span>📈</span><small>Product gross margin</small><strong>{money(orders.reduce((sum, order) => sum + Number(order.items_subtotal || 0), 0) - orderItems.reduce((sum, item) => sum + Number(item.unit_cost_snapshot || 0) * Number(item.quantity || 0), 0))}</strong><em>Before driver costs, discounts and other expenses</em></article>
             <article><span>📋</span><small>Orders loaded</small><strong>{orders.length}</strong><em>Latest orders only</em></article>
-            <div className="toktok-admin-callout"><strong>Net profit is not calculated yet</strong><p>TokTok order records do not currently store a historical driver-cost snapshot per order. This summary avoids presenting gross sales as profit. A proper net-profit report needs a verified cost source for each completed order.</p></div>
+            <div className="toktok-admin-callout"><strong>Net profit still needs driver-cost history</strong><p>Product gross margin uses cost snapshots saved on TokTok order items. Net profit is not shown because driver costs are not currently saved as a historical per-order snapshot. Totals cover the latest loaded orders, not lifetime figures.</p></div>
           </div>}
 
           {tab === 'orders' && <div className="toktok-admin-panel"><div className="toktok-admin-panel-heading"><div><h3>TokTok orders</h3><p>Search orders, inspect item details, and update status/payment.</p></div><span>{orders.length} recent orders</span></div><label className="toktok-admin-search">Search orders<input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Order number, store, location, status…" /></label>
