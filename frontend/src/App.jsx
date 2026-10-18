@@ -472,7 +472,6 @@ if (
 if (session && studentPage === 'toktok' && profile?.role === 'student') {
   return (
     <TokTokPage
-      profile={profile}
       onBack={goToStudentHome}
       onOpenOrders={() => setStudentPage('orders')}
     />
