@@ -91,11 +91,10 @@ function StudentHome({
 
   useEffect(() => {
     let cancelled = false
-    supabase.from('toktok_settings').select('setting_value').eq('setting_key', 'toktok_enabled').maybeSingle()
+    supabase.rpc('get_toktok_enabled')
       .then(({ data, error }) => {
-        if (cancelled || error || !data) return
-        const value = data.setting_value
-        setToktokEnabled(value === true || value === 'true')
+        if (cancelled || error || typeof data !== 'boolean') return
+        setToktokEnabled(data)
       })
     return () => { cancelled = true }
   }, [])
