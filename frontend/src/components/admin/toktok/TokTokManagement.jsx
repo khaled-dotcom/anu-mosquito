@@ -275,7 +275,7 @@ export default function TokTokManagement() {
       return
     }
     const paymentStatus = String(order.payment_status || '').toLowerCase()
-    const nextPaymentStatus = paymentStatus === 'confirmed' ? 'refunded' : 'rejected'
+    const nextPaymentStatus = paymentStatus === 'confirmed' ? 'refunded' : 'pending'
     const prompt = paymentStatus === 'confirmed'
       ? 'Payment was confirmed. Cancel order ' + order.order_number + ' and mark payment as refunded?'
       : 'Cancel order ' + order.order_number + ' and reject its pending payment?'
