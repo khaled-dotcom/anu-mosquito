@@ -27,3 +27,32 @@
 .toktok-product-form .toktok-product-image{margin-top:2px}
 .toktok-product-form .toktok-admin-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 @media(max-width:600px){.toktok-product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.toktok-product-card-image{height:135px}.toktok-product-card-body{padding:11px;gap:8px}.toktok-product-card-body h4{font-size:14px}.toktok-product-prices{align-items:flex-start;flex-direction:column;gap:3px}.toktok-product-prices strong{font-size:16px}.toktok-product-actions{grid-template-columns:1fr;gap:6px}.toktok-product-actions button{padding:9px}.toktok-product-form .toktok-admin-form-grid{grid-template-columns:1fr}}
+
+
+.toktok-admin-store-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 460px;
+  margin: 18px 0;
+  color: var(--toktok-text, #17324d);
+  font-weight: 700;
+}
+.toktok-admin-store-filter select {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 13px;
+  border: 1px solid #cbd8e8;
+  border-radius: 12px;
+  background: #fff;
+  color: #17324d;
+  font: inherit;
+}
+.toktok-product-selected-store {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #eef6ff;
+  color: #174c80;
+  font-size: 0.95rem;
+}
