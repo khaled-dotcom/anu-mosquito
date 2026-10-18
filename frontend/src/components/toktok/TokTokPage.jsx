@@ -28,44 +28,54 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
   const loadCatalog = useCallback(async () => {
     setLoading(true)
     setError('')
-    const { data: storeRows, error: storeError } = await supabase
-      .from('toktok_stores')
-      .select('id,name,description,image_url')
-      .eq('is_active', true)
-      .eq('is_open', true)
-      .order('sort_order')
-    if (storeError) {
-      setError('Could not load TokTok stores. Please try again.')
-      setLoading(false)
-      return
-    }
-    const safeStores = storeRows || []
-    setStores(safeStores)
-    const nextStoreId = safeStores.some((store) => store.id === storeId) ? storeId : (safeStores[0]?.id || '')
-    setStoreId(nextStoreId)
-    if (!nextStoreId) {
-      setCategories([])
-      setProducts([])
-      setBatches([])
-      setLoading(false)
-      return
-    }
-    const [categoryResult, productResult, batchResult] = await Promise.all([
-      supabase.from('toktok_categories').select('id,name,sort_order').eq('store_id', nextStoreId).eq('is_active', true).order('sort_order'),
-      supabase.from('toktok_products').select('id,store_id,category_id,name,description,image_url,selling_price,stock_quantity').eq('store_id', nextStoreId).eq('is_available', true).order('sort_order'),
-      supabase.from('toktok_batches').select('id,store_id,registration_start,registration_end,delivery_time,capacity').eq('store_id', nextStoreId).eq('is_active', true).gte('registration_end', new Date().toISOString()).order('delivery_time'),
-    ])
-    if (categoryResult.error || productResult.error || batchResult.error) {
-      setError('Could not load this store menu or delivery times.')
-    } else {
+    try {
+      const { data: storeRows, error: storeError } = await supabase
+        .from('toktok_stores')
+        .select('id,name,description,image_url')
+        .eq('is_active', true)
+        .eq('is_open', true)
+        .order('sort_order')
+      if (storeError) throw storeError
+
+      const safeStores = storeRows || []
+      setStores(safeStores)
+      const nextStoreId = safeStores.some((store) => store.id === storeId) ? storeId : (safeStores[0]?.id || '')
+      if (nextStoreId !== storeId) setStoreId(nextStoreId)
+
+      if (!nextStoreId) {
+        setCategories([])
+        setProducts([])
+        setBatches([])
+        setBatchId('')
+        setCart({})
+        return
+      }
+
+      const now = new Date()
+      const [categoryResult, productResult, batchResult] = await Promise.all([
+        supabase.from('toktok_categories').select('id,name,sort_order').eq('store_id', nextStoreId).eq('is_active', true).order('sort_order'),
+        supabase.from('toktok_products').select('id,store_id,category_id,name,description,image_url,selling_price,stock_quantity').eq('store_id', nextStoreId).eq('is_available', true).order('sort_order'),
+        supabase.from('toktok_batches').select('id,store_id,registration_start,registration_end,delivery_time,capacity').eq('store_id', nextStoreId).eq('is_active', true).gte('registration_end', now.toISOString()).order('delivery_time'),
+      ])
+      if (categoryResult.error) throw categoryResult.error
+      if (productResult.error) throw productResult.error
+      if (batchResult.error) throw batchResult.error
+
+      const openBatches = (batchResult.data || []).filter((batch) =>
+        new Date(batch.registration_start) <= now && new Date(batch.registration_end) >= now
+      )
       setCategories(categoryResult.data || [])
       setProducts(productResult.data || [])
-      setBatches((batchResult.data || []).filter((batch) => new Date(batch.registration_start) <= new Date() && new Date(batch.registration_end) >= new Date()))
-      setBatchId((current) => (batchResult.data || []).some((batch) => batch.id === current) ? current : ((batchResult.data || []).find((batch) => new Date(batch.registration_start) <= new Date() && new Date(batch.registration_end) >= new Date())?.id || ''))
+      setBatches(openBatches)
+      setBatchId((current) => openBatches.some((batch) => batch.id === current) ? current : (openBatches[0]?.id || ''))
       setCart({})
       setCategoryId('all')
+    } catch (loadError) {
+      console.error('TokTok catalog load failed:', loadError)
+      setError('Could not load TokTok right now. Please refresh and try again.')
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }, [storeId])
 
   useEffect(() => { loadCatalog() }, [loadCatalog]) // load when the TokTok screen opens
