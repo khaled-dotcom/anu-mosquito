@@ -78,7 +78,8 @@ export default function TokTokAdminPage() {
     let payload = { ...form }
     if (kind === 'store') {
       payload.name = payload.name.trim()
-      payload.slug = (payload.slug.trim() || payload.name.toLowerCase()).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+      const slugSource = (payload.slug.trim() || payload.name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+      payload.slug = slugSource || `store-${Date.now()}`
       payload.sort_order = Number(payload.sort_order || 0)
     }
     if (kind === 'category') payload = { ...payload, store_id: storeId, name: payload.name.trim(), sort_order: Number(payload.sort_order || 0) }
