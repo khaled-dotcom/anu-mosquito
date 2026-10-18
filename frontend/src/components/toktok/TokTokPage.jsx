@@ -219,21 +219,16 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
       uploadedPath = userResult.user.id + '/toktok-' + crypto.randomUUID() + '.' + extension
       const { error: uploadError } = await supabase.storage.from('payment-proofs').upload(uploadedPath, file, { contentType: file.type, upsert: false })
       if (uploadError) throw uploadError
-      const { data, error: orderError } = await supabase.rpc('toktok_place_order', {
+      const { data, error: orderError } = await supabase.rpc('toktok_place_order_with_payment', {
         p_store_id: storeId, p_batch_id: batchId,
         p_items: cartItems.map(({ id, quantity }) => ({ product_id: id, quantity })),
-        p_delivery_address: address.trim() || null, p_notes: notes.trim() || null,
+        p_delivery_address: address.trim() || null,
+        p_notes: notes.trim() || null,
+        p_payment_method_id: selectedPaymentMethod.id,
+        p_payment_proof_url: uploadedPath,
       })
       if (orderError) throw orderError
       const order = Array.isArray(data) ? data[0] : data
-      const { error: paymentSaveError } = await supabase.from('toktok_orders').update({
-        payment_method_id: selectedPaymentMethod.id,
-        payment_method_snapshot: selectedPaymentMethod.name,
-        payment_proof_url: uploadedPath,
-        payment_status: 'pending_confirmation',
-        batch_time_snapshot: batches.find((batch) => batch.id === batchId)?.delivery_time || null,
-      }).eq('id', order.id).eq('student_id', userResult.user.id)
-      if (paymentSaveError) throw paymentSaveError
       setCart({})
       setCartOpen(false)
       setCheckoutStep('cart')
