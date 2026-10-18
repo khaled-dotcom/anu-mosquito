@@ -100,43 +100,52 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
   async function loadMyOrders() {
     setOrdersLoading(true)
     setError('')
-    const { data: userResult, error: userError } = await supabase.auth.getUser()
-    if (userError || !userResult.user) {
-      setError('Please sign in again to view your TokTok orders.')
-      setOrdersLoading(false)
-      return
-    }
-    const { data, error: ordersError } = await supabase
-      .from('toktok_orders')
-      .select('id,order_number,order_date,store_name_snapshot,delivery_address,delivery_fee,items_subtotal,total_amount,payment_status,status,notes,created_at')
-      .eq('student_id', userResult.user.id)
-      .order('created_at', { ascending: false })
-      .limit(50)
-    if (ordersError) {
-      setError('Could not load your TokTok orders. Please try again.')
-    } else {
-      const orders = data || []
-      if (orders.length === 0) {
+    try {
+      const { data: userResult, error: userError } = await supabase.auth.getUser()
+      if (userError) throw userError
+      if (!userResult.user) {
         setMyOrders([])
-      } else {
-        const { data: itemRows, error: itemsError } = await supabase
-          .from('toktok_order_items')
-          .select('order_id,product_name_snapshot,quantity,unit_price,line_total,notes')
-          .in('order_id', orders.map((order) => order.id))
-        if (itemsError) {
-          setMyOrders(orders.map((order) => ({ ...order, items: [] })))
-          setError('Orders loaded, but some item details could not be loaded.')
-        } else {
-          const itemsByOrder = (itemRows || []).reduce((grouped, item) => {
-            if (!grouped[item.order_id]) grouped[item.order_id] = []
-            grouped[item.order_id].push(item)
-            return grouped
-          }, {})
-          setMyOrders(orders.map((order) => ({ ...order, items: itemsByOrder[order.id] || [] })))
-        }
+        setError('Please sign in again to view your TokTok orders.')
+        return
       }
+
+      const { data, error: ordersError } = await supabase
+        .from('toktok_orders')
+        .select('id,order_number,order_date,store_name_snapshot,delivery_address,delivery_fee,items_subtotal,total_amount,payment_status,status,notes,created_at')
+        .eq('student_id', userResult.user.id)
+        .order('created_at', { ascending: false })
+        .limit(50)
+      if (ordersError) throw ordersError
+
+      const orders = data || []
+      if (!orders.length) {
+        setMyOrders([])
+        return
+      }
+
+      const { data: itemRows, error: itemsError } = await supabase
+        .from('toktok_order_items')
+        .select('order_id,product_name_snapshot,quantity,unit_price,line_total,notes')
+        .in('order_id', orders.map((order) => order.id))
+      if (itemsError) {
+        setMyOrders(orders.map((order) => ({ ...order, items: [] })))
+        setError('Orders loaded, but some item details could not be loaded. Please refresh.')
+        return
+      }
+
+      const itemsByOrder = (itemRows || []).reduce((grouped, item) => {
+        if (!grouped[item.order_id]) grouped[item.order_id] = []
+        grouped[item.order_id].push(item)
+        return grouped
+      }, {})
+      setMyOrders(orders.map((order) => ({ ...order, items: itemsByOrder[order.id] || [] })))
+    } catch (loadError) {
+      console.error('TokTok order history load failed:', loadError)
+      setMyOrders([])
+      setError('Could not load your TokTok orders. Please try again.')
+    } finally {
+      setOrdersLoading(false)
     }
-    setOrdersLoading(false)
   }
 
   async function openTokTokOrders() {
