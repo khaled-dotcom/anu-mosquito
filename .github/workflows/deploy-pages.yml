@@ -1,12 +1,9 @@
 name: Deploy to GitHub Pages
-# Redeploy latest ANU Mosquito frontend after deployment verification.
+# Keep the published site in sync with every main-branch update.
 
 on:
   push:
     branches: [main]
-    paths:
-      - 'frontend/**'
-      - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
 permissions:
