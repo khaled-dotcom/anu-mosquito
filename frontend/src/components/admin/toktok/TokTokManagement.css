@@ -56,3 +56,18 @@
   color: #174c80;
   font-size: 0.95rem;
 }
+
+
+/* TokTok-only delivery fee controls */
+.toktok-delivery-fee-panel{max-width:900px}
+.toktok-delivery-fee-summary{display:flex;align-items:center;gap:18px;margin:20px 0;padding:24px;border:1px solid #d9e8f7;border-radius:18px;background:linear-gradient(135deg,#f3f9ff,#fff)}
+.toktok-delivery-fee-icon{display:grid;place-items:center;flex:0 0 62px;width:62px;height:62px;border-radius:18px;background:#e2f0ff;font-size:30px}
+.toktok-delivery-fee-summary small{display:block;color:#5c7187;font-weight:700}
+.toktok-delivery-fee-summary strong{display:block;margin:5px 0;color:#123b63;font-size:clamp(25px,4vw,36px);line-height:1.2}
+.toktok-delivery-fee-summary p,.toktok-delivery-fee-note{margin:5px 0 0;color:#65798d;font-size:13px;line-height:1.6}
+.toktok-delivery-fee-form{max-width:560px}
+.toktok-delivery-fee-form label{display:flex;flex-direction:column;gap:8px;font-weight:750}
+.toktok-delivery-fee-form input{width:100%;box-sizing:border-box;min-height:48px;padding:11px 13px;border:1px solid #cbd8e8;border-radius:11px;background:#fff;color:#17324d;font:inherit}
+.toktok-delivery-fee-form input:focus{outline:2px solid #9acbff;outline-offset:1px}
+.toktok-delivery-fee-form .toktok-admin-form-actions button:disabled{opacity:.55;cursor:not-allowed}
+@media(max-width:600px){.toktok-delivery-fee-summary{align-items:flex-start;padding:17px;gap:12px}.toktok-delivery-fee-icon{flex-basis:48px;width:48px;height:48px;font-size:24px}.toktok-delivery-fee-form .toktok-admin-form-actions{flex-wrap:wrap}.toktok-delivery-fee-form .toktok-admin-form-actions button{flex:1}}
