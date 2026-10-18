@@ -6,7 +6,7 @@ const money = (value) => new Intl.NumberFormat('en-EG', {
   style: 'currency', currency: 'EGP', maximumFractionDigits: 2,
 }).format(Number(value || 0))
 
-export default function TokTokPage({ profile, onBack, onOpenOrders }) {
+export default function TokTokPage({ onBack, onOpenOrders }) {
   const [stores, setStores] = useState([])
   const [storeId, setStoreId] = useState('')
   const [categories, setCategories] = useState([])
@@ -65,7 +65,7 @@ export default function TokTokPage({ profile, onBack, onOpenOrders }) {
     setLoading(false)
   }, [storeId])
 
-  useEffect(() => { loadCatalog() }, []) // load when the TokTok screen opens
+  useEffect(() => { loadCatalog() }, [loadCatalog]) // load when the TokTok screen opens
 
   async function switchStore(nextId) {
     setStoreId(nextId)
