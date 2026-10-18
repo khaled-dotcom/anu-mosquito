@@ -77,7 +77,7 @@ export default function TokTokManagement() {
 
   function updateForm(event) {
     const { name, value } = event.target
-    setForm((current) => ({ ...current, [name]: value }))
+    setForm((current) => ({ ...current, [name]: value, ...(name === 'store_id' ? { category_id: '' } : {}) }))
   }
 
   function openAddForm() {
@@ -136,6 +136,10 @@ export default function TokTokManagement() {
     setEditing(record)
     setForm({
       ...emptyForm, ...record,
+      name: record.name || '',
+      slug: record.slug || '',
+      description: record.description || '',
+      image_url: record.image_url || '',
       store_id: record.store_id || stores[0]?.id || '',
       category_id: record.category_id || '',
       selling_price: record.selling_price ?? '',
