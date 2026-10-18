@@ -149,3 +149,32 @@
 .toktok-cart-close{flex-shrink:0;width:38px;height:38px;border:1px solid #e8dfb9;border-radius:50%;background:#fff;color:#171717;font-size:25px;line-height:1;cursor:pointer}
 @keyframes toktok-cart-rise{from{transform:translateY(24px);opacity:.7}to{transform:translateY(0);opacity:1}}
 @media(max-width:600px){.toktok-current-store img{width:58px;height:58px;border-radius:13px}.toktok-cart-bar{bottom:8px;margin:18px 0 8px;padding:10px 11px;gap:8px}.toktok-cart-bar>button{padding:12px 10px;font-size:12px}.toktok-cart-backdrop{padding:8px}.toktok-cart-panel{padding:18px;max-height:90vh}.toktok-inside-store-heading{align-items:center}}
+
+
+/* Compact product cards and TokTok's two-step checkout */
+.toktok-product-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.toktok-product{border-radius:13px}
+.toktok-product-image,.toktok-product-placeholder{height:112px;min-height:112px;object-fit:cover}
+.toktok-product-body{padding:10px;gap:7px}
+.toktok-product-body h3{font-size:14px;line-height:1.25;margin:0}
+.toktok-product-price{font-size:14px;color:#4b3900}
+.toktok-quantity{margin-top:2px}
+.toktok-cart-lines{display:grid;gap:8px;margin-bottom:14px}
+.toktok-cart-line{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #eee5d4;font-size:13px}
+.toktok-batch-options,.toktok-payment-methods{display:grid;gap:8px;margin:10px 0 16px}
+.toktok-batch-options button,.toktok-payment-methods button{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid #e6dcc6;border-radius:12px;background:#fff;text-align:left;color:#28251e;cursor:pointer}
+.toktok-batch-options button.selected,.toktok-payment-methods button.selected{border-color:#c99d00;background:#fff7d6;box-shadow:0 0 0 1px #c99d00}
+.toktok-batch-options button span:first-child,.toktok-payment-methods button strong{display:grid;gap:4px}
+.toktok-batch-options small,.toktok-payment-methods small{display:block;color:#756b57;font-size:12px}
+.toktok-payment-instructions{display:grid;gap:7px;padding:14px;border-radius:12px;background:#fff7d6;margin:12px 0}
+.toktok-payment-instructions>span,.toktok-payment-total small{font-size:12px;color:#756b57}
+.toktok-payment-instructions>strong{font-size:18px;overflow-wrap:anywhere}
+.toktok-payment-instructions p{margin:0;font-size:13px;line-height:1.5}
+.toktok-proof-upload{display:grid;gap:9px;padding:14px;border:1px dashed #c99d00;border-radius:12px;background:#fffdf5;font-weight:800}
+.toktok-proof-upload input{width:100%;font:inherit;font-size:13px}
+.toktok-proof-upload small,.toktok-proof-preview-name,.toktok-payment-pending-note{font-size:12px;color:#756b57;overflow-wrap:anywhere}
+.toktok-checkout-step-actions{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:center;margin-top:14px}
+.toktok-checkout-step-actions>button:first-child{padding:12px;border:1px solid #ddd1b6;border-radius:11px;background:#fff;font:inherit;font-weight:750;cursor:pointer}
+.toktok-checkout-step-actions .toktok-place-order{margin:0}
+.toktok-payment-total{display:grid;gap:5px;padding:12px;border-radius:12px;background:#faf4e3}
+@media(max-width:560px){.toktok-product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.toktok-product-image,.toktok-product-placeholder{height:95px;min-height:95px}.toktok-product-body{padding:9px}.toktok-product-body h3{font-size:13px}.toktok-cart-panel{max-height:88vh}.toktok-checkout-step-actions{grid-template-columns:1fr}.toktok-checkout-step-actions>button:first-child{order:2}}
