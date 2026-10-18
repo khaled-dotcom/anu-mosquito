@@ -283,7 +283,7 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
                   <p>Total: <strong>{money(order.total_amount)}</strong> · Payment: {order.payment_status}</p>
                   {order.items?.length > 0 && <ul className="toktok-order-items">{order.items.map((item, index) => <li key={`${order.id}-${index}`}><span>{item.product_name_snapshot} × {item.quantity}</span><strong>{money(item.line_total)}</strong></li>)}</ul>}
                   {order.delivery_address && <small>Delivery: {order.delivery_address}</small>}
-                  {order.notes && <small>Notes: {order.notes}</small>}
+                  {order.notes && <small>Notes: {order.notes}</small>}<small>Payment method: {order.payment_method_snapshot || '—'} · Payment status: {order.payment_status || 'pending'}</small>{order.batch_time_snapshot && <small>Delivery batch: {new Date(order.batch_time_snapshot).toLocaleString('en-EG', { dateStyle: 'medium', timeStyle: 'short' })}</small>}
                 </article>
               ))}</div>
             )}
