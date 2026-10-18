@@ -112,8 +112,30 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
       .eq('student_id', userResult.user.id)
       .order('created_at', { ascending: false })
       .limit(50)
-    if (ordersError) setError('Could not load your TokTok orders. Please try again.')
-    else setMyOrders(data || [])
+    if (ordersError) {
+      setError('Could not load your TokTok orders. Please try again.')
+    } else {
+      const orders = data || []
+      if (orders.length === 0) {
+        setMyOrders([])
+      } else {
+        const { data: itemRows, error: itemsError } = await supabase
+          .from('toktok_order_items')
+          .select('order_id,product_name_snapshot,quantity,unit_price,line_total,notes')
+          .in('order_id', orders.map((order) => order.id))
+        if (itemsError) {
+          setMyOrders(orders.map((order) => ({ ...order, items: [] })))
+          setError('Orders loaded, but some item details could not be loaded.')
+        } else {
+          const itemsByOrder = (itemRows || []).reduce((grouped, item) => {
+            if (!grouped[item.order_id]) grouped[item.order_id] = []
+            grouped[item.order_id].push(item)
+            return grouped
+          }, {})
+          setMyOrders(orders.map((order) => ({ ...order, items: itemsByOrder[order.id] || [] })))
+        }
+      }
+    }
     setOrdersLoading(false)
   }
 
@@ -169,6 +191,7 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
                   <div><strong>{order.order_number}</strong><small>{order.store_name_snapshot} · {new Date(order.created_at).toLocaleString('en-EG', { dateStyle: 'medium', timeStyle: 'short' })}</small></div>
                   <span className="toktok-order-status">{order.status}</span>
                   <p>Total: <strong>{money(order.total_amount)}</strong> · Payment: {order.payment_status}</p>
+                  {order.items?.length > 0 && <ul className="toktok-order-items">{order.items.map((item, index) => <li key={`${order.id}-${index}`}><span>{item.product_name_snapshot} × {item.quantity}</span><strong>{money(item.line_total)}</strong></li>)}</ul>}
                   {order.delivery_address && <small>Delivery: {order.delivery_address}</small>}
                   {order.notes && <small>Notes: {order.notes}</small>}
                 </article>
