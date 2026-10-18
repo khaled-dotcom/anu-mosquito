@@ -101,6 +101,73 @@ export default function TokTokManagement() {
     }
   }
 
+  function openEditRecord(kind, record) {
+    setError('')
+    setNotice('')
+    setEditing(record)
+    setForm({
+      ...emptyForm, ...record,
+      store_id: record.store_id || stores[0]?.id || '',
+      category_id: record.category_id || '',
+      selling_price: record.selling_price ?? '',
+      cost_price: record.cost_price ?? '',
+      stock_quantity: record.stock_quantity ?? '',
+      capacity: record.capacity ?? '',
+      sort_order: String(record.sort_order ?? 0),
+      registration_start: record.registration_start ? new Date(record.registration_start).toISOString().slice(0, 16) : '',
+      registration_end: record.registration_end ? new Date(record.registration_end).toISOString().slice(0, 16) : '',
+      delivery_time: record.delivery_time ? new Date(record.delivery_time).toISOString().slice(0, 16) : '',
+    })
+    setTab(kind)
+    setShowAdd(true)
+  }
+
+  async function deleteRecord(table, record, label) {
+    if (!window.confirm('Delete ' + label + '? Linked records may prevent deletion to protect order history.')) return
+    setError('')
+    setNotice('')
+    setBusyId(record.id)
+    try {
+      const { error: deleteError } = await supabase.from(table).delete().eq('id', record.id)
+      if (deleteError) throw deleteError
+      setNotice(label + ' deleted.')
+      await refresh()
+    } catch (err) {
+      setError(err?.message || 'Could not delete ' + label + '. Linked records may need to be retained.')
+    } finally { setBusyId('') }
+  }
+
+  async function saveCategory(event) {
+    event.preventDefault()
+    setError('')
+    setNotice('')
+    if (!categoryForm.store_id || !categoryForm.name.trim()) { setError('Choose a store and enter a category name.'); return }
+    try {
+      const payload = { store_id: categoryForm.store_id, name: categoryForm.name.trim(), description: categoryForm.description.trim() || null, sort_order: Number(categoryForm.sort_order) || 0, is_active: true }
+      const result = categoryForm.id
+        ? await supabase.from('toktok_categories').update(payload).eq('id', categoryForm.id)
+        : await supabase.from('toktok_categories').insert(payload)
+      if (result.error) throw result.error
+      setShowCategoryForm(false)
+      setCategoryForm({ store_id: stores[0]?.id || '', name: '', description: '', sort_order: '0' })
+      setNotice('Category saved.')
+      await refresh()
+    } catch (err) { setError(err?.message || 'Could not save category.') }
+  }
+
+  async function updateOrder(order, patch) {
+    setError('')
+    setNotice('')
+    setBusyId(order.id)
+    try {
+      const { error: updateError } = await supabase.from('toktok_orders').update(patch).eq('id', order.id)
+      if (updateError) throw updateError
+      setNotice('Order ' + order.order_number + ' updated.')
+      await refresh()
+    } catch (err) { setError(err?.message || 'Could not update order. Check order-management permissions.') }
+    finally { setBusyId('') }
+  }
+
   async function toggleRecord(table, id, field, currentValue, label) {
     setBusyId(id)
     setError('')
