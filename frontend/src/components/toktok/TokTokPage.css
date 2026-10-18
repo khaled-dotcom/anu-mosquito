@@ -85,3 +85,47 @@
  .toktok-inside-store-heading>button{padding:9px 10px;font-size:12px}
 }
 @media(min-width:900px){.toktok-store-row{grid-template-columns:repeat(2,minmax(0,1fr))}.toktok-store{min-height:210px}}
+
+
+/* TokTok brand correction: preserve the original black-and-yellow identity */
+.toktok-page{background:#fffdf4;color:#171717}
+.toktok-header{background:rgba(255,255,255,.97);border-bottom-color:#eee2a9;box-shadow:0 4px 18px rgba(0,0,0,.05)}
+.toktok-back,.toktok-orders{border-color:#e7d36b;color:#171717;background:#fff}
+.toktok-mark{background:#ffd629;color:#171717}
+.toktok-brand strong{color:#171717}
+.toktok-brand small{color:#6f6a52}
+.toktok-hero{background:linear-gradient(115deg,#111 0%,#252525 70%,#3a3420 100%);color:#fff;box-shadow:0 14px 32px rgba(0,0,0,.14)}
+.toktok-hero:after{opacity:.12}
+.toktok-hero .toktok-kicker{color:#ffdf3e}
+.toktok-hero h1{color:#fff}
+.toktok-hero p{color:#f7f0cc}
+.toktok-directory-heading .toktok-kicker,.toktok-inside-store-heading .toktok-kicker,.toktok-checkout .toktok-kicker{color:#927500}
+.toktok-directory-heading h2,.toktok-inside-store-heading h2{color:#171717}
+.toktok-directory-heading p{color:#6f6a52}
+.toktok-store{background-color:#242424;box-shadow:0 9px 24px rgba(0,0,0,.13)}
+.toktok-store:before{background:linear-gradient(90deg,rgba(0,0,0,.9) 0%,rgba(0,0,0,.58) 48%,rgba(0,0,0,.12) 100%)}
+.toktok-store:hover{box-shadow:0 14px 30px rgba(0,0,0,.2)}
+.toktok-store:focus-visible{outline-color:#ffd629}
+.toktok-store-copy em{background:#ffd629;color:#171717}
+.toktok-inside-store-heading>button{border-color:#e7d36b;background:#fff;color:#171717}
+.toktok-categories{background:rgba(255,253,244,.95)}
+.toktok-categories button{border-color:#e8dfb9;background:#fff;color:#383528}
+.toktok-categories button.active{background:#171717;color:#ffd629;border-color:#171717;box-shadow:0 5px 13px rgba(0,0,0,.16)}
+.toktok-product{border-color:#eee5c8;box-shadow:0 5px 18px rgba(0,0,0,.045)}
+.toktok-product:hover{box-shadow:0 10px 24px rgba(0,0,0,.1)}
+.toktok-product-image,.toktok-product-placeholder{background:#fff4bf}
+.toktok-product-body h3{color:#171717}
+.toktok-product-body p{color:#716d60}
+.toktok-product-body>strong{color:#171717}
+.toktok-quantity{border-color:#e8dfb9}
+.toktok-quantity button{background:#ffd629;color:#171717}
+.toktok-checkout{border-color:#eee4bd;background:#fff9df;box-shadow:0 8px 26px rgba(0,0,0,.05)}
+.toktok-checkout-fields input,.toktok-checkout-fields select{border-color:#e3d9aa;color:#171717}
+.toktok-place-order{background:#171717;color:#ffd629}
+.toktok-empty{border-color:#e8dfb9;background:#fff;color:#716d60}
+.toktok-empty h2{color:#171717}
+.toktok-message.is-success{background:#fff4bf;color:#4b3b00}
+.toktok-orders-heading button,.toktok-refresh-orders{border-color:#e0c52f;background:#fff4bf;color:#332900}
+.toktok-order-card{border-color:#eee4bd}
+.toktok-order-items{background:#fff8dc}
+.toktok-order-status{color:#715a00}
