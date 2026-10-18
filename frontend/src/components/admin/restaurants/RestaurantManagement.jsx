@@ -15,7 +15,6 @@ function RestaurantManagement({
   setRestaurantSearch,
 
   showRestaurantForm,
-  setShowRestaurantForm,
   openAddRestaurantForm,
   closeRestaurantForm,
 
