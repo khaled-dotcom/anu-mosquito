@@ -143,17 +143,32 @@ export default function TokTokAdminPage() {
 
   async function removeRow(table, row, label) {
     if (!window.confirm(`Delete ${label}? This action may be blocked if related records exist.`)) return
-    setError(''); setMessage('')
-    const { error: deleteError } = await supabase.from(table).delete().eq('id', row.id)
-    if (deleteError) setError(deleteError.message)
-    else { setMessage('Deleted.'); if (table === 'toktok_stores') await load(); else await loadStoreData(storeId) }
+    setError('')
+    setMessage('')
+    try {
+      const { error: deleteError } = await supabase.from(table).delete().eq('id', row.id)
+      if (deleteError) throw deleteError
+      setMessage('Deleted.')
+      if (table === 'toktok_stores') await load()
+      else await loadStoreData(storeId)
+    } catch (deleteError) {
+      console.error('TokTok admin delete failed:', deleteError)
+      setError(deleteError?.message || 'Delete failed. Please try again.')
+    }
   }
 
   async function toggleStore(store, field) {
-    setError(''); setMessage('')
-    const { error: updateError } = await supabase.from('toktok_stores').update({ [field]: !store[field] }).eq('id', store.id)
-    if (updateError) setError(updateError.message)
-    else { setMessage('Store updated.'); await load() }
+    setError('')
+    setMessage('')
+    try {
+      const { error: updateError } = await supabase.from('toktok_stores').update({ [field]: !store[field] }).eq('id', store.id)
+      if (updateError) throw updateError
+      setMessage('Store updated.')
+      await load()
+    } catch (updateError) {
+      console.error('TokTok store update failed:', updateError)
+      setError(updateError?.message || 'Store update failed. Please try again.')
+    }
   }
 
   async function saveFee(event) {
