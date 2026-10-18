@@ -88,14 +88,17 @@ export default function TokTokManagement() {
     const table = tab === 'stores' ? 'toktok_stores' : tab === 'products' ? 'toktok_products' : 'toktok_batches'
     let payload
     if (tab === 'stores') {
-      const slug = (form.slug || form.name).trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-      payload = { name: form.name.trim(), slug, description: form.description.trim() || null, is_active: true, is_open: true }
+      const slug = String(form.slug || form.name || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+      if (!(form.name || '').trim() || !slug) { setError('Enter a valid store name.'); return }
+      payload = { name: form.name.trim(), slug, description: (form.description || '').trim() || null, image_url: (form.image_url || '').trim() || null, sort_order: Number(form.sort_order) || 0, is_active: editing ? editing.is_active : true, is_open: editing ? editing.is_open : true }
     } else if (tab === 'products') {
       if (!form.store_id) { setError('Choose a store before adding a product.'); return }
       if (!(form.name || '').trim()) { setError('Enter a product name.'); return }
-      if (!form.name.trim()) { setError('Enter a product name.'); return }
+      if (!(form.name || '').trim()) { setError('Enter a product name.'); return }
       if (form.selling_price === '' || !Number.isFinite(Number(form.selling_price)) || Number(form.selling_price) < 0) { setError('Enter a valid selling price.'); return }
-      payload = { store_id: form.store_id, name: form.name.trim(), description: form.description.trim() || null, selling_price: Number(form.selling_price), cost_price: form.cost_price === '' ? null : Number(form.cost_price), stock_quantity: form.stock_quantity === '' ? null : Number(form.stock_quantity), is_available: true }
+      if (form.cost_price !== '' && (!Number.isFinite(Number(form.cost_price)) || Number(form.cost_price) < 0)) { setError('Enter a valid cost price.'); return }
+      if (form.stock_quantity !== '' && (!Number.isInteger(Number(form.stock_quantity)) || Number(form.stock_quantity) < 0)) { setError('Stock quantity must be a non-negative whole number.'); return }
+      payload = { store_id: form.store_id, category_id: form.category_id || null, name: form.name.trim(), description: (form.description || '').trim() || null, image_url: (form.image_url || '').trim() || null, selling_price: Number(form.selling_price), cost_price: form.cost_price === '' ? null : Number(form.cost_price), stock_quantity: form.stock_quantity === '' ? null : Number(form.stock_quantity), sort_order: Number(form.sort_order) || 0, is_available: editing ? editing.is_available : true }
     } else {
       if (!form.store_id) { setError('Choose a store before adding a batch.'); return }
       if (form.capacity !== '' && (!Number.isInteger(Number(form.capacity)) || Number(form.capacity) < 1)) { setError('Capacity must be a positive whole number.'); return }
@@ -108,14 +111,15 @@ export default function TokTokManagement() {
       payload = { store_id: form.store_id, registration_start: start.toISOString(), registration_end: end.toISOString(), delivery_time: delivery.toISOString(), capacity: form.capacity === '' ? null : Number(form.capacity), is_active: editing ? editing.is_active : true }
     }
     try {
-      const { error: insertError } = await supabase.from(table).insert(payload)
-      if (insertError) throw insertError
+      const result = editing ? await supabase.from(table).update(payload).eq('id', editing.id) : await supabase.from(table).insert(payload)
+      if (result.error) throw result.error
       setShowAdd(false)
-      setNotice(tab === 'stores' ? 'Store added successfully.' : tab === 'products' ? 'Product added successfully.' : 'Delivery batch added successfully.')
+      setEditing(null)
+      setNotice(editing ? 'Changes saved successfully.' : tab === 'stores' ? 'Store added successfully.' : tab === 'products' ? 'Product added successfully.' : 'Delivery batch added successfully.')
       await refresh()
     } catch (err) {
-      console.error('TokTok admin insert failed:', err)
-      setError(err?.message || 'Could not add this record. Check the required fields and admin permissions.')
+      console.error('TokTok admin save failed:', err)
+      setError(err?.message || 'Could not save this record. Check the required fields and admin permissions.')
     }
   }
 
