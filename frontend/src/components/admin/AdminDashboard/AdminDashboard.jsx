@@ -15,9 +15,11 @@ import DriverManagement from '../drivers/DriverManagement'
 import HomeCategoryManagement from '../categories/HomeCategoryManagement'
 import TeamsManagement from '../teams/TeamsManagement'
 import DiscountManagement from '../discounts/DiscountManagement'
+import TokTokAdminPage from '../../toktok/TokTokAdminPage'
 
 const ADMIN_NAV = [
   { key: 'dashboard', label: 'Dashboard', icon: '🏠' },
+  { key: 'toktok-admin', label: 'ANU TokTok', icon: '🛺' },
   { key: 'restaurants', label: 'Restaurants', icon: '🍔' },
   { key: 'food', label: 'Food & Menu', icon: '🍕' },
   { key: 'home-categories', label: 'Home Categories', icon: '🏷️' },
@@ -274,6 +276,8 @@ handleAssignDriver,
           </div>
 
         </header>
+
+        {adminSection === 'toktok-admin' && <TokTokAdminPage />}
 
         {/* Dashboard */}
         {adminSection === 'dashboard' && (
