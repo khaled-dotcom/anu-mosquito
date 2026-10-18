@@ -69,16 +69,25 @@ export default function TokTokManagement() {
     event.preventDefault()
     setError('')
     setNotice('')
-    const input = event.currentTarget
     const table = tab === 'stores' ? 'toktok_stores' : tab === 'products' ? 'toktok_products' : 'toktok_batches'
     let payload
     if (tab === 'stores') {
       const slug = (form.slug || form.name).trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
       payload = { name: form.name.trim(), slug, description: form.description.trim() || null, is_active: true, is_open: true }
     } else if (tab === 'products') {
-      payload = { store_id: form.store_id, name: form.name.trim(), selling_price: Number(form.selling_price), cost_price: form.cost_price === '' ? null : Number(form.cost_price), stock_quantity: form.stock_quantity === '' ? null : Number(form.stock_quantity), is_available: true }
+      if (!form.store_id) { setError('Choose a store before adding a product.'); return }
+      if (!form.name.trim()) { setError('Enter a product name.'); return }
+      if (form.selling_price === '' || !Number.isFinite(Number(form.selling_price)) || Number(form.selling_price) < 0) { setError('Enter a valid selling price.'); return }
+      payload = { store_id: form.store_id, name: form.name.trim(), description: form.description.trim() || null, selling_price: Number(form.selling_price), cost_price: form.cost_price === '' ? null : Number(form.cost_price), stock_quantity: form.stock_quantity === '' ? null : Number(form.stock_quantity), is_available: true }
     } else {
-      payload = { store_id: form.store_id, registration_start: new Date(form.registration_start).toISOString(), registration_end: new Date(form.registration_end).toISOString(), delivery_time: new Date(form.delivery_time).toISOString(), capacity: form.capacity === '' ? null : Number(form.capacity), is_active: true }
+      if (!form.store_id) { setError('Choose a store before adding a batch.'); return }
+      const start = new Date(form.registration_start)
+      const end = new Date(form.registration_end)
+      const delivery = new Date(form.delivery_time)
+      if (![start, end, delivery].every((date) => Number.isFinite(date.getTime()))) { setError('Enter all batch dates and times.'); return }
+      if (end <= start) { setError('Registration closing time must be after opening time.'); return }
+      if (delivery < end) { setError('Delivery time must be at or after registration closes.'); return }
+      payload = { store_id: form.store_id, registration_start: start.toISOString(), registration_end: end.toISOString(), delivery_time: delivery.toISOString(), capacity: form.capacity === '' ? null : Number(form.capacity), is_active: true }
     }
     try {
       const { error: insertError } = await supabase.from(table).insert(payload)
