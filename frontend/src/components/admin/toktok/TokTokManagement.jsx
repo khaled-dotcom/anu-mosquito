@@ -33,6 +33,7 @@ export default function TokTokManagement() {
   const [categories, setCategories] = useState([])
   const [orderItems, setOrderItems] = useState([])
   const [search, setSearch] = useState('')
+  const [selectedStoreId, setSelectedStoreId] = useState('')
   const [editing, setEditing] = useState(null)
   const [categoryForm, setCategoryForm] = useState({ store_id: '', name: '', description: '', sort_order: '0' })
   const [showCategoryForm, setShowCategoryForm] = useState(false)
@@ -85,7 +86,7 @@ export default function TokTokManagement() {
     setError('')
     setNotice('')
     setEditing(null)
-    setForm({ ...emptyForm, store_id: stores[0]?.id || '' })
+    setForm({ ...emptyForm, store_id: tab === 'products' ? selectedStoreId : stores[0]?.id || '' })
     setShowAdd(true)
   }
 
@@ -134,6 +135,7 @@ export default function TokTokManagement() {
     setError('')
     setNotice('')
     setEditing(record)
+    if (kind === 'products') setSelectedStoreId(record.store_id || '')
     setForm({
       ...emptyForm, ...record,
       name: record.name || '',
@@ -254,15 +256,16 @@ export default function TokTokManagement() {
           {tab === 'products' && <div className="toktok-admin-panel">
             <div className="toktok-admin-panel-heading">
               <div><h3>TokTok products</h3><p>Manage product details, pricing, photos and availability.</p></div>
-              <div className="toktok-admin-heading-actions"><span>{products.length} products</span><button type="button" className="toktok-admin-add" onClick={openAddForm} disabled={stores.length === 0}>+ Add product</button></div>
+              <div className="toktok-admin-heading-actions"><span>{selectedStoreId ? products.filter((product) => product.store_id === selectedStoreId).length + ' products' : 'Choose a store first'}</span><button type="button" className="toktok-admin-add" onClick={openAddForm} disabled={!selectedStoreId}>+ Add product</button></div>
             </div>
-            <label className="toktok-admin-search">Search products<input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Product or store name…" /></label>
+            <label className="toktok-admin-store-filter">Choose store to manage products *<select value={selectedStoreId} onChange={(e) => { setSelectedStoreId(e.target.value); setSearch(''); setShowAdd(false); setEditing(null); setError(''); setNotice('') }}><option value="">Select a TokTok store…</option>{stores.map((store) => <option key={store.id} value={store.id}>{store.name}</option>)}</select></label>
+            {selectedStoreId && <label className="toktok-admin-search">Search products<input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Product name or description…" /></label>}
             {showAdd && tab === 'products' && <form className="toktok-admin-form toktok-product-form" onSubmit={addRecord}>
               <h4>{editing ? 'Edit product' : 'Add a product'}</h4>
+              <h5 className="toktok-product-selected-store">Store: {stores.find((store) => store.id === selectedStoreId)?.name || '—'}</h5>
               <label>Product name *<input name="name" value={form.name} onChange={updateForm} required placeholder="Enter product name" /></label>
               <div className="toktok-admin-form-grid">
-                <label>Store *<select name="store_id" value={form.store_id} onChange={updateForm} required>{stores.map((store) => <option key={store.id} value={store.id}>{store.name}</option>)}</select></label>
-                <label>Category<select name="category_id" value={form.category_id} onChange={updateForm}><option value="">No category</option>{categories.filter((c) => c.store_id === form.store_id && c.is_active).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
+                <label>Category<select name="category_id" value={form.category_id} onChange={updateForm}><option value="">No category</option>{categories.filter((c) => c.store_id === selectedStoreId && c.is_active).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
                 <label>Selling price (EGP) *<input name="selling_price" type="number" min="0" step="0.01" value={form.selling_price} onChange={updateForm} required /></label>
                 <label>Cost price (EGP)<input name="cost_price" type="number" min="0" step="0.01" value={form.cost_price} onChange={updateForm} /></label>
               </div>
@@ -274,8 +277,8 @@ export default function TokTokManagement() {
               <label>Display order<input name="sort_order" type="number" value={form.sort_order} onChange={updateForm} /></label>
               <div className="toktok-admin-form-actions"><button type="button" onClick={() => {setShowAdd(false);setEditing(null)}}>Cancel</button><button type="submit">{editing ? 'Save changes' : 'Save product'}</button></div>
             </form>}
-            {products.length === 0 ? <p className="toktok-admin-empty">No TokTok products found.</p> : <div className="toktok-product-grid">
-              {products.filter((product) => [product.name, product.description, stores.find((store) => store.id === product.store_id)?.name, categories.find((category) => category.id === product.category_id)?.name].some((value) => String(value || '').toLowerCase().includes(search.toLowerCase()))).map((product) => <article className="toktok-product-card" key={product.id}>
+            {!selectedStoreId ? <p className="toktok-admin-empty">Choose a TokTok store above to view and manage only its products.</p> : products.filter((product) => product.store_id === selectedStoreId).length === 0 ? <p className="toktok-admin-empty">No products found for this store yet. Use “Add product” to create the first one.</p> : <div className="toktok-product-grid">
+              {products.filter((product) => product.store_id === selectedStoreId && [product.name, product.description, categories.find((category) => category.id === product.category_id)?.name].some((value) => String(value || '').toLowerCase().includes(search.toLowerCase()))).map((product) => <article className="toktok-product-card" key={product.id}>
                 <div className="toktok-product-card-image">{product.image_url ? <img src={product.image_url} alt={product.name} loading="lazy" /> : <span>🍽️</span>}<span className={product.is_available ? 'toktok-admin-status on' : 'toktok-admin-status off'}>{product.is_available ? 'Available' : 'Unavailable'}</span></div>
                 <div className="toktok-product-card-body"><small className="toktok-product-store">{stores.find((store) => store.id === product.store_id)?.name || 'No store'}{categories.find((category) => category.id === product.category_id)?.name ? ' · ' + categories.find((category) => category.id === product.category_id)?.name : ''}</small><h4>{product.name}</h4><p>{product.description || 'No description added.'}</p><div className="toktok-product-prices"><strong>{money(product.selling_price)}</strong>{product.cost_price != null && <small>Cost {money(product.cost_price)}</small>}</div><div className="toktok-product-actions"><button type="button" onClick={() => openEditRecord('products', product)}>Edit</button><button type="button" disabled={busyId === product.id} onClick={() => toggleRecord('toktok_products', product.id, 'is_available', product.is_available, 'Product availability')}>{product.is_available ? 'Disable' : 'Enable'}</button><button type="button" className="danger" disabled={busyId === product.id} onClick={() => deleteRecord('toktok_products', product, 'product ' + product.name)}>Delete</button></div></div>
               </article>)}
