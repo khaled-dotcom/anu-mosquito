@@ -21,6 +21,7 @@ const TABS = [
   { id: 'categories', label: 'Categories', icon: '🏷️' },
   { id: 'finance', label: 'Finance', icon: '💰' },
   { id: 'batches', label: 'Delivery batches', icon: '🛺' },
+  { id: 'delivery-fee', label: 'Delivery price', icon: '💳' },
   { id: 'orders', label: 'Orders', icon: '📦' },
 ]
 
@@ -32,6 +33,9 @@ export default function TokTokManagement() {
   const [orders, setOrders] = useState([])
   const [categories, setCategories] = useState([])
   const [orderItems, setOrderItems] = useState([])
+  const [deliveryFee, setDeliveryFee] = useState('0')
+  const [savedDeliveryFee, setSavedDeliveryFee] = useState(0)
+  const [savingDeliveryFee, setSavingDeliveryFee] = useState(false)
   const [search, setSearch] = useState('')
   const [selectedStoreId, setSelectedStoreId] = useState('')
   const [editing, setEditing] = useState(null)
@@ -55,14 +59,21 @@ export default function TokTokManagement() {
         supabase.from('toktok_batches').select('id,store_id,registration_start,registration_end,delivery_time,capacity,is_active').order('delivery_time', { ascending: false }).limit(100),
         supabase.from('toktok_orders').select('id,order_number,order_date,store_name_snapshot,delivery_address,items_subtotal,delivery_fee,total_amount,payment_status,status,created_at').order('created_at', { ascending: false }).limit(100),
       ])
-      const categoryResult = await supabase.from('toktok_categories').select('id,store_id,name,description,image_url,is_active,sort_order').order('sort_order').order('name')
-      const failed = [storeResult, productResult, batchResult, orderResult, categoryResult].find((result) => result.error)
+      const [categoryResult, deliveryFeeResult] = await Promise.all([
+        supabase.from('toktok_categories').select('id,store_id,name,description,image_url,is_active,sort_order').order('sort_order').order('name'),
+        supabase.from('toktok_settings').select('setting_value').eq('setting_key', 'delivery_fee').maybeSingle(),
+      ])
+      const failed = [storeResult, productResult, batchResult, orderResult, categoryResult, deliveryFeeResult].find((result) => result.error)
       if (failed) throw failed.error
       setStores(storeResult.data || [])
       setProducts(productResult.data || [])
       setBatches(batchResult.data || [])
       setOrders(orderResult.data || [])
       setCategories(categoryResult.data || [])
+      const feeValue = Number(deliveryFeeResult.data?.setting_value ?? 0)
+      const normalizedFee = Number.isFinite(feeValue) && feeValue >= 0 ? feeValue : 0
+      setDeliveryFee(String(normalizedFee))
+      setSavedDeliveryFee(normalizedFee)
       if ((orderResult.data || []).length) {
         const itemsResult = await supabase.from('toktok_order_items').select('id,order_id,product_name_snapshot,quantity,unit_price,unit_cost_snapshot,line_total,notes').in('order_id', orderResult.data.map((o) => o.id))
         setOrderItems(itemsResult.error ? [] : (itemsResult.data || []))
@@ -170,6 +181,30 @@ export default function TokTokManagement() {
     } catch (err) {
       setError(err?.message || 'Could not delete ' + label + '. Linked records may need to be retained.')
     } finally { setBusyId('') }
+  }
+
+  async function saveDeliveryFee(event) {
+    event.preventDefault()
+    setError('')
+    setNotice('')
+    const amount = Number(deliveryFee)
+    if (deliveryFee === '' || !Number.isFinite(amount) || amount < 0 || amount > 100000) {
+      setError('Enter a valid delivery price between EGP 0 and EGP 100,000.')
+      return
+    }
+    setSavingDeliveryFee(true)
+    try {
+      const { data: authData, error: authError } = await supabase.auth.getUser()
+      if (authError) throw authError
+      const { error: saveError } = await supabase.from('toktok_settings').upsert({ setting_key: 'delivery_fee', setting_value: amount, updated_by: authData.user?.id || null, updated_at: new Date().toISOString() }, { onConflict: 'setting_key' })
+      if (saveError) throw saveError
+      setSavedDeliveryFee(amount)
+      setDeliveryFee(String(amount))
+      setNotice('TokTok delivery price saved. New orders will use this price; existing orders will remain unchanged.')
+    } catch (err) {
+      console.error('TokTok delivery price save failed:', err)
+      setError(err?.message || 'Could not save the TokTok delivery price. Make sure you are signed in as an admin.')
+    } finally { setSavingDeliveryFee(false) }
   }
 
   async function saveCategory(event) {
@@ -284,6 +319,16 @@ export default function TokTokManagement() {
               </article>)}
             </div>}
           </div>}
+          {tab === 'delivery-fee' && <div className="toktok-admin-panel toktok-delivery-fee-panel">
+            <div className="toktok-admin-panel-heading"><div><h3>TokTok delivery price</h3><p>One delivery fee for every TokTok store. This setting is separate from Mosquito restaurant delivery prices.</p></div><span className="toktok-admin-status on">TokTok only</span></div>
+            <div className="toktok-delivery-fee-summary"><span className="toktok-delivery-fee-icon">🛺</span><div><small>Current delivery fee</small><strong>{money(savedDeliveryFee)}</strong><p>Applied automatically to new TokTok orders at checkout.</p></div></div>
+            <form className="toktok-admin-form toktok-delivery-fee-form" onSubmit={saveDeliveryFee}>
+              <label htmlFor="toktok-delivery-fee">Delivery price (EGP)<input id="toktok-delivery-fee" type="number" min="0" max="100000" step="0.01" inputMode="decimal" value={deliveryFee} onChange={(event) => setDeliveryFee(event.target.value)} required /></label>
+              <p className="toktok-delivery-fee-note">Changing this price affects new orders only. Delivery prices saved on existing orders will not change.</p>
+              <div className="toktok-admin-form-actions"><button type="button" disabled={savingDeliveryFee || Number(deliveryFee) === savedDeliveryFee} onClick={() => setDeliveryFee(String(savedDeliveryFee))}>Reset</button><button type="submit" disabled={savingDeliveryFee}>{savingDeliveryFee ? 'Saving…' : 'Save delivery price'}</button></div>
+            </form>
+          </div>}
+
           {tab === 'batches' && <div className="toktok-admin-panel"><div className="toktok-admin-panel-heading"><div><h3>Delivery batches</h3><p>Review batch timings and turn batches on or off.</p></div><div className="toktok-admin-heading-actions"><span>{batches.length} batches</span><button type="button" className="toktok-admin-add" onClick={openAddForm} disabled={stores.length === 0}>+ Add batch</button></div></div><label className="toktok-admin-search">Search batches<input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Store, status or date…" /></label>
             {showAdd && tab === 'batches' && <form className="toktok-admin-form" onSubmit={addRecord}><h4>{editing ? 'Edit delivery batch' : 'Create a delivery batch'}</h4><label>Store *<select name="store_id" value={form.store_id} onChange={updateForm} required>{stores.map((store) => <option key={store.id} value={store.id}>{store.name}</option>)}</select></label><div className="toktok-admin-form-grid"><label>Registration opens *<input type="datetime-local" name="registration_start" value={form.registration_start} onChange={updateForm} required /></label><label>Registration closes *<input type="datetime-local" name="registration_end" value={form.registration_end} onChange={updateForm} required /></label><label>Delivery time *<input type="datetime-local" name="delivery_time" value={form.delivery_time} onChange={updateForm} required /></label><label>Order capacity<input type="number" min="1" step="1" name="capacity" value={form.capacity} onChange={updateForm} /></label></div><div className="toktok-admin-form-actions"><button type="button" onClick={() => {setShowAdd(false);setEditing(null)}}>Cancel</button><button type="submit">{editing ? 'Save changes' : 'Save batch'}</button></div></form>}
             {batches.length === 0 ? <p className="toktok-admin-empty">No TokTok batches found.</p> : <div className="toktok-admin-table-wrap"><table className="toktok-admin-table"><thead><tr><th>Store</th><th>Delivery time</th><th>Registration ends</th><th>Capacity</th><th>Status</th><th>Action</th></tr></thead><tbody>{batches.filter((batch) => [stores.find((store) => store.id === batch.store_id)?.name, batch.is_active ? 'active' : 'inactive', batch.delivery_time].some((value) => String(value || '').toLowerCase().includes(search.toLowerCase()))).map((batch) => <tr key={batch.id}><td>{stores.find((store) => store.id === batch.store_id)?.name || '—'}</td><td>{batch.delivery_time ? new Date(batch.delivery_time).toLocaleString('en-EG', { dateStyle: 'medium', timeStyle: 'short' }) : '—'}</td><td>{batch.registration_end ? new Date(batch.registration_end).toLocaleString('en-EG', { dateStyle: 'medium', timeStyle: 'short' }) : '—'}</td><td>{batch.capacity ?? '—'}</td><td><span className={batch.is_active ? 'toktok-admin-status on' : 'toktok-admin-status off'}>{batch.is_active ? 'Active' : 'Inactive'}</span></td><td><button className="toktok-admin-action" disabled={busyId === batch.id} onClick={() => toggleRecord('toktok_batches', batch.id, 'is_active', batch.is_active, 'Batch status')} type="button">{batch.is_active ? 'Deactivate' : 'Activate'}</button> <button className="toktok-admin-action" onClick={() => openEditRecord('batches', batch)} type="button">Edit</button> <button className="toktok-admin-action" disabled={busyId === batch.id} onClick={() => deleteRecord('toktok_batches', batch, 'delivery batch')} type="button">Delete</button></td></tr>)}</tbody></table></div>}
