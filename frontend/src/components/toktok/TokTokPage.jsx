@@ -54,7 +54,7 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
       const now = new Date()
       const [categoryResult, productResult, batchResult] = await Promise.all([
         supabase.from('toktok_categories').select('id,name,sort_order').eq('store_id', nextStoreId).eq('is_active', true).order('sort_order'),
-        supabase.from('toktok_products').select('id,store_id,category_id,name,description,image_url,selling_price,stock_quantity').eq('store_id', nextStoreId).eq('is_available', true).order('sort_order'),
+        supabase.from('toktok_products').select('id,store_id,category_id,name,description,image_url,selling_price').eq('store_id', nextStoreId).eq('is_available', true).order('sort_order'),
         supabase.from('toktok_batches').select('id,store_id,registration_start,registration_end,delivery_time,capacity').eq('store_id', nextStoreId).eq('is_active', true).gte('registration_end', now.toISOString()).order('delivery_time'),
       ])
       if (categoryResult.error) throw categoryResult.error
@@ -99,7 +99,6 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
   function changeQuantity(product, delta) {
     setCart((current) => {
       const next = Math.max(0, Math.min(99, Number(current[product.id] || 0) + delta))
-      if (product.stock_quantity != null && next > product.stock_quantity) return current
       const updated = { ...current }
       if (next === 0) delete updated[product.id]
       else updated[product.id] = next
@@ -251,7 +250,7 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
               {shownProducts.map((product) => <article className="toktok-product" key={product.id}>
                 {product.image_url ? <img className="toktok-product-image" src={product.image_url} alt="" loading="lazy" /> : <div className="toktok-product-placeholder">🛍️</div>}
                 <div className="toktok-product-body"><h3>{product.name}</h3><p>{product.description || 'Available for campus delivery.'}</p><strong>{money(product.selling_price)}</strong>
-                  {product.stock_quantity === 0 ? <small className="toktok-out-stock">Out of stock</small> : <div className="toktok-quantity"><button type="button" aria-label={`Remove one ${product.name}`} onClick={() => changeQuantity(product, -1)} disabled={!cart[product.id]}>−</button><span>{cart[product.id] || 0}</span><button type="button" aria-label={`Add one ${product.name}`} onClick={() => changeQuantity(product, 1)} disabled={product.stock_quantity != null && Number(cart[product.id] || 0) >= product.stock_quantity}>+</button></div>}
+                  <div className="toktok-quantity"><button type="button" aria-label={`Remove one ${product.name}`} onClick={() => changeQuantity(product, -1)} disabled={!cart[product.id]}>−</button><span>{cart[product.id] || 0}</span><button type="button" aria-label={`Add one ${product.name}`} onClick={() => changeQuantity(product, 1)}>+</button></div>
                 </div>
               </article>)}
             </section>}
