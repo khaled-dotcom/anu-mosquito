@@ -150,23 +150,36 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
     if (!cartItems.length) return setError('Add at least one product to your cart.')
     if (!batchId) return setError('There is no open delivery batch. Please check back soon.')
     setSubmitting(true)
-    const { data, error: orderError } = await supabase.rpc('toktok_place_order', {
-      p_store_id: storeId,
-      p_batch_id: batchId,
-      p_items: cartItems.map(({ id, quantity }) => ({ product_id: id, quantity })),
-      p_delivery_address: address.trim() || null,
-      p_notes: notes.trim() || null,
-    })
-    setSubmitting(false)
-    if (orderError) {
-      setError(orderError.message || 'Could not place the order. Please try again.')
-      return
+    try {
+      const { data, error: orderError } = await supabase.rpc('toktok_place_order', {
+        p_store_id: storeId,
+        p_batch_id: batchId,
+        p_items: cartItems.map(({ id, quantity }) => ({ product_id: id, quantity })),
+        p_delivery_address: address.trim() || null,
+        p_notes: notes.trim() || null,
+      })
+      if (orderError) throw orderError
+
+      setCart({})
+      setAddress('')
+      setNotes('')
+      setNotice(data?.order_number
+        ? `Order ${data.order_number} placed successfully.`
+        : 'Order placed successfully.')
+      await loadCatalog()
+    } catch (orderError) {
+      console.error('TokTok order placement failed:', orderError)
+      const message = String(orderError?.message || '').toLowerCase()
+      if (/stock|out of stock|quantity/.test(message)) {
+        setError('One or more items may no longer be available in that quantity. Refresh the menu and try again.')
+      } else if (/batch|capacity|registration|delivery time/.test(message)) {
+        setError('That delivery batch is no longer available. Refresh the menu and choose another batch.')
+      } else {
+        setError('Could not place your order. Please refresh and try again.')
+      }
+    } finally {
+      setSubmitting(false)
     }
-    setCart({})
-    setAddress('')
-    setNotes('')
-    setNotice(`Order ${data?.order_number || ''} placed successfully.`)
-    await loadCatalog()
   }
 
   return (
