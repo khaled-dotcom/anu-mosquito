@@ -329,3 +329,445 @@
     margin-top: 4px;
   }
 }
+
+
+/* =========================================================
+   ANU MOSQUITO ADMIN — unified visual system
+   Imported after section styles so every admin area shares
+   consistent spacing, controls, cards and responsive behavior.
+========================================================= */
+.admin-layout {
+  --admin-ink: #12264a;
+  --admin-muted: #64748b;
+  --admin-line: #e2eaf5;
+  --admin-panel: #ffffff;
+  --admin-soft: #f5f8fe;
+}
+
+.admin-main {
+  max-width: 1760px;
+  margin: 0 auto;
+}
+
+.admin-sidebar {
+  box-shadow: 10px 0 34px rgba(15, 31, 77, 0.08);
+}
+
+.admin-brand {
+  min-height: 72px;
+}
+
+.admin-brand-title {
+  letter-spacing: -0.035em;
+}
+
+.admin-nav {
+  gap: 5px;
+  padding: 4px 0 18px;
+}
+
+.admin-nav-button {
+  min-height: 44px;
+  width: 100%;
+  line-height: 1.25;
+  transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.admin-nav-button span {
+  flex: 0 0 22px;
+  font-size: 17px;
+}
+
+.admin-nav-button.active {
+  background: linear-gradient(100deg, rgba(96, 165, 250, 0.22), rgba(96, 165, 250, 0.08));
+  box-shadow: inset 3px 0 0 #60a5fa;
+}
+
+.admin-main {
+  padding-top: 32px;
+}
+
+.admin-topbar {
+  padding: 0 2px 22px;
+  border-bottom: 1px solid rgba(203, 216, 235, 0.72);
+}
+
+.admin-topbar h1 {
+  letter-spacing: -0.045em;
+  font-size: clamp(25px, 2.2vw, 32px);
+}
+
+.admin-user {
+  border-radius: 16px;
+  background: rgba(255,255,255,0.88);
+}
+
+.admin-welcome {
+  min-height: 168px;
+  padding: clamp(24px, 3vw, 36px);
+  background:
+    radial-gradient(circle at 86% 20%, rgba(255,255,255,.18), transparent 25%),
+    linear-gradient(125deg, #173b91 0%, #1d4ed8 58%, #4388f5 100%);
+  border: 1px solid rgba(255,255,255,.2);
+}
+
+.admin-welcome h2 {
+  letter-spacing: -0.04em;
+}
+
+.admin-mosquito {
+  display: grid;
+  place-items: center;
+  width: 104px;
+  height: 104px;
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 30px;
+  background: rgba(255,255,255,.12);
+  font-size: 58px;
+  transform: rotate(5deg);
+}
+
+.admin-stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.admin-stat-card {
+  min-width: 0;
+  min-height: 112px;
+  border-radius: 18px;
+  padding: 18px;
+  gap: 13px;
+  box-shadow: 0 5px 18px rgba(23, 55, 105, 0.045);
+}
+
+.admin-stat-card > .admin-stat-icon {
+  flex: 0 0 46px;
+  width: 46px;
+  height: 46px;
+  border: 1px solid #e1eaff;
+  background: linear-gradient(145deg, #f0f5ff, #e8f0ff);
+  border-radius: 15px;
+  font-size: 21px;
+}
+
+.admin-stat-card div span {
+  line-height: 1.35;
+}
+
+.admin-stat-card strong {
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.admin-section-card,
+.admin-management-section,
+.admin-orders-panel,
+.finance-panel,
+.user-management-panel {
+  border-color: var(--admin-line);
+  border-radius: 20px;
+  box-shadow: 0 7px 24px rgba(18, 38, 74, 0.045);
+}
+
+.admin-section-heading {
+  align-items: center;
+}
+
+.admin-section-heading h2,
+.admin-management-header h2,
+.admin-orders-header h2 {
+  letter-spacing: -0.035em;
+}
+
+.admin-actions {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-actions button {
+  min-height: 142px;
+  border-color: #e3eaf5;
+  background: linear-gradient(180deg, #fff, #fbfdff);
+  border-radius: 17px;
+}
+
+.admin-actions button > span:first-child {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 16px;
+  border-radius: 14px;
+  background: #eef4ff;
+  font-size: 22px;
+}
+
+.admin-actions strong {
+  line-height: 1.4;
+}
+
+.admin-actions small {
+  line-height: 1.5;
+}
+
+.admin-restaurant-row {
+  padding: 16px 0;
+  border-color: #edf1f7;
+}
+
+.admin-restaurant-left {
+  min-width: 0;
+}
+
+.admin-restaurant-left img,
+.admin-restaurant-placeholder {
+  flex: 0 0 54px;
+  width: 54px;
+  height: 54px;
+  border: 1px solid #e8eef8;
+  border-radius: 15px;
+}
+
+.admin-restaurant-left strong {
+  line-height: 1.4;
+}
+
+.admin-active-badge {
+  white-space: nowrap;
+}
+
+.admin-empty {
+  border: 1px dashed #d8e3f1;
+  border-radius: 16px;
+  background: #f9fbff;
+  line-height: 1.65;
+}
+
+.admin-form-card {
+  border-color: #dce7f6;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(20, 55, 100, 0.04);
+}
+
+.admin-form-group input,
+.admin-form-group textarea,
+.admin-form-group select,
+.admin-layout input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.admin-layout select,
+.admin-layout textarea {
+  min-height: 44px;
+  border-radius: 11px;
+}
+
+.admin-layout textarea {
+  min-height: 104px;
+}
+
+.admin-layout button:not(.admin-nav-button):not(.admin-menu-toggle):not(.admin-nav-close) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.admin-layout button:focus-visible,
+.admin-layout a:focus-visible {
+  outline: 3px solid rgba(59, 130, 246, 0.45);
+  outline-offset: 2px;
+}
+
+.admin-layout table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.admin-layout th {
+  color: #526784;
+  background: #f5f8fd;
+  font-weight: 700;
+}
+
+.admin-layout td,
+.admin-layout th {
+  border-color: #e8eef6;
+}
+
+.admin-layout .admin-management-header,
+.admin-layout .admin-orders-header {
+  gap: 16px;
+}
+
+.admin-layout .admin-management-header p,
+.admin-layout .admin-orders-header p {
+  color: var(--admin-muted);
+  line-height: 1.55;
+}
+
+.admin-layout .admin-search-box {
+  border-radius: 13px;
+  border-color: #e0e8f3;
+}
+
+.admin-layout .admin-search-box:focus-within {
+  border-color: #6b9cf5;
+}
+
+.admin-layout .admin-form-actions {
+  border-color: #e5ecf5;
+}
+
+.admin-layout .admin-modal,
+.admin-layout [role="dialog"] {
+  border-radius: 20px;
+}
+
+@media (min-width: 901px) {
+  .admin-sidebar {
+    width: 272px;
+    padding: 24px 15px;
+  }
+
+  .admin-main {
+    padding-left: clamp(24px, 3vw, 48px);
+    padding-right: clamp(24px, 3vw, 48px);
+  }
+}
+
+@media (max-width: 1100px) {
+  .admin-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .admin-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .admin-main {
+    max-width: none;
+  }
+
+  .admin-mobile-bar {
+    box-shadow: 0 4px 18px rgba(15, 31, 61, 0.045);
+  }
+
+  .admin-main {
+    padding-top: 22px;
+  }
+
+  .admin-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 650px) {
+  .admin-main {
+    padding: 14px 12px calc(30px + var(--safe-bottom));
+  }
+
+  .admin-welcome {
+    min-height: 144px;
+    padding: 20px;
+    border-radius: 20px;
+  }
+
+  .admin-welcome h2 {
+    font-size: 21px;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-welcome p {
+    max-width: 250px;
+    line-height: 1.55;
+  }
+
+  .admin-mosquito {
+    flex: 0 0 66px;
+    width: 66px;
+    height: 66px;
+    border-radius: 21px;
+    font-size: 38px;
+  }
+
+  .admin-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .admin-stat-card {
+    min-height: 124px;
+    padding: 13px;
+    border-radius: 16px;
+  }
+
+  .admin-stat-card > .admin-stat-icon {
+    flex-basis: 38px;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    font-size: 18px;
+  }
+
+  .admin-stat-card div span {
+    font-size: 11px;
+  }
+
+  .admin-stat-card strong {
+    font-size: 19px;
+  }
+
+  .admin-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-actions button {
+    min-width: 0;
+    min-height: 132px;
+    padding: 13px;
+    border-radius: 15px;
+  }
+
+  .admin-actions button > span:first-child {
+    width: 38px;
+    height: 38px;
+    margin-bottom: 12px;
+  }
+
+  .admin-actions strong {
+    font-size: 13px;
+  }
+
+  .admin-actions small {
+    font-size: 11px;
+  }
+
+  .admin-section-card,
+  .admin-management-section,
+  .admin-orders-panel {
+    border-radius: 17px;
+    padding: 15px;
+  }
+
+  .admin-section-heading h2,
+  .admin-management-header h2,
+  .admin-orders-header h2 {
+    font-size: 19px;
+  }
+
+  .admin-form-card {
+    padding: 15px;
+  }
+
+  .admin-form-actions {
+    gap: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-layout *,
+  .admin-layout *::before,
+  .admin-layout *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
