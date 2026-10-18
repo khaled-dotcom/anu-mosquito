@@ -174,13 +174,28 @@ export default function TokTokAdminPage() {
   async function saveFee(event) {
     event.preventDefault()
     const amount = Number(deliveryFee)
-    if (!Number.isFinite(amount) || amount < 0) { setError('Enter a valid non-negative delivery fee.'); return }
-    setSaving(true); setError(''); setMessage('')
-    const { data: userData } = await supabase.auth.getUser()
-    const { error: feeError } = await supabase.from('toktok_settings').upsert({ setting_key: 'delivery_fee', setting_value: amount, updated_by: userData.user?.id }, { onConflict: 'setting_key' })
-    setSaving(false)
-    if (feeError) setError(feeError.message)
-    else setMessage('Delivery fee saved.')
+    if (!Number.isFinite(amount) || amount < 0) {
+      setError('Enter a valid non-negative delivery fee.')
+      return
+    }
+    setSaving(true)
+    setError('')
+    setMessage('')
+    try {
+      const { data: userData, error: userError } = await supabase.auth.getUser()
+      if (userError) throw userError
+      const { error: feeError } = await supabase.from('toktok_settings').upsert(
+        { setting_key: 'delivery_fee', setting_value: amount, updated_by: userData.user?.id },
+        { onConflict: 'setting_key' }
+      )
+      if (feeError) throw feeError
+      setMessage('Delivery fee saved.')
+    } catch (feeError) {
+      console.error('TokTok delivery fee save failed:', feeError)
+      setError(feeError?.message || 'Could not save delivery fee. Please try again.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const field = (label, value, onChange, props = {}) => <label className="toktok-admin-field">{label}<input value={value ?? ''} onChange={(e) => onChange(e.target.value)} {...props} /></label>
