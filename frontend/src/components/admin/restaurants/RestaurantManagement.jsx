@@ -135,7 +135,11 @@ onChange={(e) => setRestaurantDescription(e.target.value)}
                 folder="restaurant"
                 value={restaurantImageUrl}
                 onChange={setRestaurantImageUrl}
+                shape="wide"
               />
+              <p className="restaurant-image-help">
+                Choose a photo from your device. It will be compressed automatically before upload.
+              </p>
             </div>
 
             {/* Active */}
