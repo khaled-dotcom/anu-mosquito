@@ -233,7 +233,7 @@ function StudentHome({
             <span className="toktok-service-icon" aria-hidden="true">🛺</span>
             <span className="toktok-service-copy">
               <strong>ANU TokTok</strong>
-              <small>Rides and delivery around campus</small>
+              <small>Delivery around campus</small>
             </span>
             <span className="toktok-service-arrow" aria-hidden="true">→</span>
           </button>
