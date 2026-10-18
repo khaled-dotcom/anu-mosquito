@@ -217,17 +217,25 @@ function StudentHome({
         </label>
 
         <section className="toktok-home-entry" aria-labelledby="toktok-section-heading">
-          <h2 className="toktok-section-heading" id="toktok-section-heading">Need a ride or delivery?</h2>
-          <p className="toktok-section-subtitle">Explore quick rides and delivery with ANU TokTok.</p>
+          <div className="toktok-section-header">
+            <div className="toktok-section-title-icon" aria-hidden="true">✨</div>
+            <div>
+              <h2 className="toktok-section-heading" id="toktok-section-heading">Extra Services</h2>
+              <p className="toktok-section-subtitle">More ways to make your campus day easier.</p>
+            </div>
+          </div>
           <button
             type="button"
-            className="header-orders-button toktok-entry-button"
+            className="toktok-service-card"
             onClick={() => setStudentPage('toktok')}
             aria-label="Open ANU TokTok"
           >
-            <span aria-hidden="true">🛺</span>
-            <span>Explore ANU TokTok</span>
-            <span aria-hidden="true">→</span>
+            <span className="toktok-service-icon" aria-hidden="true">🛺</span>
+            <span className="toktok-service-copy">
+              <strong>ANU TokTok</strong>
+              <small>Rides and delivery around campus</small>
+            </span>
+            <span className="toktok-service-arrow" aria-hidden="true">→</span>
           </button>
         </section>
 
