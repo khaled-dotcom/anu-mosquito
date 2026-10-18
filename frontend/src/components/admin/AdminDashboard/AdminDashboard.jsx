@@ -15,6 +15,7 @@ import DriverManagement from '../drivers/DriverManagement'
 import HomeCategoryManagement from '../categories/HomeCategoryManagement'
 import TeamsManagement from '../teams/TeamsManagement'
 import DiscountManagement from '../discounts/DiscountManagement'
+import TokTokPortal from '../../toktok/TokTokPortal'
 
 const ADMIN_NAV = [
   { key: 'dashboard', label: 'Dashboard', icon: '🏠' },
@@ -31,6 +32,7 @@ const ADMIN_NAV = [
   { key: 'drivers', label: 'Drivers', icon: '🚗' },
   { key: 'payment-methods', label: 'Payment Methods', icon: '💳' },
   { key: 'settings', label: 'Settings', icon: '⚙️' },
+  { key: 'toktok-management', label: 'ANU TokTok Management', icon: '🛍️' },
 ]
 
 function AdminDashboard({
@@ -251,7 +253,9 @@ handleAssignDriver,
             <h1>{currentNav.label}</h1>
 
             <p>
-              Manage ANU Mosquito from one place.
+              {currentNav.key === 'toktok-management'
+                ? 'Manage ANU TokTok independently.'
+                : 'Manage ANU Mosquito from one place.'}
             </p>
           </div>
 
@@ -786,6 +790,11 @@ handleAssignDriver={handleAssignDriver}
 
 {adminSection === 'settings' && (
   <DeliverySettings />
+)}
+
+{/* Independent ANU TokTok management app */}
+{adminSection === 'toktok-management' && (
+  <TokTokPortal mode="admin" />
 )}
       </main>
 
