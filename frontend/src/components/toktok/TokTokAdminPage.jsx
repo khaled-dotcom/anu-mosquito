@@ -84,7 +84,27 @@ export default function TokTokAdminPage() {
     }
     if (kind === 'category') payload = { ...payload, store_id: storeId, name: payload.name.trim(), sort_order: Number(payload.sort_order || 0) }
     if (kind === 'product') payload = { ...payload, store_id: storeId, category_id: payload.category_id || null, name: payload.name.trim(), selling_price: Number(payload.selling_price), cost_price: payload.cost_price === '' ? null : Number(payload.cost_price), stock_quantity: payload.stock_quantity === '' ? null : Number(payload.stock_quantity), sort_order: Number(payload.sort_order || 0) }
-    if (kind === 'batch') payload = { ...payload, store_id: storeId, registration_start: new Date(payload.registration_start).toISOString(), registration_end: new Date(payload.registration_end).toISOString(), delivery_time: new Date(payload.delivery_time).toISOString(), capacity: payload.capacity === '' ? null : Number(payload.capacity) }
+    if (kind === 'batch') {
+      const start = new Date(payload.registration_start)
+      const end = new Date(payload.registration_end)
+      const delivery = new Date(payload.delivery_time)
+      if (![start, end, delivery].every((date) => Number.isFinite(date.getTime()))) {
+        setSaving(false)
+        setError('Enter valid registration and delivery dates.')
+        return
+      }
+      if (end <= start) {
+        setSaving(false)
+        setError('Registration closing time must be after the opening time.')
+        return
+      }
+      if (payload.capacity !== '' && (!Number.isInteger(Number(payload.capacity)) || Number(payload.capacity) < 1)) {
+        setSaving(false)
+        setError('Batch capacity must be a positive whole number or left blank.')
+        return
+      }
+      payload = { ...payload, store_id: storeId, registration_start: start.toISOString(), registration_end: end.toISOString(), delivery_time: delivery.toISOString(), capacity: payload.capacity === '' ? null : Number(payload.capacity) }
+    }
     delete payload.id
     delete payload.created_at
     delete payload.updated_at
