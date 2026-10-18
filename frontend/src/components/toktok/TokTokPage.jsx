@@ -15,6 +15,7 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
   const [batches, setBatches] = useState([])
   const [batchId, setBatchId] = useState('')
   const [cart, setCart] = useState({})
+  const [cartOpen, setCartOpen] = useState(false)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -70,6 +71,7 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
       setBatches(openBatches)
       setBatchId((current) => openBatches.some((batch) => batch.id === current) ? current : (openBatches[0]?.id || ''))
       setCart({})
+      setCartOpen(false)
       setCategoryId('all')
     } catch (loadError) {
       console.error('TokTok catalog load failed:', loadError)
@@ -85,6 +87,7 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
     setStoreId(nextId)
     setSelectedStoreOpen(true)
     setCart({})
+    setCartOpen(false)
     setCategoryId('all')
     setBatchId('')
     setLoading(true)
@@ -97,6 +100,7 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
     setSelectedStoreOpen(false)
     setCategoryId('all')
     setCart({})
+    setCartOpen(false)
     setError('')
     setNotice('')
   }
@@ -189,6 +193,7 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
       if (orderError) throw orderError
 
       setCart({})
+      setCartOpen(false)
       setAddress('')
       setNotes('')
       setNotice(data?.order_number
@@ -219,7 +224,7 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
       </header>
 
       <main className="toktok-main">
-        <section className="toktok-hero"><span className="toktok-kicker">THE TOKTOK SERVICE</span><h1>Need something? We’ll bring it.</h1><p>Choose a store, add your items, and select an available delivery batch.</p></section>
+        {!selectedStoreOpen && !showOrders && <section className="toktok-hero"><span className="toktok-kicker">THE TOKTOK SERVICE</span><h1>Need something? We’ll bring it.</h1><p>Choose a store, add your items, and select an available delivery batch.</p></section>}
         {error && <p className="toktok-message is-error" role="alert">{error}</p>}
         {notice && <p className="toktok-message is-success" role="status">{notice}</p>}
 
