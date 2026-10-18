@@ -248,7 +248,7 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
                 <div className="toktok-directory-heading"><span className="toktok-kicker">SHOP BY STORE</span><h2>What are you looking for?</h2><p>Choose a store to explore its menu.</p></div>
                 <div className="toktok-store-row">
                   {stores.map((store) => <button key={store.id} className="toktok-store" onClick={() => switchStore(store.id)} type="button" style={store.image_url ? { backgroundImage: `linear-gradient(90deg, rgba(5,18,35,.82), rgba(5,18,35,.18)), url("${store.image_url}")` } : undefined}>
-                    <span className="toktok-store-icon">{store.image_url ? null : '🛍️'}</span>
+                    {!store.image_url && <span className="toktok-store-icon">🛍️</span>}
                     <span className="toktok-store-copy"><strong>{store.name}</strong><small>{store.description || 'Explore store'}</small><em>Explore menu <span aria-hidden="true">→</span></em></span>
                   </button>)}
                 </div>
