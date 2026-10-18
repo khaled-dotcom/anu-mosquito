@@ -21,6 +21,7 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null)
   const [paymentProof, setPaymentProof] = useState(null)
   const [paymentMethodsLoading, setPaymentMethodsLoading] = useState(false)
+  const [deliveryFee, setDeliveryFee] = useState(0)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -68,9 +69,7 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
       if (productResult.error) throw productResult.error
       if (batchResult.error) throw batchResult.error
 
-      const openBatches = (batchResult.data || []).filter((batch) =>
-        new Date(batch.registration_start) <= now && new Date(batch.registration_end) >= now
-      )
+      const openBatches = (batchResult.data || []).filter((batch) => new Date(batch.registration_end) >= now)
       setCategories(categoryResult.data || [])
       setProducts(productResult.data || [])
       setBatches(openBatches)
@@ -92,15 +91,26 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
     let alive = true
     async function loadPaymentMethods() {
       setPaymentMethodsLoading(true)
-      const { data, error: methodsError } = await supabase.from('payment_methods').select('id,name,type,account_number,instructions').eq('is_active', true).order('created_at')
+      const [methodResult, settingsResult] = await Promise.all([
+        supabase.from('payment_methods').select('id,name,type,account_number,instructions').eq('is_active', true).order('created_at'),
+        supabase.from('toktok_settings').select('setting_key,setting_value').in('setting_key', ['delivery_fee_tiers', 'delivery_fee']),
+      ])
       if (!alive) return
-      if (methodsError) {
-        console.error('TokTok payment methods failed:', methodsError)
+      if (methodResult.error) {
+        console.error('TokTok payment methods failed:', methodResult.error)
         setError('Could not load payment methods. Please try again.')
       } else {
-        setPaymentMethods(data || [])
-        setSelectedPaymentMethod(data?.[0] || null)
+        setPaymentMethods(methodResult.data || [])
+        setSelectedPaymentMethod(methodResult.data?.[0] || null)
       }
+      const settings = settingsResult.data || []
+      const tiersRow = settings.find((row) => row.setting_key === 'delivery_fee_tiers')
+      const legacyRow = settings.find((row) => row.setting_key === 'delivery_fee')
+      const tiers = Array.isArray(tiersRow?.setting_value) ? tiersRow.setting_value : []
+      const fee = tiers.length
+        ? Number([...tiers].filter((tier) => Number(tier.min_order_total) <= subtotal).sort((a,b) => Number(b.min_order_total) - Number(a.min_order_total))[0]?.fee ?? 0)
+        : Number(legacyRow?.setting_value ?? 0)
+      setDeliveryFee(Number.isFinite(fee) ? fee : 0)
       setPaymentMethodsLoading(false)
     }
     loadPaymentMethods()
@@ -318,12 +328,12 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
                     {checkoutStep === 'cart' ? <div className="toktok-checkout-fields">
                       <div className="toktok-cart-lines">{cartItems.map((item) => <div key={item.id} className="toktok-cart-line"><span>{item.name} × {item.quantity}</span><strong>{money(Number(item.selling_price) * item.quantity)}</strong></div>)}</div>
                       <h3>Choose a delivery batch</h3>
-                      {batches.length === 0 ? <p>No delivery batches are accepting orders right now.</p> : <div className="toktok-batch-options">{batches.map((batch) => <button key={batch.id} type="button" className={batchId === batch.id ? 'selected' : ''} onClick={() => setBatchId(batch.id)}><span><strong>{new Date(batch.delivery_time).toLocaleDateString('en-EG', { weekday: 'short', month: 'short', day: 'numeric' })}</strong><small>{new Date(batch.delivery_time).toLocaleTimeString('en-EG', { hour: 'numeric', minute: '2-digit' })}</small></span><span>{batchId === batch.id ? '✓' : '○'}</span></button>)}</div>}
+                      {batches.length === 0 ? <p>No delivery batches are accepting orders right now.</p> : <div className="toktok-batch-options">{batches.map((batch) => { const notOpenYet = new Date(batch.registration_start) > new Date(); return <button key={batch.id} type="button" disabled={notOpenYet} className={(batchId === batch.id ? 'selected ' : '') + (notOpenYet ? 'not-open' : '')} onClick={() => setBatchId(batch.id)}><span><strong>{new Date(batch.delivery_time).toLocaleDateString('en-EG', { weekday: 'short', month: 'short', day: 'numeric' })}</strong><small>{new Date(batch.delivery_time).toLocaleTimeString('en-EG', { hour: 'numeric', minute: '2-digit' })}</small>{notOpenYet && <small>Opens at {new Date(batch.registration_start).toLocaleTimeString('en-EG', { hour: 'numeric', minute: '2-digit' })}</small>}</span><span>{batchId === batch.id ? '✓' : '○'}</span></button>})}</div>}
                       <label>Delivery location<input value={address} onChange={(event) => setAddress(event.target.value)} maxLength={300} placeholder="Where should we meet you on campus?" /></label>
                       <label>Order notes (optional)<input value={notes} onChange={(event) => setNotes(event.target.value)} maxLength={500} placeholder="Any instructions?" /></label>
                       <button className="toktok-place-order" type="button" onClick={() => setCheckoutStep('payment')} disabled={count === 0 || !batchId}>Continue to payment →</button>
                     </div> : <div className="toktok-checkout-fields">
-                      <div className="toktok-payment-total"><span>Items subtotal</span><strong>{money(subtotal)}</strong><small>Delivery fee is added to the order total.</small></div>
+                      <div className="toktok-payment-total"><span>Items subtotal</span><strong>{money(subtotal)}</strong><span>Delivery fee</span><strong>{money(deliveryFee)}</strong><span>Total to pay</span><strong>{money(subtotal + deliveryFee)}</strong></div>
                       <h3>Choose payment method</h3>
                       {paymentMethodsLoading ? <p>Loading payment methods…</p> : paymentMethods.length === 0 ? <p>No active payment methods are available. Contact TokTok administration.</p> : <div className="toktok-payment-methods">{paymentMethods.map((method) => <button key={method.id} type="button" className={selectedPaymentMethod?.id === method.id ? 'selected' : ''} onClick={() => setSelectedPaymentMethod(method)}><strong>{method.name}</strong><small>{method.type}</small><span>{selectedPaymentMethod?.id === method.id ? '✓' : '○'}</span></button>)}</div>}
                       {selectedPaymentMethod && <div className="toktok-payment-instructions"><span>Transfer to</span><strong>{selectedPaymentMethod.account_number}</strong>{selectedPaymentMethod.instructions && <p>{selectedPaymentMethod.instructions}</p>}</div>}
