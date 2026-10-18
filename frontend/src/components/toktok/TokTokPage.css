@@ -251,3 +251,20 @@
   .toktok-checkout-step-actions>button:first-child{order:2}
   .toktok-payment-total{padding:14px}
 }
+
+
+/* TokTok-only order confirmation, matching Mosquito's success state */
+.toktok-success-screen{position:fixed;inset:0;z-index:120;display:grid;place-items:center;overflow:auto;padding:24px;background:#fffdf4}
+.toktok-success-content{width:min(100%,520px);text-align:center;padding:20px 0}
+.toktok-success-icon{display:grid;place-items:center;width:82px;height:82px;margin:0 auto 22px;border-radius:50%;background:#171717;color:#ffdf00;font-size:43px;font-weight:900;box-shadow:0 0 0 9px #fff1a6}
+.toktok-success-content>.toktok-kicker{display:block;margin-top:28px;color:#927500;font-weight:900;letter-spacing:.13em;font-size:11px}
+.toktok-success-content h1{margin:10px 0;color:#171717;font-size:clamp(28px,5vw,38px);letter-spacing:-.04em}
+.toktok-success-content>p{max-width:420px;margin:0 auto 22px;color:#716b5f;font-size:15px;line-height:1.6}
+.toktok-success-summary{display:grid;gap:0;text-align:left;margin:22px 0;padding:8px 18px;border:1px solid #eee4bd;border-radius:17px;background:#fff}
+.toktok-success-summary>div{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:13px 0;border-bottom:1px solid #f0ead5}
+.toktok-success-summary>div:last-child{border-bottom:0}
+.toktok-success-summary span{color:#716b5f;font-size:13px}
+.toktok-success-summary strong{max-width:60%;text-align:right;color:#171717;font-size:14px;overflow-wrap:anywhere}
+.toktok-success-summary .toktok-success-pending{color:#806400}
+.toktok-success-content>.toktok-place-order,.toktok-success-secondary{width:100%;margin-top:10px}
+.toktok-success-secondary{min-height:48px;border:1px solid #e5dcae;border-radius:12px;background:#fff;color:#171717;padding:13px 18px;font:inherit;font-weight:850;cursor:pointer}
