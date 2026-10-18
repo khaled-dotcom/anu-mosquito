@@ -26,7 +26,7 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
   const [myOrders, setMyOrders] = useState([])
   const [ordersLoading, setOrdersLoading] = useState(false)
 
-  const loadCatalog = useCallback(async () => {
+  const loadCatalog = useCallback(async (requestedStoreId = '') => {
     setLoading(true)
     setError('')
     try {
@@ -40,8 +40,8 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
 
       const safeStores = storeRows || []
       setStores(safeStores)
-      const nextStoreId = safeStores.some((store) => store.id === storeId) ? storeId : (safeStores[0]?.id || '')
-      if (nextStoreId !== storeId) setStoreId(nextStoreId)
+      const nextStoreId = safeStores.some((store) => store.id === requestedStoreId) ? requestedStoreId : (safeStores[0]?.id || '')
+      setStoreId(nextStoreId)
 
       if (!nextStoreId) {
         setCategories([])
@@ -77,7 +77,7 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
     } finally {
       setLoading(false)
     }
-  }, [storeId])
+  }, [])
 
   useEffect(() => { loadCatalog() }, [loadCatalog]) // load when the TokTok screen opens
 
@@ -90,6 +90,7 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
     setLoading(true)
     setError('')
     setNotice('')
+    loadCatalog(nextId)
   }
 
   function backToStores() {
