@@ -232,6 +232,8 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
       const { data, error: orderError } = await supabase.rpc('toktok_place_order_with_payment', {
         p_store_id: storeId, p_batch_id: batchId,
         p_items: cartItems.map(({ id, quantity }) => ({ product_id: id, quantity })),
+        p_delivery_address: null,
+        p_notes: null,
         p_payment_method_id: selectedPaymentMethod.id,
         p_payment_proof_url: uploadedPath,
       })
