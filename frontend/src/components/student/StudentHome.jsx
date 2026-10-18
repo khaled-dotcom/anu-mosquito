@@ -216,7 +216,9 @@ function StudentHome({
           )}
         </label>
 
-        <div className="toktok-home-entry" style={{ display: 'flex', justifyContent: 'center', margin: '16px 0' }}>
+        <section className="toktok-home-entry" aria-labelledby="toktok-section-heading">
+          <h2 className="toktok-section-heading" id="toktok-section-heading">Need a ride or delivery?</h2>
+          <p className="toktok-section-subtitle">Explore quick rides and delivery with ANU TokTok.</p>
           <button
             type="button"
             className="header-orders-button toktok-entry-button"
@@ -224,9 +226,10 @@ function StudentHome({
             aria-label="Open ANU TokTok"
           >
             <span aria-hidden="true">🛺</span>
-            <span>ANU TokTok</span>
+            <span>Explore ANU TokTok</span>
+            <span aria-hidden="true">→</span>
           </button>
-        </div>
+        </section>
 
         {(extrasLoading || usableCategories.length > 0) && (
           <section className="section" aria-label="Categories">
