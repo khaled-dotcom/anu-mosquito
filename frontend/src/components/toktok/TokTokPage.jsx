@@ -21,6 +21,9 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
   const [address, setAddress] = useState('')
   const [notes, setNotes] = useState('')
   const [categoryId, setCategoryId] = useState('all')
+  const [showOrders, setShowOrders] = useState(false)
+  const [myOrders, setMyOrders] = useState([])
+  const [ordersLoading, setOrdersLoading] = useState(false)
 
   const loadCatalog = useCallback(async () => {
     setLoading(true)
@@ -106,6 +109,31 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
     })
   }
 
+  async function loadMyOrders() {
+    setOrdersLoading(true)
+    setError('')
+    const { data: userResult, error: userError } = await supabase.auth.getUser()
+    if (userError || !userResult.user) {
+      setError('Please sign in again to view your TokTok orders.')
+      setOrdersLoading(false)
+      return
+    }
+    const { data, error: ordersError } = await supabase
+      .from('toktok_orders')
+      .select('id,order_number,order_date,store_name_snapshot,delivery_address,delivery_fee,items_subtotal,total_amount,payment_status,status,notes,created_at')
+      .eq('student_id', userResult.user.id)
+      .order('created_at', { ascending: false })
+      .limit(50)
+    if (ordersError) setError('Could not load your TokTok orders. Please try again.')
+    else setMyOrders(data || [])
+    setOrdersLoading(false)
+  }
+
+  async function openTokTokOrders() {
+    setShowOrders(true)
+    await loadMyOrders()
+  }
+
   async function placeOrder() {
     setError('')
     setNotice('')
@@ -136,7 +164,7 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
       <header className="toktok-header">
         <button className="toktok-back" type="button" onClick={onBack}>← Back to Mosquito</button>
         <div className="toktok-brand"><span className="toktok-mark">🛺</span><div><strong>ANU TokTok</strong><small>Campus essentials, delivered</small></div></div>
-        <button className="toktok-orders" type="button" onClick={onOpenOrders}>My Mosquito Orders</button>
+        <button className="toktok-orders" type="button" onClick={openTokTokOrders}>My TokTok Orders</button>
       </header>
 
       <main className="toktok-main">
@@ -144,7 +172,23 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
         {error && <p className="toktok-message is-error" role="alert">{error}</p>}
         {notice && <p className="toktok-message is-success" role="status">{notice}</p>}
 
-        {loading ? <div className="toktok-empty">Loading TokTok…</div> : stores.length === 0 ? (
+        {showOrders ? (
+          <section className="toktok-my-orders">
+            <div className="toktok-orders-heading"><h2>My TokTok Orders</h2><button type="button" onClick={() => setShowOrders(false)}>Back to stores</button></div>
+            {ordersLoading ? <div className="toktok-empty">Loading your orders…</div> : myOrders.length === 0 ? <div className="toktok-empty">You haven't placed any TokTok orders yet.</div> : (
+              <div className="toktok-order-list">{myOrders.map((order) => (
+                <article className="toktok-order-card" key={order.id}>
+                  <div><strong>{order.order_number}</strong><small>{order.store_name_snapshot} · {new Date(order.created_at).toLocaleString('en-EG', { dateStyle: 'medium', timeStyle: 'short' })}</small></div>
+                  <span className="toktok-order-status">{order.status}</span>
+                  <p>Total: <strong>{money(order.total_amount)}</strong> · Payment: {order.payment_status}</p>
+                  {order.delivery_address && <small>Delivery: {order.delivery_address}</small>}
+                  {order.notes && <small>Notes: {order.notes}</small>}
+                </article>
+              ))}</div>
+            )}
+            <button type="button" className="toktok-refresh-orders" onClick={loadMyOrders} disabled={ordersLoading}>Refresh orders</button>
+          </section>
+        ) : loading ? <div className="toktok-empty">Loading TokTok…</div> : stores.length === 0 ? (
           <div className="toktok-empty"><span>🛺</span><h2>TokTok is getting ready</h2><p>No stores are open yet. Please check back soon.</p></div>
         ) : (
           <>
