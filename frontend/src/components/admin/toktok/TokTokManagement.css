@@ -97,3 +97,49 @@
 .toktok-admin-order-actions button:nth-child(2){background:#fff0f0;border-color:#f4cccc;color:#a13333}
 .toktok-admin-order-actions select{padding:9px;border:1px solid #d7e3f0;border-radius:10px;background:#fff;color:#34445b;font:inherit;font-size:12px}
 @media(max-width:650px){.toktok-admin-order-toolbar{align-items:stretch;flex-direction:column}.toktok-admin-order-meta{grid-template-columns:1fr}.toktok-admin-order-top>strong{font-size:15px}.toktok-admin-order-actions>*{flex:1;text-align:center}}
+
+
+/* TokTok-only order controls: black and vivid yellow palette. */
+.toktok-admin-order-toolbar .toktok-admin-action,
+.toktok-admin-order-actions button,
+.toktok-admin-order-actions a {
+  background: #171717;
+  color: #ffdf00;
+  border-color: #171717;
+}
+.toktok-admin-order-actions button:first-child {
+  background: #171717;
+  color: #ffdf00;
+  border-color: #171717;
+}
+.toktok-admin-order-actions button:nth-child(2) {
+  background: #fff4bf;
+  color: #171717;
+  border-color: #ffdf00;
+}
+.toktok-admin-order-actions button:disabled,
+.toktok-admin-order-actions select:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+.toktok-admin-order-status-control {
+  display: grid;
+  gap: 5px;
+  color: #635500;
+  font-size: 11px;
+  font-weight: 800;
+}
+.toktok-admin-order-status-control select {
+  min-width: 130px;
+  padding: 9px 10px;
+  border: 1px solid #e5dcae;
+  border-radius: 10px;
+  background: #fffdf4;
+  color: #171717;
+  font: inherit;
+  font-size: 12px;
+}
+.toktok-admin-order-status-control select:focus {
+  outline: 2px solid #ffdf00;
+  outline-offset: 1px;
+}
