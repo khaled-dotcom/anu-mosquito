@@ -59,6 +59,8 @@ function App() {
   setRestaurantIsActive,
 
   loadRestaurants,
+  openAddRestaurantForm,
+  closeRestaurantForm,
   handleSaveRestaurant,
   handleToggleRestaurant,
   handleDeleteRestaurant,
@@ -329,6 +331,8 @@ if (
 
       showRestaurantForm={showRestaurantForm}
       setShowRestaurantForm={setShowRestaurantForm}
+      openAddRestaurantForm={openAddRestaurantForm}
+      closeRestaurantForm={closeRestaurantForm}
 
       editingRestaurant={editingRestaurant}
       restaurantName={restaurantName}
