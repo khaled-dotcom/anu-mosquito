@@ -7,6 +7,13 @@ const blankStore = { name: '', slug: '', description: '', image_url: '', is_acti
 const blankProduct = { name: '', description: '', image_url: '', selling_price: '', cost_price: '', stock_quantity: '', category_id: '', is_available: true, sort_order: 0 }
 const blankCategory = { name: '', description: '', sort_order: 0, is_active: true }
 const blankBatch = { registration_start: '', registration_end: '', delivery_time: '', capacity: '', is_active: true }
+const toLocalDateTimeInput = (value) => {
+  if (!value) return ''
+  const date = new Date(value)
+  if (!Number.isFinite(date.getTime())) return ''
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
+  return local.toISOString().slice(0, 16)
+}
 
 export default function TokTokAdminPage() {
   const [tab, setTab] = useState('stores')
@@ -66,7 +73,7 @@ export default function TokTokAdminPage() {
     if (kind === 'store') setStoreForm({ ...blankStore, ...row })
     if (kind === 'category') setCategoryForm({ ...blankCategory, ...row })
     if (kind === 'product') setProductForm({ ...blankProduct, ...row, selling_price: String(row.selling_price), cost_price: row.cost_price == null ? '' : String(row.cost_price), stock_quantity: row.stock_quantity == null ? '' : String(row.stock_quantity) })
-    if (kind === 'batch') setBatchForm({ ...blankBatch, ...row, registration_start: row.registration_start?.slice(0, 16) || '', registration_end: row.registration_end?.slice(0, 16) || '', delivery_time: row.delivery_time?.slice(0, 16) || '', capacity: row.capacity == null ? '' : String(row.capacity) })
+    if (kind === 'batch') setBatchForm({ ...blankBatch, ...row, registration_start: toLocalDateTimeInput(row.registration_start), registration_end: toLocalDateTimeInput(row.registration_end), delivery_time: toLocalDateTimeInput(row.delivery_time), capacity: row.capacity == null ? '' : String(row.capacity) })
   }
 
   function resetForms() {
