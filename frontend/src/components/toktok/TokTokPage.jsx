@@ -33,6 +33,7 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
   const [showOrders, setShowOrders] = useState(false)
   const [myOrders, setMyOrders] = useState([])
   const [ordersLoading, setOrdersLoading] = useState(false)
+  const [orderSuccess, setOrderSuccess] = useState(null)
 
   const loadCatalog = useCallback(async (requestedStoreId = '') => {
     setLoading(true)
@@ -246,8 +247,8 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
       setAddress('')
       setNotes('')
       setPaymentProof(null)
-      setNotice('Order ' + order.order_number + ' submitted. Your payment proof is waiting for admin confirmation.')
-      await loadCatalog()
+      setOrderSuccess(order)
+      setNotice('')
       await loadMyOrders()
     } catch (orderError) {
       console.error('TokTok order placement failed:', orderError)
@@ -368,6 +369,24 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
           </div>
         )}
       </main>
+      {orderSuccess && (
+        <div className="toktok-success-screen" role="dialog" aria-modal="true" aria-labelledby="toktok-success-title">
+          <div className="toktok-success-content">
+            <div className="toktok-success-icon" aria-hidden="true">✓</div>
+            <span className="toktok-kicker">ORDER RECEIVED</span>
+            <h1 id="toktok-success-title">Your order is placed!</h1>
+            <p>We received your order and payment screenshot. Your payment is waiting for TokTok admin confirmation.</p>
+            <section className="toktok-success-summary">
+              <div><span>Order number</span><strong>{orderSuccess.order_number || '—'}</strong></div>
+              <div><span>Store</span><strong>{orderSuccess.store_name_snapshot || stores.find((store) => store.id === storeId)?.name || 'TokTok'}</strong></div>
+              <div><span>Total</span><strong>{money(orderSuccess.total_amount ?? subtotal + deliveryFee)}</strong></div>
+              <div><span>Payment status</span><strong className="toktok-success-pending">Waiting for confirmation</strong></div>
+            </section>
+            <button type="button" className="toktok-place-order" onClick={async () => { setOrderSuccess(null); setShowOrders(true); await loadMyOrders() }}>Track my order</button>
+            <button type="button" className="toktok-success-secondary" onClick={() => { setOrderSuccess(null); setShowOrders(false); setSelectedStoreOpen(false); loadCatalog() }}>Back to stores</button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
