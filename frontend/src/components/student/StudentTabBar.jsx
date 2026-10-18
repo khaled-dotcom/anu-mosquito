@@ -25,16 +25,6 @@ function StudentTabBar({ active, profile, setStudentPage, handleLogout }) {
 
         <button
           type="button"
-          className={active === 'toktok' ? 'active toktok-tab' : 'toktok-tab'}
-          aria-current={active === 'toktok' ? 'page' : undefined}
-          onClick={() => setStudentPage('toktok')}
-        >
-          <span className="toktok-tab-icon" aria-hidden="true">🛺</span>
-          <span>TokTok</span>
-        </button>
-
-        <button
-          type="button"
           className={active === 'orders' ? 'active' : ''}
           aria-current={active === 'orders' ? 'page' : undefined}
           onClick={() => setStudentPage('orders')}
