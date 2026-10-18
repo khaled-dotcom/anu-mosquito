@@ -14,3 +14,8 @@
 .toktok-order-status { text-transform: capitalize; font-weight: 700; color: #6e5300; }
 .toktok-refresh-orders { margin-top: 1rem; }
 .toktok-refresh-orders:disabled { opacity: .6; cursor: wait; }
+
+.toktok-order-items { list-style: none; margin: .35rem 0; padding: .65rem .8rem; border-radius: 10px; background: #fff9e8; display: grid; gap: .45rem; }
+.toktok-order-items li { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; font-size: .9rem; }
+.toktok-order-items li span { overflow-wrap: anywhere; }
+.toktok-order-items li strong { white-space: nowrap; }
