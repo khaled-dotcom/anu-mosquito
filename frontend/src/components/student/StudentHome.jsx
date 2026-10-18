@@ -216,6 +216,26 @@ function StudentHome({
           )}
         </label>
 
+        <section className="toktok-entry-section" aria-label="ANU TokTok">
+          <button
+            type="button"
+            className="toktok-entry-card"
+            onClick={() => {
+              setStudentPage('toktok')
+              window.scrollTo(0, 0)
+            }}
+          >
+            <span className="toktok-entry-card__mark" aria-hidden="true">🛍️</span>
+            <span className="toktok-entry-card__copy">
+              <span className="toktok-entry-card__title">ANU TokTok</span>
+              <span className="toktok-entry-card__description">
+                Restaurants and supermarkets around the university
+              </span>
+            </span>
+            <span className="toktok-entry-card__arrow" aria-hidden="true">›</span>
+          </button>
+        </section>
+
         {(extrasLoading || usableCategories.length > 0) && (
           <section className="section" aria-label="Categories">
             <div className="cat-rail" role="list">
