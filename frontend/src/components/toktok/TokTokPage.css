@@ -178,3 +178,76 @@
 .toktok-checkout-step-actions .toktok-place-order{margin:0}
 .toktok-payment-total{display:grid;gap:5px;padding:12px;border-radius:12px;background:#faf4e3}
 @media(max-width:560px){.toktok-product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.toktok-product-image,.toktok-product-placeholder{height:95px;min-height:95px}.toktok-product-body{padding:9px}.toktok-product-body h3{font-size:13px}.toktok-cart-panel{max-height:88vh}.toktok-checkout-step-actions{grid-template-columns:1fr}.toktok-checkout-step-actions>button:first-child{order:2}}
+
+
+/* TokTok checkout now follows the same full-page checkout rhythm as Mosquito.
+   Only TokTok's action colors differ: black and vivid yellow. */
+.toktok-cart-backdrop{
+  position:fixed;inset:0;z-index:100;display:flex;align-items:stretch;justify-content:center;
+  padding:0;background:#fffdf4;backdrop-filter:none;overflow:hidden;
+}
+.toktok-cart-panel{
+  width:min(100%,920px);height:100%;max-height:100%;overflow-y:auto;overscroll-behavior:contain;
+  display:block;margin:0;padding:24px clamp(16px,4vw,34px) 112px;border:0;border-radius:0;
+  background:#fffdf4;box-shadow:none;animation:none;
+}
+.toktok-cart-panel-heading{
+  position:sticky;top:-24px;z-index:3;margin:0 calc(clamp(16px,4vw,34px)*-1) 22px;
+  padding:18px clamp(16px,4vw,34px);background:rgba(255,253,244,.97);
+  border-bottom:1px solid #eee4bd;backdrop-filter:blur(12px);
+}
+.toktok-cart-panel-heading h2{font-size:clamp(24px,3vw,32px);letter-spacing:-.035em;color:#171717}
+.toktok-cart-panel-heading p{color:#6f6a52;font-size:14px}
+.toktok-cart-close{width:42px;height:42px;border-color:#e8dfb9;background:#fff;font-size:26px}
+.toktok-checkout-fields{display:grid;gap:14px;max-width:760px;margin:0 auto}
+.toktok-checkout-fields h3{margin:10px 0 0;font-size:18px;color:#171717;letter-spacing:-.02em}
+.toktok-cart-lines{padding:4px 16px;border:1px solid #eee4bd;border-radius:16px;background:#fff;gap:0}
+.toktok-cart-line{padding:14px 0;border-bottom:1px solid #f0ead5;font-size:14px;color:#343126}
+.toktok-cart-line:last-child{border-bottom:0}
+.toktok-batch-options button,.toktok-payment-methods button{
+  min-height:68px;padding:14px 16px;border:1.5px solid #e8dfb9;border-radius:14px;
+  background:#fff;color:#242018;transition:border-color .15s,background .15s,box-shadow .15s;
+}
+.toktok-batch-options button.selected,.toktok-payment-methods button.selected{
+  border-color:#171717;background:#fff4b8;box-shadow:0 0 0 1px #171717;
+}
+.toktok-batch-options button:disabled{opacity:.5;cursor:not-allowed}
+.toktok-batch-options button strong,.toktok-payment-methods button strong{font-size:15px}
+.toktok-payment-total{
+  grid-template-columns:1fr auto;gap:12px;padding:18px;border:1px solid #eee4bd;border-radius:16px;background:#fff;
+}
+.toktok-payment-total span{color:#716b5f;font-size:14px}
+.toktok-payment-total strong{color:#171717;text-align:right;font-size:14px}
+.toktok-payment-total strong:last-child{font-size:21px;color:#171717}
+.toktok-payment-instructions{padding:18px;border:1px solid #f0d94e;border-radius:16px;background:#fff7ce}
+.toktok-proof-upload{padding:18px;border:1.5px dashed #c9a900;border-radius:15px;background:#fff}
+.toktok-proof-upload input{margin-top:4px}
+.toktok-proof-preview-name{padding:10px 12px;border-radius:10px;background:#fff4bf;color:#403400}
+.toktok-place-order,.toktok-cart-bar>button{
+  min-height:48px;border:0;border-radius:12px;background:#171717;color:#ffdf00;
+  padding:13px 18px;font:inherit;font-weight:850;cursor:pointer;transition:transform .15s,background .15s;
+}
+.toktok-place-order:hover,.toktok-cart-bar>button:hover{background:#292929;transform:translateY(-1px)}
+.toktok-place-order:disabled,.toktok-cart-bar>button:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.toktok-checkout-step-actions{display:grid;grid-template-columns:130px minmax(0,1fr);gap:10px;margin:10px 0 0}
+.toktok-checkout-step-actions>button:first-child{
+  min-height:48px;padding:12px;border:1px solid #e5dcae;border-radius:12px;background:#fff;color:#171717;font:inherit;font-weight:800;cursor:pointer;
+}
+.toktok-payment-pending-note{display:block;padding:12px 14px;border-radius:12px;background:#fff4bf;color:#554500;line-height:1.5}
+.toktok-checkout-fields>label:not(.toktok-proof-upload){display:grid;gap:7px;color:#262318;font-size:14px;font-weight:750}
+.toktok-checkout-fields input:not([type=file]),.toktok-checkout-fields select{
+  min-height:48px;padding:12px 14px;border:1px solid #e5dcae;border-radius:12px;background:#fff;color:#171717;font:inherit;
+}
+.toktok-checkout-fields input:focus,.toktok-checkout-fields select:focus{outline:2px solid #ffd900;outline-offset:1px}
+.toktok-cart-bar{border:1px solid #e9d54b;background:#fffdf4}
+.toktok-cart-bar>button{background:#171717;color:#ffdf00}
+.toktok-orders,.toktok-back{font-weight:800}
+@media(max-width:600px){
+  .toktok-cart-panel{padding:0 14px 104px}
+  .toktok-cart-panel-heading{top:0;margin:0 -14px 18px;padding:14px}
+  .toktok-cart-panel-heading h2{font-size:24px}
+  .toktok-checkout-fields{gap:12px}
+  .toktok-checkout-step-actions{grid-template-columns:1fr}
+  .toktok-checkout-step-actions>button:first-child{order:2}
+  .toktok-payment-total{padding:14px}
+}
