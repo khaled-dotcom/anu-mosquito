@@ -280,11 +280,17 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
                 {order.batch_time_snapshot && <div className="toktok-order-delivery-time"><span>Expected delivery</span><strong>{new Date(order.batch_time_snapshot).toLocaleTimeString('en-EG', { hour: 'numeric', minute: '2-digit' })}</strong><small>{new Date(order.batch_time_snapshot).toLocaleDateString('en-EG', { weekday: 'short', month: 'short', day: 'numeric' })}</small></div>}
                 <div className="toktok-order-tracking" aria-label="Order progress">
                   {['pending', 'confirmed', 'preparing', 'ready', 'delivered'].map((step, index) => {
-                    const currentStatus = String(order.status || 'pending').toLowerCase().replace(/\s+/g, '_')
+                    const currentStatus = String(order.status || 'pending').toLowerCase().replace(/[\s-]+/g, '_')
                     const steps = ['pending', 'confirmed', 'preparing', 'ready', 'delivered']
                     const cancelled = currentStatus.includes('cancel')
+                    const statusAliases = currentStatus.includes('deliver') || currentStatus.includes('complete') ? 4
+                      : currentStatus.includes('out_for_delivery') || currentStatus.includes('on_the_way') || currentStatus.includes('picked_up') ? 3
+                      : currentStatus.includes('ready') ? 3
+                      : currentStatus.includes('prepar') || currentStatus.includes('cook') || currentStatus.includes('process') ? 2
+                      : currentStatus.includes('confirm') || currentStatus.includes('accept') || currentStatus.includes('paid') ? 1
+                      : 0
                     const currentIndex = steps.indexOf(currentStatus)
-                    const activeIndex = currentIndex >= 0 ? currentIndex : (currentStatus.includes('complete') ? 4 : 0)
+                    const activeIndex = currentIndex >= 0 ? currentIndex : statusAliases
                     const complete = !cancelled && index <= activeIndex
                     return <div key={step} className={'toktok-track-step' + (complete ? ' is-complete' : '') + (index === activeIndex && !cancelled ? ' is-current' : '') + (cancelled ? ' is-cancelled' : '')}><span className="toktok-track-dot">{cancelled && index === 0 ? '!' : complete ? '✓' : index + 1}</span><small>{step === 'pending' ? 'Placed' : step === 'confirmed' ? 'Confirmed' : step === 'preparing' ? 'Preparing' : step === 'ready' ? 'On the way' : 'Delivered'}</small></div>
                   })}
