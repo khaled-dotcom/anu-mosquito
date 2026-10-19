@@ -183,8 +183,8 @@ export default function TokTokManagement() {
       if (!(form.name || '').trim() || !slug) { setError('Enter a valid store name.'); return }
       if (!(form.code || '').trim()) { setError('Enter a store code.'); return }
       if (!editing) {
-        const accountCode = String(form.account_code || '').replace(/\\D/g, '')
-        if (!/^\\d{7}$/.test(accountCode)) { setError('Restaurant login code must contain exactly 7 digits.'); return }
+        const accountCode = String(form.account_code || '').replace(/\D/g, '')
+        if (!/^\d{7}$/.test(accountCode)) { setError('Restaurant login code must contain exactly 7 digits.'); return }
         if (String(form.account_password || '').length < 6) { setError('Restaurant account password must be at least 6 characters.'); return }
       }
       payload = { name: form.name.trim(), code: form.code.trim().toUpperCase(), slug, description: (form.description || '').trim() || null, image_url: (form.image_url || '').trim() || null, sort_order: Number(form.sort_order) || 0, is_active: editing ? editing.is_active : true, is_open: editing ? editing.is_open : true }
@@ -584,7 +584,7 @@ export default function TokTokManagement() {
               <div className="toktok-admin-order-actions">
                 <button type="button" onClick={() => confirmOrderPayment(order)} disabled={busyId === order.id || String(order.payment_status || '').toLowerCase() === 'confirmed' || String(order.status || '').toLowerCase() === 'cancelled'}>✓ Confirm payment</button>
                 <button type="button" onClick={() => cancelOrder(order)} disabled={busyId === order.id || ['delivered', 'completed', 'cancelled'].includes(String(order.status || '').toLowerCase())}>✕ Cancel order</button>
-                {order.student_phone_snapshot && <a href={'https://wa.me/' + (String(order.student_phone_snapshot).replace(/\\D/g, '').startsWith('0') ? '2' + String(order.student_phone_snapshot).replace(/\\D/g, '') : String(order.student_phone_snapshot).replace(/\\D/g, ''))} target="_blank" rel="noreferrer">Contact student ↗</a>}
+                {order.student_phone_snapshot && <a href={'https://wa.me/' + (String(order.student_phone_snapshot).replace(/\D/g, '').startsWith('0') ? '2' + String(order.student_phone_snapshot).replace(/\D/g, '') : String(order.student_phone_snapshot).replace(/\D/g, ''))} target="_blank" rel="noreferrer">Contact student ↗</a>}
 
               </div>
             </article>)}</div>}
