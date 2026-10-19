@@ -30,6 +30,8 @@ export default function TokTokManagement() {
   const [stores, setStores] = useState([])
   const [products, setProducts] = useState([])
   const [batches, setBatches] = useState([])
+  const [scheduleTemplates, setScheduleTemplates] = useState([])
+  const [scheduleEditingId, setScheduleEditingId] = useState('')
   const [orders, setOrders] = useState([])
   const [categories, setCategories] = useState([])
   const [orderItems, setOrderItems] = useState([])
@@ -58,6 +60,8 @@ export default function TokTokManagement() {
     setLoading(true)
     setError('')
     try {
+      const { error: ensureBatchesError } = await supabase.rpc('ensure_toktok_daily_batches')
+      if (ensureBatchesError) throw ensureBatchesError
       const [storeResult, productResult, batchResult, orderResult] = await Promise.all([
         supabase.from('toktok_stores').select('id,name,code,slug,description,image_url,is_active,is_open,sort_order').order('sort_order'),
         supabase.from('toktok_products').select('id,store_id,category_id,name,description,image_url,selling_price,cost_price,is_available,sort_order').order('sort_order').order('name'),
@@ -66,7 +70,7 @@ export default function TokTokManagement() {
       ])
       const [categoryResult, deliveryFeeResult] = await Promise.all([
         supabase.from('toktok_categories').select('id,store_id,name,description,image_url,is_active,sort_order').order('sort_order').order('name'),
-        supabase.from('toktok_settings').select('setting_key,setting_value').in('setting_key', ['delivery_fee_tiers', 'delivery_fee', 'toktok_enabled']),
+        supabase.from('toktok_settings').select('setting_key,setting_value').in('setting_key', ['delivery_fee_tiers', 'delivery_fee', 'toktok_enabled', 'toktok_batch_schedule']),
       ])
       const failed = [storeResult, productResult, batchResult, orderResult, categoryResult, deliveryFeeResult].find((result) => result.error)
       if (failed) throw failed.error
@@ -82,6 +86,8 @@ export default function TokTokManagement() {
       setOrders(ordersWithProof)
       setCategories(categoryResult.data || [])
       const settingsRows = deliveryFeeResult.data || []
+      const batchScheduleRow = settingsRows.find((row) => row.setting_key === 'toktok_batch_schedule')
+      setScheduleTemplates(Array.isArray(batchScheduleRow?.setting_value) ? batchScheduleRow.setting_value : [])
       const toktokEnabledRow = settingsRows.find((row) => row.setting_key === 'toktok_enabled')
       setToktokEnabled(toktokEnabledRow ? (toktokEnabledRow.setting_value === true || toktokEnabledRow.setting_value === 'true') : true)
       const tiersRow = settingsRows.find((row) => row.setting_key === 'delivery_fee_tiers')
@@ -114,7 +120,8 @@ export default function TokTokManagement() {
     setError('')
     setNotice('')
     setEditing(null)
-    setForm({ ...emptyForm, store_id: tab === 'products' ? selectedStoreId : stores[0]?.id || '' })
+    setScheduleEditingId('')
+    setForm({ ...emptyForm, store_id: tab === 'products' ? selectedStoreId : stores[0]?.id || '', registration_start: '09:00', registration_end: '10:00', delivery_time: '10:30' })
     setShowAdd(true)
   }
 
@@ -122,29 +129,65 @@ export default function TokTokManagement() {
     event.preventDefault()
     setError('')
     setNotice('')
-    const table = tab === 'stores' ? 'toktok_stores' : tab === 'products' ? 'toktok_products' : 'toktok_batches'
+    if (tab === 'batches') {
+      if (!form.store_id) { setError('Choose a store before adding a batch schedule.'); return }
+      const startTime = form.registration_start
+      const endTime = form.registration_end
+      const deliveryTime = form.delivery_time
+      if (![startTime, endTime, deliveryTime].every((value) => /^([01]\\d|2[0-3]):[0-5]\\d$/.test(value || ''))) {
+        setError('Enter valid registration opening, closing, and delivery times.')
+        return
+      }
+      if (endTime <= startTime) { setError('Registration closing time must be after opening time on the same day.'); return }
+      if (deliveryTime < endTime) { setError('Delivery time must be at or after registration closes.'); return }
+      if (form.capacity !== '' && (!Number.isInteger(Number(form.capacity)) || Number(form.capacity) < 1)) { setError('Capacity must be a positive whole number.'); return }
+      const template = {
+        id: scheduleEditingId || (globalThis.crypto?.randomUUID?.() || String(Date.now())),
+        store_id: form.store_id,
+        registration_start: startTime,
+        registration_end: endTime,
+        delivery_time: deliveryTime,
+        capacity: form.capacity === '' ? null : Number(form.capacity),
+        is_active: scheduleEditingId ? (scheduleTemplates.find((item) => item.id === scheduleEditingId)?.is_active ?? true) : true,
+      }
+      const nextTemplates = scheduleEditingId
+        ? scheduleTemplates.map((item) => item.id === scheduleEditingId ? template : item)
+        : [...scheduleTemplates, template]
+      try {
+        const { data: authData, error: authError } = await supabase.auth.getUser()
+        if (authError) throw authError
+        const { error: saveError } = await supabase.from('toktok_settings').upsert({
+          setting_key: 'toktok_batch_schedule',
+          setting_value: nextTemplates,
+          updated_by: authData.user?.id || null,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'setting_key' })
+        if (saveError) throw saveError
+        setScheduleTemplates(nextTemplates)
+        setShowAdd(false)
+        setScheduleEditingId('')
+        setEditing(null)
+        setNotice(scheduleEditingId ? 'Recurring batch schedule updated. Existing orders and previous batches remain unchanged.' : 'Recurring batch schedule saved. New batches are generated automatically each day.')
+        await refresh()
+      } catch (err) {
+        setError(err?.message || 'Could not save recurring batch schedule.')
+      }
+      return
+    }
+
+    const table = tab === 'stores' ? 'toktok_stores' : 'toktok_products'
     let payload
     if (tab === 'stores') {
-      const slug = String(form.slug || form.name || '').trim().toLowerCase().normalize('NFKC').replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '')
+      const slug = String(form.slug || form.name || '').trim().toLowerCase().normalize('NFKC').replace(/[^\\p{L}\\p{N}]+/gu, '-').replace(/^-|-$/g, '')
       if (!(form.name || '').trim() || !slug) { setError('Enter a valid store name.'); return }
       if (!(form.code || '').trim()) { setError('Enter a store code.'); return }
       payload = { name: form.name.trim(), code: form.code.trim().toUpperCase(), slug, description: (form.description || '').trim() || null, image_url: (form.image_url || '').trim() || null, sort_order: Number(form.sort_order) || 0, is_active: editing ? editing.is_active : true, is_open: editing ? editing.is_open : true }
-    } else if (tab === 'products') {
+    } else {
       if (!form.store_id) { setError('Choose a store before adding a product.'); return }
       if (!(form.name || '').trim()) { setError('Enter a product name.'); return }
       if (form.selling_price === '' || !Number.isFinite(Number(form.selling_price)) || Number(form.selling_price) < 0) { setError('Enter a valid selling price.'); return }
       if (form.cost_price !== '' && (!Number.isFinite(Number(form.cost_price)) || Number(form.cost_price) < 0)) { setError('Enter a valid cost price.'); return }
       payload = { store_id: form.store_id, category_id: form.category_id || null, name: form.name.trim(), description: (form.description || '').trim() || null, image_url: (form.image_url || '').trim() || null, selling_price: Number(form.selling_price), cost_price: form.cost_price === '' ? null : Number(form.cost_price), sort_order: Number(form.sort_order) || 0, is_available: editing ? editing.is_available : true }
-    } else {
-      if (!form.store_id) { setError('Choose a store before adding a batch.'); return }
-      if (form.capacity !== '' && (!Number.isInteger(Number(form.capacity)) || Number(form.capacity) < 1)) { setError('Capacity must be a positive whole number.'); return }
-      const start = new Date(form.registration_start)
-      const end = new Date(form.registration_end)
-      const delivery = new Date(form.delivery_time)
-      if (![start, end, delivery].every((date) => Number.isFinite(date.getTime()))) { setError('Enter all batch dates and times.'); return }
-      if (end <= start) { setError('Registration closing time must be after opening time.'); return }
-      if (delivery < end) { setError('Delivery time must be at or after registration closes.'); return }
-      payload = { store_id: form.store_id, registration_start: start.toISOString(), registration_end: end.toISOString(), delivery_time: delivery.toISOString(), capacity: form.capacity === '' ? null : Number(form.capacity), is_active: editing ? editing.is_active : true }
     }
     try {
       const result = editing ? await supabase.from(table).update(payload).eq('id', editing.id) : await supabase.from(table).insert(payload)
@@ -163,6 +206,7 @@ export default function TokTokManagement() {
     setError('')
     setNotice('')
     setEditing(record)
+    if (kind === 'batches' && record.id && typeof record.registration_start === 'string' && /^([01]\\d|2[0-3]):/.test(record.registration_start)) setScheduleEditingId(record.id)
     if (kind === 'products') setSelectedStoreId(record.store_id || '')
     setForm({
       ...emptyForm, ...record,
@@ -177,9 +221,9 @@ export default function TokTokManagement() {
       cost_price: record.cost_price ?? '',
       capacity: record.capacity ?? '',
       sort_order: String(record.sort_order ?? 0),
-      registration_start: toLocalDateTimeInput(record.registration_start),
-      registration_end: toLocalDateTimeInput(record.registration_end),
-      delivery_time: toLocalDateTimeInput(record.delivery_time),
+      registration_start: kind === 'batches' && /^([01]\\d|2[0-3]):/.test(record.registration_start || '') ? record.registration_start : toLocalDateTimeInput(record.registration_start),
+      registration_end: kind === 'batches' && /^([01]\\d|2[0-3]):/.test(record.registration_end || '') ? record.registration_end : toLocalDateTimeInput(record.registration_end),
+      delivery_time: kind === 'batches' && /^([01]\\d|2[0-3]):/.test(record.delivery_time || '') ? record.delivery_time : toLocalDateTimeInput(record.delivery_time),
     })
     setTab(kind)
     setShowAdd(true)
@@ -198,6 +242,19 @@ export default function TokTokManagement() {
     } catch (err) {
       setError(err?.message || 'Could not delete ' + label + '. Linked records may need to be retained.')
     } finally { setBusyId('') }
+  }
+
+  async function deleteScheduleTemplate(template) {
+    if (!window.confirm('Delete this recurring schedule? Existing daily batches and orders will remain unchanged.')) return
+    const nextTemplates = scheduleTemplates.filter((item) => item.id !== template.id)
+    try {
+      const { data: authData, error: authError } = await supabase.auth.getUser()
+      if (authError) throw authError
+      const { error: saveError } = await supabase.from('toktok_settings').upsert({ setting_key: 'toktok_batch_schedule', setting_value: nextTemplates, updated_by: authData.user?.id || null, updated_at: new Date().toISOString() }, { onConflict: 'setting_key' })
+      if (saveError) throw saveError
+      setScheduleTemplates(nextTemplates)
+      setNotice('Recurring schedule deleted. Previously generated batches and existing orders were kept.')
+    } catch (err) { setError(err?.message || 'Could not delete recurring schedule.') }
   }
 
   async function toggleToktokVisibility() {
@@ -436,9 +493,12 @@ export default function TokTokManagement() {
             </form>
           </div>}
 
-          {tab === 'batches' && <div className="toktok-admin-panel"><div className="toktok-admin-panel-heading"><div><h3>Delivery batches</h3><p>Review batch timings and turn batches on or off.</p></div><div className="toktok-admin-heading-actions"><span>{batches.length} batches</span><button type="button" className="toktok-admin-add" onClick={openAddForm} disabled={stores.length === 0}>+ Add batch</button></div></div><label className="toktok-admin-search">Search batches<input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Store, status or date…" /></label>
-            {showAdd && tab === 'batches' && <form className="toktok-admin-form" onSubmit={addRecord}><h4>{editing ? 'Edit delivery batch' : 'Create a delivery batch'}</h4><label>Store *<select name="store_id" value={form.store_id} onChange={updateForm} required>{stores.map((store) => <option key={store.id} value={store.id}>{store.name}</option>)}</select></label><div className="toktok-admin-form-grid"><label>Registration opens *<input type="datetime-local" name="registration_start" value={form.registration_start} onChange={updateForm} required /></label><label>Registration closes *<input type="datetime-local" name="registration_end" value={form.registration_end} onChange={updateForm} required /></label><label>Delivery time *<input type="datetime-local" name="delivery_time" value={form.delivery_time} onChange={updateForm} required /></label><label>Order capacity<input type="number" min="1" step="1" name="capacity" value={form.capacity} onChange={updateForm} /></label></div><div className="toktok-admin-form-actions"><button type="button" onClick={() => {setShowAdd(false);setEditing(null)}}>Cancel</button><button type="submit">{editing ? 'Save changes' : 'Save batch'}</button></div></form>}
-            {batches.length === 0 ? <p className="toktok-admin-empty">No TokTok batches found.</p> : <div className="toktok-admin-table-wrap"><table className="toktok-admin-table"><thead><tr><th>Store</th><th>Delivery time</th><th>Registration ends</th><th>Capacity</th><th>Status</th><th>Action</th></tr></thead><tbody>{batches.filter((batch) => [stores.find((store) => store.id === batch.store_id)?.name, batch.is_active ? 'active' : 'inactive', batch.delivery_time].some((value) => String(value || '').toLowerCase().includes(search.toLowerCase()))).map((batch) => <tr key={batch.id}><td>{stores.find((store) => store.id === batch.store_id)?.name || '—'}</td><td>{batch.delivery_time ? new Date(batch.delivery_time).toLocaleString('en-EG', { dateStyle: 'medium', timeStyle: 'short' }) : '—'}</td><td>{batch.registration_end ? new Date(batch.registration_end).toLocaleString('en-EG', { dateStyle: 'medium', timeStyle: 'short' }) : '—'}</td><td>{batch.capacity ?? '—'}</td><td><span className={batch.is_active ? 'toktok-admin-status on' : 'toktok-admin-status off'}>{batch.is_active ? 'Active' : 'Inactive'}</span></td><td><button className="toktok-admin-action" disabled={busyId === batch.id} onClick={() => toggleRecord('toktok_batches', batch.id, 'is_active', batch.is_active, 'Batch status')} type="button">{batch.is_active ? 'Deactivate' : 'Activate'}</button> <button className="toktok-admin-action" onClick={() => openEditRecord('batches', batch)} type="button">Edit</button> <button className="toktok-admin-action" disabled={busyId === batch.id} onClick={() => deleteRecord('toktok_batches', batch, 'delivery batch')} type="button">Delete</button></td></tr>)}</tbody></table></div>}
+          {tab === 'batches' && <div className="toktok-admin-panel"><div className="toktok-admin-panel-heading"><div><h3>Recurring delivery schedule</h3><p>Set times once. TokTok creates the dated batches automatically every day using Egypt time.</p></div><div className="toktok-admin-heading-actions"><span>{scheduleTemplates.length} schedules</span><button type="button" className="toktok-admin-add" onClick={openAddForm} disabled={stores.length === 0}>+ Add schedule</button></div></div>
+            <div className="toktok-admin-callout"><strong>Daily automatic batches</strong><p>Only the clock times are saved here. Each day's batch is created with that day's date. Existing batches and orders are never rewritten.</p></div>
+            {showAdd && tab === 'batches' && <form className="toktok-admin-form" onSubmit={addRecord}><h4>{scheduleEditingId ? 'Edit recurring schedule' : 'Create recurring schedule'}</h4><label>Store *<select name="store_id" value={form.store_id} onChange={updateForm} required>{stores.map((store) => <option key={store.id} value={store.id}>{store.name}</option>)}</select></label><div className="toktok-admin-form-grid"><label>Registration opens *<input type="time" name="registration_start" value={form.registration_start} onChange={updateForm} required /></label><label>Registration closes *<input type="time" name="registration_end" value={form.registration_end} onChange={updateForm} required /></label><label>Delivery time *<input type="time" name="delivery_time" value={form.delivery_time} onChange={updateForm} required /></label><label>Order capacity<input type="number" min="1" step="1" name="capacity" value={form.capacity} onChange={updateForm} /></label></div><div className="toktok-admin-form-actions"><button type="button" onClick={() => {setShowAdd(false);setEditing(null);setScheduleEditingId('')}}>Cancel</button><button type="submit">{scheduleEditingId ? 'Save schedule' : 'Save recurring schedule'}</button></div></form>}
+            {scheduleTemplates.length === 0 ? <p className="toktok-admin-empty">No recurring schedules configured yet. Add one to start generating daily batches.</p> : <div className="toktok-admin-table-wrap"><table className="toktok-admin-table"><thead><tr><th>Store</th><th>Registration opens</th><th>Registration closes</th><th>Delivery time</th><th>Capacity</th><th>Actions</th></tr></thead><tbody>{scheduleTemplates.map((item) => <tr key={item.id}><td>{stores.find((store) => store.id === item.store_id)?.name || '—'}</td><td>{item.registration_start}</td><td>{item.registration_end}</td><td>{item.delivery_time}</td><td>{item.capacity ?? 'Unlimited'}</td><td><button className="toktok-admin-action" type="button" onClick={() => openEditRecord('batches', item)}>Edit</button> <button className="toktok-admin-action" type="button" onClick={() => deleteScheduleTemplate(item)}>Delete</button></td></tr>)}</tbody></table></div>}
+            <h4>Generated batches (today and upcoming)</h4>
+            {batches.length === 0 ? <p className="toktok-admin-empty">No dated batches are currently available. Schedules generate when registration is still open.</p> : <div className="toktok-admin-table-wrap"><table className="toktok-admin-table"><thead><tr><th>Store</th><th>Delivery date and time</th><th>Registration closes</th><th>Capacity</th><th>Status</th></tr></thead><tbody>{batches.filter((batch) => [stores.find((store) => store.id === batch.store_id)?.name, batch.is_active ? 'active' : 'inactive', batch.delivery_time].some((value) => String(value || '').toLowerCase().includes(search.toLowerCase()))).map((batch) => <tr key={batch.id}><td>{stores.find((store) => store.id === batch.store_id)?.name || '—'}</td><td>{batch.delivery_time ? new Date(batch.delivery_time).toLocaleString('en-EG', { dateStyle: 'medium', timeStyle: 'short' }) : '—'}</td><td>{batch.registration_end ? new Date(batch.registration_end).toLocaleString('en-EG', { dateStyle: 'medium', timeStyle: 'short' }) : '—'}</td><td>{batch.capacity ?? '—'}</td><td><span className={batch.is_active ? 'toktok-admin-status on' : 'toktok-admin-status off'}>{batch.is_active ? 'Active' : 'Inactive'}</span></td></tr>)}</tbody></table></div>}
           </div>}
 
           {tab === 'categories' && <div className="toktok-admin-panel">
