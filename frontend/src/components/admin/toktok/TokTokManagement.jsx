@@ -182,6 +182,11 @@ export default function TokTokManagement() {
       const slug = String(form.slug || form.name || '').trim().toLowerCase().normalize('NFKC').replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '')
       if (!(form.name || '').trim() || !slug) { setError('Enter a valid store name.'); return }
       if (!(form.code || '').trim()) { setError('Enter a store code.'); return }
+      if (!editing) {
+        const accountPhone = String(form.account_phone || '').replace(/\\D/g, '')
+        if (!/^01[0125]\\d{8}$/.test(accountPhone)) { setError('Enter a valid Egyptian mobile number for the restaurant account.'); return }
+        if (String(form.account_password || '').length < 6) { setError('Restaurant account password must be at least 6 characters.'); return }
+      }
       payload = { name: form.name.trim(), code: form.code.trim().toUpperCase(), slug, description: (form.description || '').trim() || null, image_url: (form.image_url || '').trim() || null, sort_order: Number(form.sort_order) || 0, is_active: editing ? editing.is_active : true, is_open: editing ? editing.is_open : true }
     } else {
       if (!form.store_id) { setError('Choose a store before adding a product.'); return }
