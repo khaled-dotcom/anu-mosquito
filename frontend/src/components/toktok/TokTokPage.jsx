@@ -63,12 +63,17 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
       const now = new Date()
       const { error: ensureBatchesError } = await supabase.rpc('ensure_toktok_daily_batches')
       if (ensureBatchesError) throw ensureBatchesError
+      const { data: scheduleRow, error: scheduleError } = await supabase.from('toktok_settings').select('setting_value').eq('setting_key', 'toktok_batch_schedule').maybeSingle()
+      if (scheduleError) throw scheduleError
+      const hasRecurringSchedules = Array.isArray(scheduleRow?.setting_value) && scheduleRow.setting_value.length > 0
       const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
       const tomorrowStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
+      let batchQuery = supabase.from('toktok_batches').select('id,store_id,registration_start,registration_end,delivery_time,capacity').eq('store_id', nextStoreId).eq('is_active', true).gte('registration_end', now.toISOString()).order('delivery_time')
+      if (hasRecurringSchedules) batchQuery = batchQuery.gte('delivery_time', todayStart.toISOString()).lt('delivery_time', tomorrowStart.toISOString())
       const [categoryResult, productResult, batchResult] = await Promise.all([
         supabase.from('toktok_categories').select('id,name,sort_order').eq('store_id', nextStoreId).eq('is_active', true).order('sort_order'),
         supabase.from('toktok_products').select('id,store_id,category_id,name,description,image_url,selling_price').eq('store_id', nextStoreId).eq('is_available', true).order('sort_order'),
-        supabase.from('toktok_batches').select('id,store_id,registration_start,registration_end,delivery_time,capacity').eq('store_id', nextStoreId).eq('is_active', true).gte('delivery_time', todayStart.toISOString()).lt('delivery_time', tomorrowStart.toISOString()).gte('registration_end', now.toISOString()).order('delivery_time'),
+        batchQuery,
       ])
       if (categoryResult.error) throw categoryResult.error
       if (productResult.error) throw productResult.error
