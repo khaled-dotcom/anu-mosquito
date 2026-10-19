@@ -111,9 +111,9 @@ function Auth({
 
         const { error: loginError } =
   await loginUser(
-    universityId,
-    password
-  )
+            cleanLoginId,
+            password
+          )
 
         if (loginError) {
           setMessage(
@@ -129,9 +129,9 @@ function Auth({
       } else {
         const { error } =
   await loginUser(
-    universityId,
-    password
-  )
+            cleanLoginId,
+            password
+          )
 
         if (error) {
           setMessage(
