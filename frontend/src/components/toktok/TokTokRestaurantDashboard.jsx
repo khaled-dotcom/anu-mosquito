@@ -88,7 +88,7 @@ export default function TokTokRestaurantDashboard({ profile, handleLogout }) {
       const orderIds = currentOrders.map((order) => order.id)
       let itemRows = []
       if (orderIds.length) {
-        const { data, error: itemError } = await supabase.from('toktok_order_items')
+        const { data, error: itemError } = await supabase.from('toktok_restaurant_order_item_feed')
           .select('id,order_id,product_name_snapshot,quantity,unit_price,options_snapshot,notes,line_total')
           .in('order_id', orderIds)
         if (itemError) throw itemError
