@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../../supabase'
 import ImageUploader from '../../common/ImageUploader'
+import TokTokStoreAccountManager from './TokTokStoreAccountManager'
 import './TokTokManagement.css'
 
 const toLocalDateTimeInput = (value) => {
@@ -53,7 +54,7 @@ export default function TokTokManagement() {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [showAdd, setShowAdd] = useState(false)
-  const emptyForm = { name: '', code: '', slug: '', description: '', image_url: '', store_id: '', category_id: '', selling_price: '', cost_price: '', sort_order: '0', registration_start: '', registration_end: '', delivery_time: '', capacity: '' }
+  const emptyForm = { name: '', code: '', slug: '', description: '', image_url: '', store_id: '', category_id: '', selling_price: '', cost_price: '', sort_order: '0', registration_start: '', registration_end: '', delivery_time: '', capacity: '', account_phone: '', account_password: '' }
   const [form, setForm] = useState(emptyForm)
 
   const refresh = useCallback(async () => {
@@ -190,11 +191,44 @@ export default function TokTokManagement() {
       payload = { store_id: form.store_id, category_id: form.category_id || null, name: form.name.trim(), description: (form.description || '').trim() || null, image_url: (form.image_url || '').trim() || null, selling_price: Number(form.selling_price), cost_price: form.cost_price === '' ? null : Number(form.cost_price), sort_order: Number(form.sort_order) || 0, is_available: editing ? editing.is_available : true }
     }
     try {
-      const result = editing ? await supabase.from(table).update(payload).eq('id', editing.id) : await supabase.from(table).insert(payload)
-      if (result.error) throw result.error
+      if (editing) {
+        const result = await supabase.from(table).update(payload).eq('id', editing.id)
+        if (result.error) throw result.error
+      } else if (tab === 'stores') {
+        const result = await supabase.from('toktok_stores').insert(payload).select('id').single()
+        if (result.error) throw result.error
+
+        const { data: accountData, error: accountError } = await supabase.functions.invoke('toktok-store-account', {
+          body: {
+            action: 'create',
+            store_id: result.data.id,
+            phone: String(form.account_phone || '').trim(),
+            password: form.account_password,
+          },
+        })
+        if (accountError || !accountData?.success) {
+          let accountMessage = accountData?.error || accountError?.message || 'Account creation failed.'
+          if (accountError?.context) {
+            try {
+              const errorBody = await accountError.context.json()
+              if (errorBody?.error) accountMessage = errorBody.error
+            } catch {
+              // Keep the original function error.
+            }
+          }
+          setShowAdd(false)
+          setEditing(null)
+          await refresh()
+          setNotice('Store created, but account setup failed: ' + accountMessage + '. Use the account controls on the store row to finish setup.')
+          return
+        }
+      } else {
+        const result = await supabase.from(table).insert(payload)
+        if (result.error) throw result.error
+      }
       setShowAdd(false)
       setEditing(null)
-      setNotice(editing ? 'Changes saved successfully.' : tab === 'stores' ? 'Store added successfully.' : tab === 'products' ? 'Product added successfully.' : 'Delivery batch added successfully.')
+      setNotice(editing ? 'Changes saved successfully.' : tab === 'stores' ? 'Store and restaurant login account created successfully.' : tab === 'products' ? 'Product added successfully.' : 'Delivery batch added successfully.')
       await refresh()
     } catch (err) {
       console.error('TokTok admin save failed:', err)
@@ -441,8 +475,8 @@ export default function TokTokManagement() {
           </div>}
 
           {tab === 'stores' && <div className="toktok-admin-panel"><div className="toktok-admin-panel-heading"><div><h3>TokTok stores</h3><p>Control which stores are active and accepting orders.</p></div><div className="toktok-admin-heading-actions"><span>{stores.length} stores</span><button type="button" className="toktok-admin-add" onClick={openAddForm}>+ Add store</button></div></div><label className="toktok-admin-search">Search stores<input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Store name or description…" /></label>
-            {showAdd && tab === 'stores' && <form className="toktok-admin-form" onSubmit={addRecord}><h4>{editing ? 'Edit TokTok store' : 'Add a TokTok store'}</h4><label>Store name *<input name="name" value={form.name} onChange={updateForm} required placeholder="e.g. Campus Market" /></label><label>Store code *<input name="code" value={form.code} onChange={updateForm} required maxLength="12" placeholder="e.g. CM" /></label><label>Slug (optional)<input name="slug" value={form.slug} onChange={updateForm} placeholder="campus-market" /></label><label>Description<textarea name="description" value={form.description} onChange={updateForm} rows="2" /></label><div className="toktok-admin-store-image"><ImageUploader label="Store photo" folder="restaurant" value={form.image_url} onChange={(url) => setForm((current) => ({ ...current, image_url: url }))} shape="wide" /><p>الصورة بتتصغّر وبتتضغط تلقائيًا قبل الرفع.</p></div><label>Display order<input name="sort_order" type="number" value={form.sort_order} onChange={updateForm} /></label><div className="toktok-admin-form-actions"><button type="button" onClick={() => {setShowAdd(false);setEditing(null)}}>Cancel</button><button type="submit">{editing ? 'Save changes' : 'Save store'}</button></div></form>}
-            {stores.length === 0 ? <p className="toktok-admin-empty">No TokTok stores found.</p> : <div className="toktok-admin-list">{stores.filter((store) => [store.name, store.slug, store.description].some((value) => String(value || '').toLowerCase().includes(search.toLowerCase()))).map((store) => <article className="toktok-admin-row" key={store.id}><div className="toktok-admin-row-icon">{store.image_url ? <img src={store.image_url} alt="" /> : '🏪'}</div><div className="toktok-admin-row-main"><strong>{store.name}</strong><small className="toktok-admin-store-code">Code: {store.code || '—'}</small><small>{store.description || 'No description'}</small><div className="toktok-admin-pills"><span className={store.is_active ? 'on' : 'off'}>{store.is_active ? 'Active' : 'Inactive'}</span><span className={store.is_open ? 'on' : 'off'}>{store.is_open ? 'Open for orders' : 'Closed'}</span></div></div><div className="toktok-admin-row-actions"><button disabled={busyId === store.id} onClick={() => toggleRecord('toktok_stores', store.id, 'is_active', store.is_active, 'Store status')} type="button">{store.is_active ? 'Deactivate' : 'Activate'}</button><button disabled={busyId === store.id} onClick={() => toggleRecord('toktok_stores', store.id, 'is_open', store.is_open, 'Store opening status')} type="button">{store.is_open ? 'Close store' : 'Open store'}</button><button disabled={busyId === store.id} onClick={() => openEditRecord('stores', store)} type="button">Edit</button><button disabled={busyId === store.id} onClick={() => deleteRecord('toktok_stores', store, 'store ' + store.name)} type="button">Delete</button></div></article>)}</div>}
+            {showAdd && tab === 'stores' && <form className="toktok-admin-form" onSubmit={addRecord}><h4>{editing ? 'Edit TokTok store' : 'Add a TokTok store'}</h4><label>Store name *<input name="name" value={form.name} onChange={updateForm} required placeholder="e.g. Campus Market" /></label><label>Store code *<input name="code" value={form.code} onChange={updateForm} required maxLength="12" placeholder="e.g. CM" /></label><label>Slug (optional)<input name="slug" value={form.slug} onChange={updateForm} placeholder="campus-market" /></label><label>Description<textarea name="description" value={form.description} onChange={updateForm} rows="2" /></label><div className="toktok-admin-store-image"><ImageUploader label="Store photo" folder="restaurant" value={form.image_url} onChange={(url) => setForm((current) => ({ ...current, image_url: url }))} shape="wide" /><p>الصورة بتتصغّر وبتتضغط تلقائيًا قبل الرفع.</p></div><label>Display order<input name="sort_order" type="number" value={form.sort_order} onChange={updateForm} /></label>{!editing && <div className="toktok-store-account-create-fields"><h5>Restaurant login account</h5><p>Create the store and its login together. The restaurant will sign in with this mobile number and password.</p><label>Restaurant mobile number *<input name="account_phone" type="tel" inputMode="numeric" autoComplete="tel" maxLength="11" value={form.account_phone} onChange={(e) => setForm((current) => ({ ...current, account_phone: e.target.value.replace(/\D/g, '') }))} required placeholder="01xxxxxxxxx" /></label><label>Initial password *<input name="account_password" type="password" autoComplete="new-password" minLength="6" value={form.account_password} onChange={updateForm} required placeholder="At least 6 characters" /></label></div>}<div className="toktok-admin-form-actions"><button type="button" onClick={() => {setShowAdd(false);setEditing(null)}}>Cancel</button><button type="submit">{editing ? 'Save changes' : 'Save store'}</button></div></form>}
+            {stores.length === 0 ? <p className="toktok-admin-empty">No TokTok stores found.</p> : <div className="toktok-admin-list">{stores.filter((store) => [store.name, store.slug, store.description].some((value) => String(value || '').toLowerCase().includes(search.toLowerCase()))).map((store) => <article className="toktok-admin-row" key={store.id}><div className="toktok-admin-row-icon">{store.image_url ? <img src={store.image_url} alt="" /> : '🏪'}</div><div className="toktok-admin-row-main"><strong>{store.name}</strong><small className="toktok-admin-store-code">Code: {store.code || '—'}</small><small>{store.description || 'No description'}</small><div className="toktok-admin-pills"><span className={store.is_active ? 'on' : 'off'}>{store.is_active ? 'Active' : 'Inactive'}</span><span className={store.is_open ? 'on' : 'off'}>{store.is_open ? 'Open for orders' : 'Closed'}</span></div><TokTokStoreAccountManager store={store} /></div><div className="toktok-admin-row-actions"><button disabled={busyId === store.id} onClick={() => toggleRecord('toktok_stores', store.id, 'is_active', store.is_active, 'Store status')} type="button">{store.is_active ? 'Deactivate' : 'Activate'}</button><button disabled={busyId === store.id} onClick={() => toggleRecord('toktok_stores', store.id, 'is_open', store.is_open, 'Store opening status')} type="button">{store.is_open ? 'Close store' : 'Open store'}</button><button disabled={busyId === store.id} onClick={() => openEditRecord('stores', store)} type="button">Edit</button><button disabled={busyId === store.id} onClick={() => deleteRecord('toktok_stores', store, 'store ' + store.name)} type="button">Delete</button></div></article>)}</div>}
           </div>}
 
           {tab === 'products' && <div className="toktok-admin-panel">

@@ -16,6 +16,8 @@ const StudentHome = lazy(() => import('./components/student/StudentHome'))
 const StudentMenu = lazy(() => import('./components/student/StudentMenu'))
 const StudentOrders = lazy(() => import('./components/student/StudentOrders'))
 const TokTokPage = lazy(() => import('./components/toktok/TokTokPage'))
+const TokTokRestaurantDashboard = lazy(() => import('./components/toktok/TokTokRestaurantDashboard'))
+const TokTokRestaurantLogin = lazy(() => import('./components/toktok/TokTokRestaurantLogin'))
 const Auth = lazy(() => import('./components/auth/Auth'))
 
 function App() {
@@ -199,9 +201,11 @@ handleDeleteCategory,
 
       setCheckingAuth(false)
 
-      setRestaurantsLoading(true)
-      await loadRestaurants()
-      if (!cancelled) setRestaurantsLoading(false)
+      if (['admin', 'student'].includes(loadedProfile.role)) {
+        setRestaurantsLoading(true)
+        await loadRestaurants()
+        if (!cancelled) setRestaurantsLoading(false)
+      }
 
       if (loadedProfile?.role === 'admin') {
         loadBatches()
@@ -236,7 +240,7 @@ handleDeleteCategory,
   async function loadProfile(userId) {
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, full_name, university_id, driver_id, phone, role, admin_id')
+      .select('id, full_name, university_id, driver_id, phone, role, admin_id, toktok_store_id')
       .eq('id', userId)
       .single()
 
@@ -441,6 +445,15 @@ handleAssignDriver={handleAssignDriver}
   )
 }
 
+if (session && profile?.role === 'toktok_restaurant') {
+  return (
+    <TokTokRestaurantDashboard
+      profile={profile}
+      handleLogout={handleLogout}
+    />
+  )
+}
+
 if (
   session &&
   profile?.role === 'moderator'
@@ -535,6 +548,10 @@ setStudentPage={setStudentPage}
   // =========================
   // LOGIN / REGISTER
   // =========================
+
+ if (!session && window.location.hash === '#/toktok/restaurant') {
+   return <TokTokRestaurantLogin />
+ }
 
  return (
   <Auth
