@@ -17,7 +17,6 @@ const StudentMenu = lazy(() => import('./components/student/StudentMenu'))
 const StudentOrders = lazy(() => import('./components/student/StudentOrders'))
 const TokTokPage = lazy(() => import('./components/toktok/TokTokPage'))
 const TokTokRestaurantDashboard = lazy(() => import('./components/toktok/TokTokRestaurantDashboard'))
-const TokTokRestaurantLogin = lazy(() => import('./components/toktok/TokTokRestaurantLogin'))
 const Auth = lazy(() => import('./components/auth/Auth'))
 
 function App() {
@@ -548,10 +547,6 @@ setStudentPage={setStudentPage}
   // =========================
   // LOGIN / REGISTER
   // =========================
-
- if (!session && window.location.hash === '#/toktok/restaurant') {
-   return <TokTokRestaurantLogin />
- }
 
  return (
   <Auth

@@ -11,6 +11,14 @@ export function getAuthEmail(id) {
 export async function loginUser(id, password) {
   const cleanId = id.trim()
 
+  // Restaurant accounts use their Egyptian mobile number as the login ID.
+  if (/^01[0125]\d{8}$/.test(cleanId)) {
+    return await supabase.auth.signInWithPassword({
+      email: `toktok-${cleanId}@login.anumosquito.com`,
+      password,
+    })
+  }
+
   // Moderator
 if (cleanId === '5555555') {
   const { data, error } =

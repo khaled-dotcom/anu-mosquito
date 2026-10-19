@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../../supabase'
 import './TokTokStoreAccountManager.css'
 
-const LOGIN_HASH = '#/toktok/restaurant'
+const LOGIN_HASH = ''
 
 export default function TokTokStoreAccountManager({ store }) {
   const [account, setAccount] = useState(null)
@@ -48,7 +48,7 @@ export default function TokTokStoreAccountManager({ store }) {
   return (
     <div className="tt-store-account">
       <div className="tt-store-account-head"><span className="tt-store-account-icon">🔐</span><div><strong>{loading ? 'حساب المطعم' : account ? 'حساب الدخول جاهز' : 'لم يتم إنشاء حساب بعد'}</strong>{!loading && account && <small>رقم الدخول: {account.phone || '—'}</small>}{!loading && !account && <small>أضف رقم الموبايل وكلمة المرور لتمكين دخول المطعم.</small>}</div></div>
-      {!loading && !mode && <div className="tt-store-account-actions"><button type="button" onClick={() => { setError(''); setNotice(''); setMode(account ? 'reset' : 'create'); setPassword('') }}>{account ? 'تغيير كلمة المرور' : 'إضافة حساب المطعم'}</button><a href={loginUrl} target="_blank" rel="noreferrer">صفحة دخول المطعم ↗</a></div>}
+      {!loading && !mode && <div className="tt-store-account-actions"><button type="button" onClick={() => { setError(''); setNotice(''); setMode(account ? 'reset' : 'create'); setPassword('') }}>{account ? 'تغيير كلمة المرور' : 'إضافة حساب المطعم'}</button><a href={loginUrl} target="_blank" rel="noreferrer">صفحة تسجيل الدخول الرئيسية ↗</a></div>}
       {mode && <form className="tt-store-account-form" onSubmit={submit}>{!account && <label>رقم موبايل المطعم<input type="tel" inputMode="numeric" maxLength="11" value={phone} onChange={(event) => setPhone(event.target.value.replace(/\D/g, ''))} placeholder="01xxxxxxxxx" required /></label>}<label>{account ? 'كلمة المرور الجديدة' : 'كلمة المرور'}<input type="password" minLength="6" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} required /></label><div><button type="submit" disabled={busy}>{busy ? 'جاري الحفظ…' : account ? 'حفظ كلمة المرور' : 'إنشاء الحساب'}</button><button type="button" className="tt-store-account-cancel" onClick={() => { setMode(''); setError(''); setPassword('') }}>إلغاء</button></div></form>}
       {error && <p className="tt-store-account-error" role="alert">{error}</p>}{notice && <p className="tt-store-account-notice" role="status">{notice}</p>}
     </div>

@@ -26,12 +26,16 @@ function Auth({
 
     setMessage('')
 
-    if (!/^\d{7}$/.test(universityId)) {
-      setMessage('ID must contain exactly 7 digits.')
+    const cleanLoginId = universityId.replace(/\D/g, '')
+    const validStudentId = /^\d{7}$/.test(cleanLoginId)
+    const validRestaurantPhone = /^01[0125]\d{8}$/.test(cleanLoginId)
+
+    if (isRegister ? !validStudentId : !(validStudentId || validRestaurantPhone)) {
+      setMessage(isRegister ? 'University ID must contain exactly 7 digits.' : 'Enter your 7-digit University ID or the restaurant mobile number.')
       return
     }
 
-    if (isRegister && universityId === '9000001') {
+    if (isRegister && cleanLoginId === '9000001') {
       setMessage('This ID is reserved for Admin login.')
       return
     }
@@ -67,7 +71,7 @@ function Auth({
             'student-auth',
             {
               body: {
-                university_id: universityId,
+                university_id: cleanLoginId,
                 password,
                 full_name: fullName.trim(),
                 phone,
@@ -222,11 +226,11 @@ function Auth({
                 type="text"
                 inputMode="numeric"
                 autoComplete="username"
-                maxLength={7}
-                placeholder="University ID (7 digits)"
+                maxLength={isRegister ? 7 : 11}
+                placeholder={isRegister ? 'University ID (7 digits)' : 'University ID or restaurant phone'}
                 value={universityId}
                 onChange={(e) =>
-                  setUniversityId(e.target.value.replace(/\D/g, ''))
+                  setUniversityId(e.target.value.replace(/\D/g, '').slice(0, isRegister ? 7 : 11))
                 }
                 required
               />
