@@ -1,117 +1,61 @@
 import { supabase } from '../supabase'
 
 export function getAuthEmail(id) {
-  if (id === '9000001') {
-    return 'admin@anu-mosquito.com'
-  }
-
+  if (id === '9000001') return 'admin@anu-mosquito.com'
   return `${id}@anu-mosquito.com`
 }
 
 export async function loginUser(id, password) {
   const cleanId = id.trim()
 
-  // Restaurant accounts use their Egyptian mobile number as the login ID.
-  if (/^01[0125]\d{8}$/.test(cleanId)) {
-    return await supabase.auth.signInWithPassword({
+  // Keep the reserved admin and moderator IDs on their existing login path.
+  if (cleanId === '5555555' || cleanId === '9000001') {
+    return supabase.auth.signInWithPassword({
+      email: getAuthEmail(cleanId),
+      password,
+    })
+  }
+
+  if (!/^\d{7}$/.test(cleanId)) {
+    return { data: null, error: new Error('ID must contain exactly 7 digits.') }
+  }
+
+  // Try student credentials first. Restaurant IDs are also seven digits, but
+  // the restaurant fallback is only attempted if student and driver login fail.
+  const { data: studentData, error: studentError } =
+    await supabase.auth.signInWithPassword({
+      email: getAuthEmail(cleanId),
+      password,
+    })
+
+  if (!studentError && studentData?.session) {
+    return { data: studentData, error: null }
+  }
+
+  const { data: driverData, error: driverError } =
+    await supabase.functions.invoke('driver-login', {
+      body: { driver_id: cleanId, password },
+    })
+
+  if (!driverError && !driverData?.error && driverData?.session) {
+    const { data: sessionData, error: sessionError } =
+      await supabase.auth.setSession(driverData.session)
+    return { data: sessionData, error: sessionError }
+  }
+
+  // Restaurant account email is internal; the user only enters their 7-digit code.
+  const { data: restaurantData, error: restaurantError } =
+    await supabase.auth.signInWithPassword({
       email: `toktok-${cleanId}@login.anumosquito.com`,
       password,
     })
-  }
 
-  // Moderator
-if (cleanId === '5555555') {
-  const { data, error } =
-    await supabase.auth.signInWithPassword({
-      email: getAuthEmail(cleanId),
-      password,
-    })
-
-  return {
-    data,
-    error,
-  }
-}
-
-// Admin
-if (cleanId === '9000001') {
-  const { data, error } =
-    await supabase.auth.signInWithPassword({
-      email: getAuthEmail(cleanId),
-      password,
-    })
-
-  return {
-    data,
-    error,
-  }
-}
-  // Student login first
-  if (/^\d{7}$/.test(cleanId)) {
-    const { data: studentData, error: studentError } =
-      await supabase.auth.signInWithPassword({
-        email: getAuthEmail(cleanId),
-        password,
-      })
-
-    // If Student login works, return immediately
-    if (!studentError && studentData?.session) {
-      return {
-        data: studentData,
-        error: null,
-      }
-    }
-
-    // If Student login fails, try Driver login
-    const { data: driverData, error: driverError } =
-      await supabase.functions.invoke('driver-login', {
-        body: {
-          driver_id: cleanId,
-          password,
-        },
-      })
-
-    if (driverError) {
-      return {
-        data: null,
-        error: studentError || driverError,
-      }
-    }
-
-    if (driverData?.error) {
-      return {
-        data: null,
-        error: studentError || new Error(driverData.error),
-      }
-    }
-
-    if (!driverData?.session) {
-      return {
-        data: null,
-        error: studentError || new Error('Login failed.'),
-      }
-    }
-
-    const { data: sessionData, error: sessionError } =
-      await supabase.auth.setSession(driverData.session)
-
-    if (sessionError) {
-      return {
-        data: null,
-        error: sessionError,
-      }
-    }
-
-    return {
-      data: sessionData,
-      error: null,
-    }
+  if (!restaurantError && restaurantData?.session) {
+    return { data: restaurantData, error: null }
   }
 
   return {
     data: null,
-    error: new Error('ID must contain exactly 7 digits.'),
+    error: studentError || driverError || restaurantError || new Error('Login failed.'),
   }
-
-
 }
