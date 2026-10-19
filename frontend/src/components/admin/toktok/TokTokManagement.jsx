@@ -39,6 +39,9 @@ export default function TokTokManagement() {
   const [toktokEnabled, setToktokEnabled] = useState(true)
   const [savingToktokEnabled, setSavingToktokEnabled] = useState(false)
   const [search, setSearch] = useState('')
+  const [orderStatusFilter, setOrderStatusFilter] = useState('all')
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState('all')
+  const [paymentProofPreview, setPaymentProofPreview] = useState(null)
   const [selectedStoreId, setSelectedStoreId] = useState('')
   const [editing, setEditing] = useState(null)
   const [categoryForm, setCategoryForm] = useState({ store_id: '', name: '', description: '', sort_order: '0' })
@@ -481,6 +484,12 @@ export default function TokTokManagement() {
           </div>}
         </>
       )}
+      {paymentProofPreview && <div className="toktok-payment-preview-backdrop" role="presentation" onClick={() => setPaymentProofPreview(null)}>
+        <div className="toktok-payment-preview" role="dialog" aria-modal="true" aria-label={'Payment proof for order ' + paymentProofPreview.orderNumber} onClick={(event) => event.stopPropagation()}>
+          <div className="toktok-payment-preview-heading"><div><strong>Payment proof</strong><small>Order {paymentProofPreview.orderNumber}</small></div><button type="button" aria-label="Close payment proof" onClick={() => setPaymentProofPreview(null)}>✕</button></div>
+          <img src={paymentProofPreview.url} alt={'Payment proof for order ' + paymentProofPreview.orderNumber} />
+        </div>
+      </div>}
     </section>
   )
 }
