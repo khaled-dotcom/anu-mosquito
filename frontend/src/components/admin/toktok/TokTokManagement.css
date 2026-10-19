@@ -152,3 +152,50 @@
 .toktok-admin-visibility-card>button{margin-top:5px;padding:10px 13px;border:0;border-radius:10px;background:#171717;color:#ffd600;font-weight:850;cursor:pointer}
 .toktok-admin-visibility-card>button.is-disabled{background:#ffd600;color:#171717}
 .toktok-admin-visibility-card>button:disabled{opacity:.6;cursor:wait}
+
+
+/* TokTok orders: clearer hierarchy, quick filters, and in-app payment proof viewer. */
+.toktok-admin-order-toolbar{display:grid;grid-template-columns:minmax(220px,1fr) minmax(135px,.45fr) minmax(135px,.4fr) auto auto;align-items:end;gap:10px}
+.toktok-admin-order-toolbar .toktok-admin-search{min-width:0;margin:0}
+.toktok-admin-order-filter{display:grid;gap:7px;min-width:0;color:#5c6470;font-size:12px;font-weight:800}
+.toktok-admin-order-filter select{box-sizing:border-box;width:100%;min-width:0;min-height:40px;padding:9px 10px;border:1px solid #e2e2e2;border-radius:10px;background:#fff;color:#171717;font:inherit;font-weight:600}
+.toktok-admin-order-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 18px}
+.toktok-admin-order-summary>div{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 15px;border:1px solid #ececec;border-radius:13px;background:#fafafa}
+.toktok-admin-order-summary span{color:#686868;font-size:12px;font-weight:700}
+.toktok-admin-order-summary strong{font-size:20px;color:#171717}
+.toktok-admin-order-card{gap:15px;padding:18px;border-color:#e8e8e8;box-shadow:0 4px 15px #00000008}
+.toktok-admin-order-top{align-items:center;padding-bottom:13px;border-bottom:1px solid #f0f0f0}
+.toktok-admin-order-top>div{min-width:0}
+.toktok-admin-order-top>div>strong{font-size:19px;letter-spacing:-.02em;color:#171717}
+.toktok-admin-order-top small{display:block;margin-top:4px}
+.toktok-admin-order-total{padding:8px 11px;border-radius:11px;background:#fff8bf;color:#171717}
+.toktok-admin-order-badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.toktok-admin-order-badges .order-badge{display:inline-flex;align-items:center;width:max-content;max-width:100%;padding:5px 8px;border-radius:999px;background:#f1f1f1;color:#4d4d4d;font-size:10px;font-weight:850;text-transform:capitalize}
+.toktok-admin-order-badges .status-pending,.toktok-admin-order-badges .payment-pending{background:#fff3c4;color:#795d00}
+.toktok-admin-order-badges .status-confirmed,.toktok-admin-order-badges .status-preparing,.toktok-admin-order-badges .status-ready,.toktok-admin-order-badges .payment-confirmed{background:#e7f7ec;color:#176b39}
+.toktok-admin-order-badges .status-out-for-delivery{background:#e9f2ff;color:#2458a6}
+.toktok-admin-order-badges .status-delivered,.toktok-admin-order-badges .status-completed{background:#e4f6ed;color:#176b39}
+.toktok-admin-order-badges .status-cancelled,.toktok-admin-order-badges .payment-failed,.toktok-admin-order-badges .payment-refunded{background:#ffeded;color:#a22e2e}
+.toktok-admin-order-meta{gap:8px}
+.toktok-admin-order-meta span{display:grid;align-content:start;gap:5px;padding:10px 12px;border:1px solid #f0f0f0;background:#fcfcfc}
+.toktok-admin-order-meta span>small{color:#858585;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.toktok-admin-order-meta span>b{color:#303030;font-size:12px;font-weight:700;line-height:1.5}
+.toktok-admin-order-location{grid-column:1/-1}
+.toktok-admin-order-items{padding:12px 14px;border:1px solid #f0f0f0;border-radius:12px;background:#fff}
+.toktok-admin-order-items>strong{font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+.toktok-admin-order-items p{color:#303030;font-weight:600}
+.toktok-admin-order-items>small{color:#858585;font-size:11px}
+.toktok-admin-proof button{display:inline-flex;align-items:center;gap:8px;padding:10px 13px;border:1px solid #ffdf00;border-radius:10px;background:#fff8bf;color:#171717;font:inherit;font-size:12px;font-weight:850;cursor:pointer}
+.toktok-admin-proof button:hover{background:#ffdf00}
+.toktok-admin-order-actions{padding-top:4px;border-top:1px solid #f0f0f0}
+.toktok-payment-preview-backdrop{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:20px;background:rgba(10,10,10,.78);backdrop-filter:blur(4px)}
+.toktok-payment-preview{display:flex;flex-direction:column;gap:14px;width:min(760px,100%);max-height:min(90vh,900px);padding:16px;border:1px solid #454545;border-radius:18px;background:#171717;box-shadow:0 24px 80px #0006;overflow:hidden}
+.toktok-payment-preview-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#fff}
+.toktok-payment-preview-heading>div{display:grid;gap:4px}
+.toktok-payment-preview-heading strong{font-size:16px}
+.toktok-payment-preview-heading small{color:#c9c9c9;font-size:12px}
+.toktok-payment-preview-heading button{display:grid;place-items:center;width:38px;height:38px;flex:0 0 38px;border:1px solid #555;border-radius:10px;background:#282828;color:#ffdf00;font-size:18px;cursor:pointer}
+.toktok-payment-preview>img{display:block;width:100%;max-height:calc(90vh - 100px);object-fit:contain;border-radius:10px;background:#0d0d0d}
+@media(max-width:900px){.toktok-admin-order-toolbar{grid-template-columns:minmax(0,1fr) minmax(135px,.6fr) minmax(135px,.6fr)}.toktok-admin-order-toolbar>.toktok-admin-action{width:100%}}
+@media(max-width:650px){.toktok-admin-order-toolbar{grid-template-columns:1fr 1fr;align-items:stretch}.toktok-admin-order-toolbar .toktok-admin-search{grid-column:1/-1}.toktok-admin-order-summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.toktok-admin-order-summary>div{padding:11px}.toktok-admin-order-summary span{font-size:11px}.toktok-admin-order-summary strong{font-size:18px}.toktok-admin-order-card{padding:13px}.toktok-admin-order-top{align-items:flex-start}.toktok-admin-order-top>strong{font-size:15px}.toktok-admin-order-meta{grid-template-columns:1fr 1fr}.toktok-admin-order-location{grid-column:1/-1}.toktok-payment-preview-backdrop{padding:10px}.toktok-payment-preview{padding:11px;border-radius:14px}}
+@media(max-width:390px){.toktok-admin-order-toolbar{grid-template-columns:1fr}.toktok-admin-order-toolbar .toktok-admin-search{grid-column:auto}.toktok-admin-order-summary>div{align-items:flex-start;flex-direction:column;gap:4px}}
