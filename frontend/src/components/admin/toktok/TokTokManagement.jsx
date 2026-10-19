@@ -196,6 +196,23 @@ export default function TokTokManagement() {
       payload = { store_id: form.store_id, category_id: form.category_id || null, name: form.name.trim(), description: (form.description || '').trim() || null, image_url: (form.image_url || '').trim() || null, selling_price: Number(form.selling_price), cost_price: form.cost_price === '' ? null : Number(form.cost_price), sort_order: Number(form.sort_order) || 0, is_available: editing ? editing.is_available : true }
     }
     try {
+      if (tab === 'stores') {
+        const { data: existingStores, error: slugCheckError } = await supabase
+          .from('toktok_stores')
+          .select('id,slug')
+        if (slugCheckError) throw slugCheckError
+        const usedSlugs = new Set((existingStores || [])
+          .filter((store) => store.id !== editing?.id)
+          .map((store) => String(store.slug || '').toLowerCase()))
+        const baseSlug = payload.slug
+        let candidateSlug = baseSlug
+        let suffix = 2
+        while (usedSlugs.has(candidateSlug.toLowerCase())) {
+          candidateSlug = baseSlug + '-' + suffix
+          suffix += 1
+        }
+        payload.slug = candidateSlug
+      }
       if (editing) {
         const result = await supabase.from(table).update(payload).eq('id', editing.id)
         if (result.error) throw result.error
