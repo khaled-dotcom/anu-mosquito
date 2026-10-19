@@ -27,11 +27,10 @@ function Auth({
     setMessage('')
 
     const cleanLoginId = universityId.replace(/\D/g, '')
-    const validStudentId = /^\d{7}$/.test(cleanLoginId)
-    const validRestaurantPhone = /^01[0125]\d{8}$/.test(cleanLoginId)
+    const validId = /^\d{7}$/.test(cleanLoginId)
 
-    if (isRegister ? !validStudentId : !(validStudentId || validRestaurantPhone)) {
-      setMessage(isRegister ? 'University ID must contain exactly 7 digits.' : 'Enter your 7-digit University ID or the restaurant mobile number.')
+    if (!validId) {
+      setMessage('University ID must contain exactly 7 digits.')
       return
     }
 
@@ -226,11 +225,11 @@ function Auth({
                 type="text"
                 inputMode="numeric"
                 autoComplete="username"
-                maxLength={isRegister ? 7 : 11}
-                placeholder={isRegister ? 'University ID (7 digits)' : 'University ID or restaurant phone'}
+                maxLength={7}
+                placeholder="University ID (7 digits)"
                 value={universityId}
                 onChange={(e) =>
-                  setUniversityId(e.target.value.replace(/\D/g, '').slice(0, isRegister ? 7 : 11))
+                  setUniversityId(e.target.value.replace(/\D/g, '').slice(0, 7))
                 }
                 required
               />
