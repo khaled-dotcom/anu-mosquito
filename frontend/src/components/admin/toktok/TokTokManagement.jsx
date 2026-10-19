@@ -134,7 +134,7 @@ export default function TokTokManagement() {
       const startTime = form.registration_start
       const endTime = form.registration_end
       const deliveryTime = form.delivery_time
-      if (![startTime, endTime, deliveryTime].every((value) => /^([01]\\d|2[0-3]):[0-5]\\d$/.test(value || ''))) {
+      if (![startTime, endTime, deliveryTime].every((value) => /^([01]\d|2[0-3]):[0-5]\d$/.test(value || ''))) {
         setError('Enter valid registration opening, closing, and delivery times.')
         return
       }
@@ -178,7 +178,7 @@ export default function TokTokManagement() {
     const table = tab === 'stores' ? 'toktok_stores' : 'toktok_products'
     let payload
     if (tab === 'stores') {
-      const slug = String(form.slug || form.name || '').trim().toLowerCase().normalize('NFKC').replace(/[^\\p{L}\\p{N}]+/gu, '-').replace(/^-|-$/g, '')
+      const slug = String(form.slug || form.name || '').trim().toLowerCase().normalize('NFKC').replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '')
       if (!(form.name || '').trim() || !slug) { setError('Enter a valid store name.'); return }
       if (!(form.code || '').trim()) { setError('Enter a store code.'); return }
       payload = { name: form.name.trim(), code: form.code.trim().toUpperCase(), slug, description: (form.description || '').trim() || null, image_url: (form.image_url || '').trim() || null, sort_order: Number(form.sort_order) || 0, is_active: editing ? editing.is_active : true, is_open: editing ? editing.is_open : true }
@@ -206,7 +206,7 @@ export default function TokTokManagement() {
     setError('')
     setNotice('')
     setEditing(record)
-    if (kind === 'batches' && record.id && typeof record.registration_start === 'string' && /^([01]\\d|2[0-3]):/.test(record.registration_start)) setScheduleEditingId(record.id)
+    if (kind === 'batches' && record.id && typeof record.registration_start === 'string' && /^([01]\d|2[0-3]):/.test(record.registration_start)) setScheduleEditingId(record.id)
     if (kind === 'products') setSelectedStoreId(record.store_id || '')
     setForm({
       ...emptyForm, ...record,
@@ -221,9 +221,9 @@ export default function TokTokManagement() {
       cost_price: record.cost_price ?? '',
       capacity: record.capacity ?? '',
       sort_order: String(record.sort_order ?? 0),
-      registration_start: kind === 'batches' && /^([01]\\d|2[0-3]):/.test(record.registration_start || '') ? record.registration_start : toLocalDateTimeInput(record.registration_start),
-      registration_end: kind === 'batches' && /^([01]\\d|2[0-3]):/.test(record.registration_end || '') ? record.registration_end : toLocalDateTimeInput(record.registration_end),
-      delivery_time: kind === 'batches' && /^([01]\\d|2[0-3]):/.test(record.delivery_time || '') ? record.delivery_time : toLocalDateTimeInput(record.delivery_time),
+      registration_start: kind === 'batches' && /^([01]\d|2[0-3]):/.test(record.registration_start || '') ? record.registration_start : toLocalDateTimeInput(record.registration_start),
+      registration_end: kind === 'batches' && /^([01]\d|2[0-3]):/.test(record.registration_end || '') ? record.registration_end : toLocalDateTimeInput(record.registration_end),
+      delivery_time: kind === 'batches' && /^([01]\d|2[0-3]):/.test(record.delivery_time || '') ? record.delivery_time : toLocalDateTimeInput(record.delivery_time),
     })
     setTab(kind)
     setShowAdd(true)
