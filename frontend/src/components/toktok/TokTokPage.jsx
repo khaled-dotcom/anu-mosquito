@@ -61,10 +61,14 @@ export default function TokTokPage({ onBack, onOpenOrders }) {
       }
 
       const now = new Date()
+      const { error: ensureBatchesError } = await supabase.rpc('ensure_toktok_daily_batches')
+      if (ensureBatchesError) throw ensureBatchesError
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      const tomorrowStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
       const [categoryResult, productResult, batchResult] = await Promise.all([
         supabase.from('toktok_categories').select('id,name,sort_order').eq('store_id', nextStoreId).eq('is_active', true).order('sort_order'),
         supabase.from('toktok_products').select('id,store_id,category_id,name,description,image_url,selling_price').eq('store_id', nextStoreId).eq('is_available', true).order('sort_order'),
-        supabase.from('toktok_batches').select('id,store_id,registration_start,registration_end,delivery_time,capacity').eq('store_id', nextStoreId).eq('is_active', true).gte('registration_end', now.toISOString()).order('delivery_time'),
+        supabase.from('toktok_batches').select('id,store_id,registration_start,registration_end,delivery_time,capacity').eq('store_id', nextStoreId).eq('is_active', true).gte('delivery_time', todayStart.toISOString()).lt('delivery_time', tomorrowStart.toISOString()).gte('registration_end', now.toISOString()).order('delivery_time'),
       ])
       if (categoryResult.error) throw categoryResult.error
       if (productResult.error) throw productResult.error
