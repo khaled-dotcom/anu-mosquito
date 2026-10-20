@@ -291,7 +291,7 @@ export default function TokTokRestaurantDashboard({ profile, handleLogout }) {
         <div className="tt-restaurant-sidebar-bottom"><span>{profile.full_name || 'حساب المطعم'}</span><button type="button" onClick={handleLogout}>↪ تسجيل الخروج</button></div>
       </aside>
       <main className="tt-restaurant-main">
-        <header className="tt-restaurant-topbar"><div><span className="tt-restaurant-eyebrow">ANU TOKTOK · RESTAURANT</span><h1>{title}</h1><p>{subtitle}</p></div><div className="tt-restaurant-topbar-mark">TT</div></header>
+        <header className="tt-restaurant-topbar"><div><span className="tt-restaurant-eyebrow">ANU TOKTOK · RESTAURANT</span><h1>{title}</h1><p>{subtitle}</p></div><div className="tt-restaurant-topbar-actions"><div className="tt-restaurant-topbar-mark">TT</div><button className="tt-restaurant-logout" type="button" onClick={handleLogout}>↪ تسجيل الخروج</button></div></header>
         {error && <div className="tt-restaurant-error" role="alert">{error}</div>}
         {!loading && page === 'overview' && renderOverview()}
         {!loading && page !== 'overview' && <div className="tt-restaurant-page-content">{pageGroups.length ? pageGroups.map(renderBatch) : <div className="tt-restaurant-empty"><span>{page === 'today' ? '✓' : page === 'late' ? '!' : '📦'}</span><h2>{page === 'today' ? 'لسه مفيش باتشات مكتملة' : page === 'late' ? 'مفيش طلبات متأخرة' : 'مفيش طلبات في القسم ده'}</h2><p>{page === 'today' ? 'الباتش هيظهر هنا لما كل طلباته توصل للطلاب.' : page === 'late' ? 'كل الطلبات لسه ضمن مواعيدها أو اتسلّمت للمندوب.' : 'الطلبات الجديدة هتظهر هنا تلقائيًا أول ما توصل.'}</p></div>}</div>}
